@@ -1,0 +1,1909 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MedNet — Revenue Distribution</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<!-- PASSWORD GATE -->
+<style>
+#gate {
+  position: fixed; inset: 0; z-index: 9999;
+  background: linear-gradient(135deg, #0f1e38 0%, #152847 60%, #1a3a60 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Heebo', sans-serif; direction: rtl;
+}
+#gate::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(-50deg, transparent, transparent 60px, rgba(255,255,255,0.012) 60px, rgba(255,255,255,0.012) 61px);
+}
+.gate-box {
+  position: relative; z-index: 1;
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(20px);
+  border: 1.5px solid rgba(255,255,255,0.15);
+  border-radius: 24px;
+  padding: 3rem 3rem 2.5rem;
+  width: 100%; max-width: 400px;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.4);
+  text-align: center;
+}
+.gate-logo {
+  width: 60px; height: 60px; border-radius: 16px;
+  background: rgba(255,255,255,0.12);
+  border: 1.5px solid rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.7rem; margin: 0 auto 1.4rem;
+}
+.gate-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem; color: #fff; font-weight: 700; margin-bottom: 0.3rem;
+}
+.gate-sub { font-size: 0.78rem; color: rgba(255,255,255,0.45); margin-bottom: 2rem; letter-spacing: 0.5px; }
+.gate-label { display: block; font-size: 0.72rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.45); text-align: right; margin-bottom: 0.5rem; }
+.gate-input {
+  width: 100%; padding: 0.85rem 1.1rem;
+  border-radius: 12px;
+  border: 1.5px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.08);
+  color: #fff; font-family: 'Heebo', sans-serif; font-size: 1rem;
+  outline: none; transition: border-color 0.2s, background 0.2s;
+  text-align: right; letter-spacing: 2px;
+  margin-bottom: 1.2rem;
+}
+.gate-input:focus { border-color: rgba(255,255,255,0.45); background: rgba(255,255,255,0.12); }
+.gate-input.shake { animation: shake 0.4s ease; border-color: #ef4444; }
+.gate-btn {
+  width: 100%; padding: 0.9rem;
+  border-radius: 12px; border: none;
+  background: #fff; color: #152847;
+  font-family: 'Heebo', sans-serif; font-size: 0.95rem; font-weight: 800;
+  cursor: pointer; transition: all 0.2s;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+}
+.gate-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,0.3); }
+.gate-btn:active { transform: translateY(0); }
+.gate-err {
+  margin-top: 1rem; font-size: 0.78rem; color: #f87171; font-weight: 600;
+  min-height: 1.2em; transition: opacity 0.2s;
+}
+.gate-conf {
+  margin-top: 1.5rem; font-size: 0.68rem; color: rgba(255,255,255,0.25);
+  letter-spacing: 1px; text-transform: uppercase;
+  display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+}
+@keyframes shake {
+  0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-5px)} 80%{transform:translateX(5px)}
+}
+@keyframes fadeOut {
+  to { opacity: 0; pointer-events: none; }
+}
+</style>
+
+<script>
+// SHA-256 hash of "o12345" — password never stored in plain text
+const HASH = '0555778e15e14e006a88a8593fb17650d29ced7eb43c08b40c801791e4c42ef7';
+
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+async function checkPassword() {
+  const input = document.getElementById('pwInput');
+  const err   = document.getElementById('pwErr');
+  const val   = input.value.trim();
+  if (!val) return;
+
+  const hash = await sha256(val);
+  if (hash === HASH) {
+    document.getElementById('gate').style.animation = 'fadeOut 0.5s ease forwards';
+    setTimeout(() => document.getElementById('gate').remove(), 500);
+  } else {
+    err.textContent = '❌ סיסמה שגויה — נסה שוב';
+    input.classList.add('shake');
+    input.value = '';
+    setTimeout(() => input.classList.remove('shake'), 400);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('pwInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') checkPassword();
+    document.getElementById('pwErr').textContent = '';
+  });
+});
+</script>
+<style>
+:root {
+  --navy:  #152847;
+  --navy2: #1e3a5f;
+  --bg:    #f2f5fb;
+  --white: #ffffff;
+  --border:#e0e8f5;
+  --text:  #111827;
+  --text2: #374151;
+  --text3: #6b7280;
+  --text4: #9ca3af;
+  --c-dr: #3b6fd4;
+  --c-em: #7c3aed;
+  --c-co: #0891b2;
+  --c-vm: #d97706;
+  --c-pr: #059669;
+  --c-lo: #dc2626;
+  --radius: 16px;
+  --shadow: 0 1px 4px rgba(21,40,71,0.07), 0 6px 24px rgba(21,40,71,0.07);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Heebo', sans-serif; background: var(--bg); color: var(--text); direction: rtl; min-height: 100vh; }
+
+/* TOP BAND */
+.top-band {
+  background: linear-gradient(130deg, #152847 0%, #1e3a5f 60%, #1a4a72 100%);
+  padding: 1.5rem 2.5rem 2rem;
+  position: relative; overflow: hidden;
+}
+.top-band::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(-50deg, transparent, transparent 50px, rgba(255,255,255,0.012) 50px, rgba(255,255,255,0.012) 51px);
+}
+.band-inner { position: relative; z-index: 1; max-width: 1300px; margin: 0 auto; }
+.band-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2.5rem; }
+.brand { display: flex; align-items: center; gap: 0.9rem; }
+.brand-mk { width: 44px; height: 44px; border-radius: 12px; background: rgba(255,255,255,0.13); border: 1.5px solid rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; }
+.brand-nm { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: #fff; }
+.brand-sb { font-size: 0.62rem; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 2px; font-weight: 600; }
+.nav-right { display: flex; gap: 0.6rem; align-items: center; }
+.nav-pill { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.75); font-size: 0.74rem; font-weight: 600; padding: 0.38rem 1rem; border-radius: 50px; }
+.nav-btn { background: #fff; color: var(--navy); font-family: 'Heebo', sans-serif; font-size: 0.78rem; font-weight: 800; padding: 0.42rem 1.2rem; border-radius: 50px; border: none; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.15); transition: all 0.18s; }
+.nav-btn-upload { background: rgba(255,255,255,0.18) !important; color: #fff !important; border: 1.5px solid rgba(255,255,255,0.3) !important; }
+.nav-btn-upload:hover { background: rgba(255,255,255,0.28) !important; }
+@keyframes popIn { from{opacity:0;transform:scale(0.92)} to{opacity:1;transform:scale(1)} }
+
+.band-title { text-align: center; margin-bottom: 2.5rem; }
+.band-eye { font-size: 0.68rem; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.45); margin-bottom: 0.5rem; }
+.band-title h1 { font-family: 'Playfair Display', serif; font-size: 2.4rem; color: #fff; font-weight: 700; line-height: 1.15; letter-spacing: -0.3px; }
+.band-title p { font-size: 0.88rem; color: rgba(255,255,255,0.6); margin-top: 0.55rem; }
+
+/* FILTER BUTTONS */
+.filter-row {
+  display: flex; align-items: center; gap: 0.5rem; justify-content: center; flex-wrap: wrap;
+}
+.gr-label { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: var(--text4); padding-left: 0.8rem; border-left: 1.5px solid var(--border); }
+.fb {
+  padding: 0.44rem 1.15rem; border-radius: 50px;
+  border: 1.5px solid var(--border);
+  background: var(--bg); color: var(--text2);
+  font-family: 'Heebo', sans-serif; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; transition: all 0.16s; white-space: nowrap;
+}
+.fb:hover { background: #dce6f8; color: var(--navy); border-color: #b0c4e8; }
+.fb.active { background: var(--navy); border-color: var(--navy); color: #fff; font-weight: 800; box-shadow: 0 2px 12px rgba(21,40,71,0.22); }
+
+/* MAIN CARD */
+.main-card {
+  background: var(--white); border-radius: 22px;
+  box-shadow: 0 4px 24px rgba(21,40,71,0.10);
+  overflow: hidden;
+}
+
+/* CARD HEADER */
+.card-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.5rem 2rem; border-bottom: 1px solid var(--border);
+  flex-wrap: wrap; gap: 0.8rem;
+  background: linear-gradient(135deg, #f8faff 0%, #fff 100%);
+}
+.card-head-left h2 { font-size: 1.05rem; font-weight: 800; color: var(--navy); }
+.card-head-left p { font-size: 0.74rem; color: var(--text3); margin-top: 0.15rem; }
+.legend { display: flex; gap: 1.2rem; flex-wrap: wrap; align-items: center; }
+.leg { display: flex; align-items: center; gap: 0.45rem; font-size: 0.75rem; font-weight: 600; color: var(--text2); }
+.lsq { width: 11px; height: 11px; border-radius: 3px; flex-shrink: 0; }
+
+/* CHART AREA */
+.chart-area { padding: 1.8rem 2rem; display: grid; grid-template-columns: 1.6fr 1fr; gap: 1.5rem; align-items: start; }
+@media(max-width: 900px) { .chart-area { grid-template-columns: 1fr; } }
+.chart-wrap { position: relative; height: 380px; }
+.pie-wrap { position: relative; height: 380px; }
+.pie-box { background: var(--bg); border: 1px solid var(--border); border-radius: 14px; padding: 1.3rem; }
+.pie-title { font-size: 0.82rem; font-weight: 800; color: var(--navy); margin-bottom: 0.2rem; }
+.pie-sub { font-size: 0.7rem; color: var(--text3); margin-bottom: 1rem; }
+
+/* SUMMARY ROW (mini KPIs under chart) */
+.mini-kpis {
+  display: flex; gap: 1px; border-top: 1px solid var(--border);
+  background: var(--border);
+}
+.mk {
+  flex: 1; background: var(--white); padding: 1rem 1.3rem;
+  display: flex; flex-direction: column; gap: 0.2rem;
+  transition: background 0.13s;
+}
+.mk:hover { background: #f8faff; }
+.mk-lbl { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text4); }
+.mk-val { font-size: 1.15rem; font-weight: 900; color: var(--text); letter-spacing: -0.3px; }
+.mk-pct { font-size: 0.72rem; font-weight: 700; }
+
+/* TABLE */
+.table-section { padding: 2rem; }
+.ts-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; }
+.ts-title { font-size: 0.9rem; font-weight: 800; color: var(--navy); }
+.ts-sub { font-size: 0.72rem; color: var(--text3); margin-top: 0.1rem; }
+
+.tbl-box { border: 1.5px solid var(--border); border-radius: 14px; overflow: hidden; }
+table { width: 100%; border-collapse: collapse; }
+thead tr { background: var(--navy); }
+th {
+  padding: 0.82rem 1rem; text-align: right;
+  font-size: 0.67rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+  color: rgba(255,255,255,0.7); white-space: nowrap;
+}
+th.tc { text-align: center; }
+tbody tr { border-bottom: 1px solid var(--border); transition: background 0.12s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: #f0f5ff; }
+td { padding: 0.82rem 1rem; font-size: 0.82rem; white-space: nowrap; vertical-align: middle; }
+
+.t-name { display: flex; align-items: center; gap: 0.5rem; font-weight: 700; color: var(--text); }
+.t-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.t-num { text-align: left; font-variant-numeric: tabular-nums; color: var(--text2); font-weight: 600; }
+.tc { text-align: center; }
+
+/* Inline bar */
+.ibar-wrap { display: flex; align-items: center; gap: 0.7rem; min-width: 180px; }
+.ibar-track { flex: 1; height: 8px; border-radius: 4px; background: #e5eaf5; overflow: hidden; display: flex; }
+.ibar-seg { height: 100%; transition: width 0.6s ease; }
+
+.chip { display: inline-flex; align-items: center; padding: 0.2rem 0.7rem; border-radius: 50px; font-size: 0.72rem; font-weight: 800; }
+.cg { background: #ecfdf5; color: #065f46; }
+.cw { background: #fffbeb; color: #92400e; }
+.cb { background: #fef2f2; color: #991b1b; }
+
+/* INSIGHT BOX */
+.insights { margin: 0 2rem 2rem; }
+.insight-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; }
+@media(max-width:800px){ .insight-grid{grid-template-columns:1fr} }
+.insight-card {
+  border-radius: 12px; padding: 1.1rem 1.2rem;
+  border: 1.5px solid transparent; display: flex; gap: 0.8rem; align-items: flex-start;
+}
+.ic-icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 0.05rem; }
+.ic-title { font-size: 0.78rem; font-weight: 800; margin-bottom: 0.2rem; }
+.ic-body { font-size: 0.73rem; line-height: 1.55; }
+.ic-green { background: #f0fdf4; border-color: #bbf7d0; color: #14532d; }
+.ic-red { background: #fef2f2; border-color: #fecaca; color: #7f1d1d; }
+.ic-blue { background: #eff6ff; border-color: #bfdbfe; color: #1e3a8a; }
+
+footer { text-align: center; padding: 1.8rem 0 1.2rem; color: var(--text4); font-size: 0.7rem; border-top: 1px solid var(--border); margin: 0 2rem; }
+
+.custom-section {
+  margin: 0 2rem 0;
+  border-top: 2px dashed var(--border);
+  padding: 2rem 0 2rem;
+}
+.cs-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.8rem;
+}
+.cs-title { font-size: 1rem; font-weight: 800; color: var(--navy); }
+.cs-sub   { font-size: 0.72rem; color: var(--text3); margin-top: 0.15rem; }
+.cs-run-btn {
+  background: var(--navy); color: #fff;
+  padding: 0.6rem 1.5rem; border-radius: 50px; border: none;
+  font-family: 'Heebo', sans-serif; font-size: 0.85rem; font-weight: 700;
+  cursor: pointer; transition: all 0.18s;
+  box-shadow: 0 2px 12px rgba(21,40,71,0.25);
+}
+.cs-run-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(21,40,71,0.35); }
+
+.cs-selectors {
+  display: grid; grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 1.2rem; margin-bottom: 1.5rem;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 16px; padding: 1.4rem;
+}
+@media(max-width:1000px){ .cs-selectors{ grid-template-columns: 1fr 1fr; } }
+@media(max-width:640px){  .cs-selectors{ grid-template-columns: 1fr; } }
+
+.cs-col-title {
+  font-size: 0.68rem; font-weight: 800; letter-spacing: 1.2px;
+  text-transform: uppercase; color: var(--text3);
+  margin-bottom: 0.7rem;
+}
+.cs-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.sch {
+  padding: 0.32rem 0.85rem; border-radius: 50px;
+  border: 1.5px solid var(--border2);
+  background: var(--white); color: var(--text3);
+  font-family: 'Heebo', sans-serif; font-size: 0.76rem; font-weight: 600;
+  cursor: pointer; transition: all 0.15s;
+}
+.sch:hover { border-color: var(--navy); color: var(--navy); }
+.sch.active {
+  background: var(--navy); border-color: var(--navy);
+  color: #fff;
+}
+.cs-hint { font-size: 0.65rem; color: var(--text4); margin-top: 0.5rem; }
+
+.cs-col-sm { min-width: 170px; }
+.cs-metrics { display: flex; flex-direction: column; gap: 0.35rem; }
+.smb {
+  padding: 0.38rem 0.9rem; border-radius: 8px;
+  border: 1.5px solid var(--border); background: var(--white);
+  color: var(--text3); font-family: 'Heebo', sans-serif;
+  font-size: 0.76rem; font-weight: 600; cursor: pointer;
+  text-align: right; transition: all 0.15s;
+}
+.smb:hover { border-color: var(--navy); color: var(--navy); }
+.smb.active { background: var(--navy); border-color: var(--navy); color: #fff; }
+
+/* Results */
+.cs-results {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 16px; overflow: hidden;
+  box-shadow: var(--shadow); margin-top: 0.5rem;
+}
+.cs-result-head {
+  padding: 1.1rem 1.5rem; border-bottom: 1px solid var(--border);
+  background: linear-gradient(135deg, #eff6ff, #fff);
+  font-size: 0.82rem; font-weight: 700; color: var(--navy);
+}
+.cs-charts-row {
+  display: grid; grid-template-columns: 1.3fr 1fr; gap: 0;
+  border-bottom: 1px solid var(--border);
+}
+@media(max-width:900px){ .cs-charts-row{ grid-template-columns: 1fr; } }
+.cs-chart-box { padding: 1.4rem; border-left: 1px solid var(--border); }
+.cs-chart-box:last-child { border-left: none; }
+.cs-chart-label { font-size: 0.75rem; font-weight: 700; color: var(--text3); margin-bottom: 0.9rem; }
+.cs-table-wrap { overflow-x: auto; }
+.cs-table-wrap table { width: 100%; border-collapse: collapse; }
+.cs-table-wrap thead tr { background: var(--navy); }
+.cs-table-wrap th { padding: 0.75rem 1rem; font-size: 0.67rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: rgba(255,255,255,0.7); text-align: right; white-space: nowrap; }
+.cs-table-wrap td { padding: 0.8rem 1rem; font-size: 0.81rem; border-bottom: 1px solid var(--border); white-space: nowrap; }
+.cs-table-wrap tbody tr:last-child td { border-bottom: none; }
+.cs-status {
+  font-size: 0.78rem; font-weight: 600; color: var(--text3);
+  background: var(--bg); border: 1px solid var(--border);
+  padding: 0.45rem 1.1rem; border-radius: 50px;
+}
+.cs-status.cs-status-active {
+  background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 700;
+}
+.cs-empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 3rem 2rem; text-align: center;
+  background: var(--bg); border: 2px dashed var(--border);
+  border-radius: 16px; margin-top: 0.5rem;
+}
+.cs-empty-icon { font-size: 2.5rem; margin-bottom: 0.8rem; opacity: 0.4; }
+.cs-empty-title { font-size: 0.95rem; font-weight: 700; color: var(--text3); margin-bottom: 0.4rem; }
+.cs-empty-sub { font-size: 0.78rem; color: var(--text4); max-width: 320px; line-height: 1.6; }
+
+
+
+/* ─── BRANCH COMPARISON ─── */
+.comparison-section {
+  margin: 0 2rem 0;
+  border-top: 1px solid var(--border);
+  padding: 2rem 0 2rem;
+}
+.comp-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.8rem;
+}
+.comp-title { font-size: 1rem; font-weight: 800; color: var(--navy); }
+.comp-sub   { font-size: 0.72rem; color: var(--text3); margin-top: 0.15rem; }
+.comp-tabs  { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.ctab {
+  padding: 0.38rem 1rem; border-radius: 50px; border: 1px solid var(--border);
+  background: var(--bg); color: var(--text3);
+  font-family: 'Heebo', sans-serif; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; transition: all 0.15s;
+}
+.ctab:hover { border-color: var(--navy); color: var(--navy); }
+.ctab.active { background: var(--navy); border-color: var(--navy); color: #fff; }
+
+/* Branch cards */
+.comp-grid {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; margin-bottom: 1.5rem;
+}
+@media(max-width:1100px){ .comp-grid{ grid-template-columns: repeat(3,1fr) } }
+@media(max-width:640px){  .comp-grid{ grid-template-columns: repeat(2,1fr) } }
+
+.comp-card {
+  border-radius: 14px; border: 1.5px solid var(--border);
+  background: var(--white); padding: 1.2rem 1.1rem;
+  box-shadow: var(--shadow); position: relative; overflow: hidden;
+  transition: transform 0.18s, box-shadow 0.18s;
+}
+.comp-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+.comp-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+  background: var(--cc);
+}
+.cc-name { font-size: 0.78rem; font-weight: 800; color: var(--text); margin-bottom: 0.7rem; display: flex; align-items: center; gap: 0.45rem; }
+.cc-dot  { width: 9px; height: 9px; border-radius: 50%; background: var(--cc); flex-shrink: 0; }
+.cc-big  { font-size: 1.7rem; font-weight: 900; letter-spacing: -0.5px; color: var(--ccol); line-height: 1; }
+.cc-lbl  { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text4); margin-top: 0.3rem; }
+.cc-bar-wrap { margin-top: 0.8rem; }
+.cc-bar-track { height: 6px; border-radius: 3px; background: #e8eef5; overflow: hidden; }
+.cc-bar-fill  { height: 100%; border-radius: 3px; background: var(--cc); transition: width 0.7s cubic-bezier(.4,0,.2,1); }
+.cc-bar-sub   { font-size: 0.67rem; color: var(--text4); margin-top: 0.3rem; font-weight: 500; }
+.cc-rank {
+  position: absolute; top: 0.7rem; left: 0.8rem;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--cc); color: #fff;
+  font-size: 0.65rem; font-weight: 900;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* Comparison chart */
+.comp-chart-wrap {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 14px; padding: 1.4rem 1.5rem;
+  min-height: 340px;
+}
+
+</style>
+</head>
+<body>
+
+<!-- PASSWORD OVERLAY -->
+<div id="gate">
+  <div class="gate-box">
+    <div class="gate-logo">🏥</div>
+    <div class="gate-title">MedNet Analytics</div>
+    <div class="gate-sub">INVESTOR PORTAL • CONFIDENTIAL</div>
+    <label class="gate-label" for="pwInput">סיסמה</label>
+    <input id="pwInput" class="gate-input" type="password" placeholder="••••••••" autocomplete="off" autofocus />
+    <button class="gate-btn" onclick="checkPassword()">כניסה למערכת →</button>
+    <div class="gate-err" id="pwErr"></div>
+    <div class="gate-conf">🔒 מוצפן ומאובטח</div>
+  </div>
+</div>
+
+<div class="top-band">
+  <div class="band-inner">
+    <!-- NAV -->
+    <div class="band-nav">
+      <div class="brand">
+        <div class="brand-mk">🏥</div>
+        <div>
+          <div class="brand-nm">MedNet</div>
+          <div class="brand-sb">Investor Platform</div>
+        </div>
+      </div>
+      <div class="nav-right">
+        <div class="nav-pill">📅 אוג׳ 2025 — ינו׳ 2026</div>
+        <button class="nav-btn nav-btn-upload" onclick="openUploadGate()">📂 העלה קובץ</button>
+      </div>
+    </div>
+
+    <!-- TITLE -->
+    <div class="band-title">
+      <div class="band-eye">Revenue Distribution Analysis</div>
+      <h1>התפלגות הכנסות לפי קטגוריה</h1>
+      <p>בחר קבוצה לצפייה בפירוט — כל עמודה = 100% מהכנסות אותו סניף/מחלקה</p>
+    </div>
+  </div>
+</div>
+
+<!-- FILTER BAR — outside the blue band -->
+<div style="background:#fff; border-bottom:1px solid #e0e8f5; box-shadow:0 2px 8px rgba(21,40,71,0.06);">
+  <div style="max-width:1300px;margin:0 auto;padding:0.9rem 2.5rem;">
+    <div class="filter-row">
+      <button class="fb active" onclick="setGroup('network', this)">🌐 כל הרשת</button>
+      <div class="gr-label">סניפים</div>
+      <button class="fb" onclick="setGroup('kfar', this)">כפר סבא</button>
+      <button class="fb" onclick="setGroup('rehovot', this)">רחובות</button>
+      <button class="fb" onclick="setGroup('bs', this)">באר שבע</button>
+      <button class="fb" onclick="setGroup('haifa', this)">חיפה</button>
+      <button class="fb" onclick="setGroup('motzkin', this)">מוצקין</button>
+      <div class="gr-label">מחלקות</div>
+      <button class="fb" onclick="setGroup('depts', this)">כל המחלקות</button>
+      <button class="fb" onclick="setGroup('chirum', this)">חירום</button>
+      <button class="fb" onclick="setGroup('neuro', this)">נוירולוגיה</button>
+      <button class="fb" onclick="setGroup('imaging', this)">הדמיה</button>
+      <button class="fb" onclick="setGroup('surgery', this)">כירורגיה</button>
+      <button class="fb" onclick="setGroup('cardio', this)">קרדיולוגיה</button>
+      <button class="fb" onclick="setGroup('onco', this)">אונקולוגיה</button>
+      <button class="fb" onclick="setGroup('anest', this)">הרדמה</button>
+    </div>
+  </div>
+</div>
+
+<!-- UPLOAD PASSWORD MODAL -->
+<div id="uploadGate" style="display:none;position:fixed;inset:0;z-index:8000;background:rgba(15,30,56,0.7);backdrop-filter:blur(6px);align-items:center;justify-content:center;font-family:'Heebo',sans-serif;direction:rtl;">
+  <div style="background:#fff;border-radius:20px;padding:2.5rem 2.5rem 2rem;width:100%;max-width:380px;box-shadow:0 24px 80px rgba(0,0,0,0.3);text-align:center;position:relative;animation:popIn .25s ease">
+    <div style="width:52px;height:52px;border-radius:14px;background:#eff6ff;border:1.5px solid #bfdbfe;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin:0 auto 1.2rem">📂</div>
+    <div style="font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:#152847;margin-bottom:0.3rem">העלאת קובץ</div>
+    <div style="font-size:0.76rem;color:#6b7280;margin-bottom:1.6rem">הזן סיסמת ניהול להמשך</div>
+    <label style="display:block;font-size:0.68rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#94a3b8;text-align:right;margin-bottom:0.45rem">סיסמה</label>
+    <input id="uploadPwInput" type="password" placeholder="••••" autocomplete="off"
+      style="width:100%;padding:0.8rem 1rem;border-radius:10px;border:1.5px solid #e0e8f5;font-family:'Heebo',sans-serif;font-size:1rem;outline:none;text-align:right;letter-spacing:3px;margin-bottom:1rem;transition:border-color .2s"
+      onkeydown="if(event.key==='Enter')checkUploadPw();document.getElementById('uploadPwErr').textContent=''" />
+    <button onclick="checkUploadPw()" style="width:100%;padding:0.85rem;border-radius:10px;border:none;background:#152847;color:#fff;font-family:'Heebo',sans-serif;font-size:0.92rem;font-weight:800;cursor:pointer;transition:all .2s" onmouseover="this.style.background='#1e3a5f'" onmouseout="this.style.background='#152847'">אמת סיסמה →</button>
+    <div id="uploadPwErr" style="margin-top:0.8rem;font-size:0.76rem;color:#dc2626;font-weight:600;min-height:1.2em"></div>
+    <button onclick="closeUploadGate()" style="position:absolute;top:1rem;left:1rem;background:none;border:none;font-size:1.1rem;cursor:pointer;color:#94a3b8;line-height:1">✕</button>
+  </div>
+</div>
+
+<!-- UPLOAD FILE PICKER (hidden) -->
+<input id="uploadFileInput" type="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleFileUpload(event)" />
+
+<!-- FILE DATA VIEWER MODAL -->
+<div id="fileViewer" style="display:none;position:fixed;inset:0;z-index:7000;background:rgba(15,30,56,0.75);backdrop-filter:blur(6px);align-items:flex-start;justify-content:center;font-family:'Heebo',sans-serif;direction:rtl;overflow-y:auto;padding:2rem">
+  <div style="background:#fff;border-radius:20px;width:100%;max-width:1200px;margin:0 auto;box-shadow:0 24px 80px rgba(0,0,0,0.35);overflow:hidden;animation:popIn .3s ease">
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg,#152847,#1e3a5f);padding:1.3rem 1.8rem;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-family:'Playfair Display',serif;font-size:1.1rem;color:#fff;font-weight:700" id="fvTitle">גליון נתונים</div>
+        <div style="font-size:0.72rem;color:rgba(255,255,255,0.55);margin-top:0.2rem" id="fvMeta"></div>
+      </div>
+      <button onclick="closeFileViewer()" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);color:#fff;font-size:0.82rem;font-weight:700;padding:0.4rem 1rem;border-radius:50px;cursor:pointer;font-family:'Heebo',sans-serif">✕ סגור</button>
+    </div>
+    <!-- Search + info bar -->
+    <div style="padding:1rem 1.8rem;border-bottom:1px solid #e0e8f5;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;background:#f8faff">
+      <input id="fvSearch" type="text" placeholder="🔍 חיפוש בנתונים..." oninput="filterFvTable()"
+        style="padding:0.55rem 1rem;border-radius:50px;border:1.5px solid #e0e8f5;font-family:'Heebo',sans-serif;font-size:0.83rem;outline:none;min-width:220px;direction:rtl" />
+      <div style="font-size:0.75rem;color:#6b7280;font-weight:500" id="fvCount"></div>
+      <div style="margin-right:auto;display:flex;gap:0.5rem" id="fvSheetTabs"></div>
+    </div>
+    <!-- Table -->
+    <div style="overflow:auto;max-height:60vh">
+      <table id="fvTable" style="width:100%;border-collapse:collapse;font-size:0.81rem"></table>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN CARD -->
+<div style="padding: 1.5rem 2rem 0; max-width: 1350px; margin: 0 auto;">
+<div class="main-card">
+
+  <!-- CARD HEADER -->
+  <div class="card-head">
+    <div class="card-head-left">
+      <h2 id="chartTitle">כל הרשת — סניפים</h2>
+      <p id="chartSub">התפלגות 100% של הכנסות לפי קטגוריית עלות ותרומה ישירה</p>
+    </div>
+    <div class="legend">
+      <div class="leg"><span class="lsq" style="background:var(--c-dr)"></span>שכר רופאים</div>
+      <div class="leg"><span class="lsq" style="background:var(--c-em)"></span>שכר עובדים</div>
+      <div class="leg"><span class="lsq" style="background:var(--c-co)"></span>קבלני משנה</div>
+      <div class="leg"><span class="lsq" style="background:var(--c-vm)"></span>וטמרקט 🐾</div>
+      <div class="leg"><span class="lsq" style="background:var(--c-pr)"></span>תרומה ישירה ✅</div>
+      <div class="leg"><span class="lsq" style="background:var(--c-lo)"></span>הפסד 🔴</div>
+    </div>
+  </div>
+
+  <!-- CHART -->
+  <div class="chart-area">
+    <div class="chart-wrap"><canvas id="mainChart"></canvas></div>
+    <div class="pie-box">
+      <div class="pie-title">⬤ התפלגות עלויות</div>
+      <div class="pie-sub" id="pieSub">סה״כ הקבוצה הנבחרת</div>
+      <div class="pie-wrap"><canvas id="pieChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- MINI KPIs -->
+  <div class="mini-kpis" id="miniKpis"></div>
+
+  <!-- TABLE -->
+  <div class="table-section">
+    <div class="ts-head">
+      <div>
+        <div class="ts-title">טבלת נתונים מפורטת</div>
+        <div class="ts-sub">סה״כ 6 חודשים • לחץ על שורה לפירוט</div>
+      </div>
+    </div>
+    <div class="tbl-box">
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr>
+            <th>שם</th>
+            <th>הכנסות</th>
+            <th class="tc">👨‍⚕️ שכר רופאים</th>
+            <th class="tc">👥 שכר עובדים</th>
+            <th class="tc">🐾 וטמרקט</th>
+            <th class="tc">🔧 קבלני משנה</th>
+            <th>התפלגות עלויות</th>
+            <th class="tc">💚 תרומה ישירה</th>
+            <th class="tc">מרווח %</th>
+          </tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- INSIGHTS -->
+  <div class="insights">
+    <div class="insight-grid" id="insightGrid"></div>
+  </div>
+
+  <!-- BRANCH COMPARISON -->
+  <div class="comparison-section">
+    <div class="comp-head">
+      <div>
+        <div class="comp-title">📊 השוואת ביצועים — כל הסניפים</div>
+        <div class="comp-sub">סה״כ 6 חודשים • אוג׳ 2025 – ינו׳ 2026</div>
+      </div>
+      <div class="comp-tabs" id="compTabs">
+        <button class="ctab active" onclick="setCompView('revenue',this)">הכנסות</button>
+        <button class="ctab" onclick="setCompView('margin',this)">מרווח %</button>
+        <button class="ctab" onclick="setCompView('contrib',this)">תרומה ישירה</button>
+        <button class="ctab" onclick="setCompView('dr',this)">שכר רופאים</button>
+      </div>
+    </div>
+    <div class="comp-grid" id="compGrid"></div>
+    <div class="comp-chart-wrap">
+      <div style="position:relative; height:340px;">
+        <canvas id="compChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- CUSTOM COMPARISON BUILDER -->
+  <div class="custom-section">
+    <div class="cs-head">
+      <div>
+        <div class="cs-title">🔬 כלי השוואה מותאם אישית</div>
+        <div class="cs-sub">בחר חודשים ומחלקות/סניפים לבניית השוואה מדויקת</div>
+      </div>
+      <div id="csStatus" class="cs-status">בחר חודשים וישויות כדי להתחיל</div>
+    </div>
+
+    <!-- SELECTORS ROW -->
+    <div class="cs-selectors">
+      <!-- Month selector -->
+      <div class="cs-col">
+        <div class="cs-col-title">📅 חודשים</div>
+        <div class="cs-chips" id="monthChips">
+          <button class="sch" data-type="month" data-val="0" onclick="toggleSel(this)">אוג׳ 25</button>
+          <button class="sch" data-type="month" data-val="1" onclick="toggleSel(this)">ספט׳ 25</button>
+          <button class="sch" data-type="month" data-val="2" onclick="toggleSel(this)">אוק׳ 25</button>
+          <button class="sch" data-type="month" data-val="3" onclick="toggleSel(this)">נוב׳ 25</button>
+          <button class="sch" data-type="month" data-val="4" onclick="toggleSel(this)">דצמ׳ 25</button>
+          <button class="sch" data-type="month" data-val="5" onclick="toggleSel(this)">ינו׳ 26</button>
+        </div>
+        <div class="cs-hint">לחץ להסרה/הוספה</div>
+      </div>
+
+      <!-- Branch selector -->
+      <div class="cs-col">
+        <div class="cs-col-title">🏥 סניפים</div>
+        <div class="cs-chips" id="branchChips">
+          <button class="sch" data-type="entity" data-val="כפר סבא" onclick="toggleSel(this)">כפר סבא</button>
+          <button class="sch" data-type="entity" data-val="רחובות" onclick="toggleSel(this)">רחובות</button>
+          <button class="sch" data-type="entity" data-val="באר שבע" onclick="toggleSel(this)">באר שבע</button>
+          <button class="sch" data-type="entity" data-val="חיפה" onclick="toggleSel(this)">חיפה</button>
+          <button class="sch" data-type="entity" data-val="מוצקין" onclick="toggleSel(this)">מוצקין</button>
+        </div>
+        <div class="cs-hint">סניפים ראשיים</div>
+      </div>
+
+      <!-- Dept selector -->
+      <div class="cs-col">
+        <div class="cs-col-title">🔬 מחלקות כפר סבא</div>
+        <div class="cs-chips" id="deptChips">
+          <button class="sch" data-type="entity" data-val="חירום" onclick="toggleSel(this)">חירום</button>
+          <button class="sch" data-type="entity" data-val="נוירולוגיה" onclick="toggleSel(this)">נוירולוגיה</button>
+          <button class="sch" data-type="entity" data-val="הדמיה" onclick="toggleSel(this)">הדמיה</button>
+          <button class="sch" data-type="entity" data-val="כירורגיה" onclick="toggleSel(this)">כירורגיה</button>
+          <button class="sch" data-type="entity" data-val="קרדיולוגיה" onclick="toggleSel(this)">קרדיולוגיה</button>
+          <button class="sch" data-type="entity" data-val="אונקולוגיה" onclick="toggleSel(this)">אונקולוגיה</button>
+          <button class="sch" data-type="entity" data-val="הרדמה" onclick="toggleSel(this)">הרדמה</button>
+        </div>
+        <div class="cs-hint">לחץ להוסיף להשוואה</div>
+      </div>
+
+      <!-- Metric -->
+      <div class="cs-col cs-col-sm">
+        <div class="cs-col-title">📐 מדד להשוואה</div>
+        <div class="cs-metrics" id="metricChips">
+          <button class="smb active" data-metric="cont" onclick="setMetric(this)">תרומה ישירה</button>
+          <button class="smb" data-metric="rev"  onclick="setMetric(this)">הכנסות</button>
+          <button class="smb" data-metric="dr"   onclick="setMetric(this)">שכר רופאים</button>
+          <button class="smb" data-metric="em"   onclick="setMetric(this)">שכר עובדים</button>
+          <button class="smb" data-metric="vm"   onclick="setMetric(this)">וטמרקט</button>
+          <button class="smb" data-metric="margin" onclick="setMetric(this)">מרווח %</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMPTY STATE -->
+    <div id="csEmpty" class="cs-empty">
+      <div class="cs-empty-icon">📊</div>
+      <div class="cs-empty-title">בחר חודשים וישויות להשוואה</div>
+      <div class="cs-empty-sub">לחץ על חודשים + סניפים/מחלקות — התוצאות יופיעו כאן באופן אוטומטי</div>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="cs-results" id="csResults" style="display:none">
+      <div class="cs-result-head" id="csResultHead"></div>
+      <div class="cs-charts-row">
+        <div class="cs-chart-box">
+          <div class="cs-chart-label">השוואת ישויות לאורך חודשים</div>
+          <div style="position:relative;height:300px"><canvas id="csLineChart"></canvas></div>
+        </div>
+        <div class="cs-chart-box">
+          <div class="cs-chart-label">סיכום — ממוצע לתקופה הנבחרת</div>
+          <div style="position:relative;height:300px"><canvas id="csBarChart"></canvas></div>
+        </div>
+      </div>
+      <!-- Result table -->
+      <div class="cs-table-wrap">
+        <table id="csTable">
+          <thead id="csTableHead"></thead>
+          <tbody id="csTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <footer>MedNet Analytics • Book3.xlsx • אוג׳ 2025 – ינו׳ 2026 • Confidential</footer>
+</div>
+</div>
+
+<script>
+// ─── DATA ───
+const ALL = {
+  // Branches
+  'כפר סבא':  { type:'branch', color:'#0891b2', rev:22198992, dr:4939304, em:5113394, co:224847, vm:1150990, cont:10770457 },
+  'רחובות':   { type:'branch', color:'#7c3aed', rev:3901077,  dr:2327071, em:1398184, co:0,      vm:344882,  cont:-169060  },
+  'באר שבע':  { type:'branch', color:'#059669', rev:2522324,  dr:722968,  em:418245,  co:0,      vm:341603,  cont:1039508  },
+  'חיפה':     { type:'branch', color:'#0284c7', rev:4948841,  dr:2318511, em:997865,  co:0,      vm:474974,  cont:1157491  },
+  'מוצקין':   { type:'branch', color:'#d97706', rev:595550,   dr:90554,   em:272195,  co:0,      vm:55292,   cont:177510   },
+  // Depts
+  'חירום':      { type:'dept', color:'#ef4444', rev:9124098, dr:2203685, em:2407961, co:0,      vm:916009, cont:3596444  },
+  'נוירולוגיה': { type:'dept', color:'#ec4899', rev:3514569, dr:510624,  em:443575,  co:174347, vm:83800,  cont:2302224  },
+  'הדמיה':      { type:'dept', color:'#14b8a6', rev:3036425, dr:432437,  em:534940,  co:50500,  vm:22508,  cont:1996039  },
+  'כירורגיה':   { type:'dept', color:'#a855f7', rev:3513439, dr:428538,  em:680370,  co:0,      vm:128673, cont:2275858  },
+  'קרדיולוגיה': { type:'dept', color:'#f43f5e', rev:898692,  dr:392341,  em:38958,   co:0,      vm:0,      cont:299595  },
+  'אונקולוגיה': { type:'dept', color:'#f97316', rev:1121066, dr:626712,  em:0,       co:0,      vm:0,      cont:495000  },
+  'הרדמה':      { type:'dept', color:'#84cc16', rev:610372,  dr:251563,  em:19424,   co:0,      vm:0,      cont:339403  },
+
+  // Monthly dept data
+  'חירום_monthly': { months: {
+    dr: [0, 443110, 415386, 398468, 524730, 421991],
+    em: [0, 441633, 570103, 442097, 494877, 459251],
+    co: [0, 0, 0, 0, 0, 0],
+    vm: [0, 0, 232255, 302662, 82318, 298774],
+    rev:[1526302, 1456678, 1598972, 1545136, 1429007, 1568003],
+    cont:[1526302, 571935, 381228, 401909, 327082, 387988],
+  }},
+  'נוירולוגיה_monthly': { months: {
+    dr: [0, 121651, 82232, 95035, 104618, 107088],
+    em: [0, 72007, 85481, 91575, 93961, 100551],
+    co: [0, 0, 40339, 39746, 43839, 50423],
+    vm: [0, 0, 25750, 15569, 26108, 16373],
+    rev:[764258, 434803, 475744, 805726, 550269, 483769],
+    cont:[764258, 241145, 241942, 563801, 281744, 209334],
+  }},
+  'הדמיה_monthly': { months: {
+    dr: [0, 80367, 87452, 80906, 100337, 83375],
+    em: [0, 104136, 110676, 103929, 107995, 108204],
+    co: [0, 0, 13500, 10500, 12750, 13750],
+    vm: [0, 0, 5609, 5777, 3228, 7894],
+    rev:[473890, 478567, 464873, 531811, 560003, 527281],
+    cont:[473890, 294064, 247636, 330699, 335693, 314057],
+  }},
+  'כירורגיה_monthly': { months: {
+    dr: [0, 79061, 102525, 79509, 79626, 87817],
+    em: [0, 130249, 134458, 160344, 142842, 112477],
+    co: [0, 0, 0, 0, 0, 0],
+    vm: [0, 0, 5432, 35296, 25613, 62332],
+    rev:[561458, 443381, 592931, 639583, 620246, 655840],
+    cont:[561458, 234071, 350516, 364434, 372165, 393214],
+  }},
+  'קרדיולוגיה_monthly': { months: {
+    dr: [0, 31568, 70731, 76089, 106568, 107385],
+    em: [0, 7949, 7525, 7927, 8758, 6799],
+    co: [0, 0, 0, 0, 0, 0],
+    vm: [0, 0, 0, 0, 0, 0],
+    rev:[167715, 93928, 111236, 164369, 177806, 183636],
+    cont:[167715, 54411, 32979, 80353, 62480, 69452],
+  }},
+  'אונקולוגיה_monthly': { months: {
+    dr: [0, 0, 142356, 160730, 180991, 142634],
+    em: [0, 0, 0, 0, 0, 0],
+    co: [0, 0, 0, 0, 0, 0],
+    vm: [0, 0, 0, 0, 0, 0],
+    rev:[156231, 173355, 165306, 218676, 235970, 172527],
+    cont:[156231, 173355, 22950, 57947, 54980, 29893],
+  }},
+  'הרדמה_monthly': { months: {
+    dr: [0, 35048, 51466, 59215, 54094, 51742],
+    em: [0, 3454, 2313, 4807, 3773, 5077],
+    co: [0, 0, 0, 0, 0, 0],
+    vm: [0, 0, 0, 0, 0, 0],
+    rev:[64958, 46517, 103983, 133347, 136186, 125381],
+    cont:[64958, 8015, 50204, 69325, 78319, 68562],
+  }},
+  'כפר סבא_monthly': { months: {
+    dr: [0,790805,978381,975545,1175464,1019109],
+    em: [0,944588,1086804,998550,1053788,1029664],
+    co: [0,0,53839,50246,56589,64173],
+    vm: [0,0,269046,359304,137267,385373],
+    rev:[3771427,3190723,3589999,4101214,3776818,3768811],
+    cont:[3771427,1455330,1201929,1717569,1353710,1270492],
+  }},
+  'רחובות_monthly': { months: {
+    dr: [425375,356716,362125,356392,461400,365063],
+    em: [231167,227730,241617,230396,250022,217252],
+    co: [0,0,0,0,0,0],
+    vm: [0,0,85374,86514,86480,86514],
+    rev:[0,586379,870220,850423,820875,773180],
+    cont:[-656541,1933,181104,177120,22973,104351],
+  }},
+  'באר שבע_monthly': { months: {
+    dr: [117201,115677,107026,99366,138179,145519],
+    em: [67982,65735,69339,69932,75318,69939],
+    co: [0,0,0,0,0,0],
+    vm: [0,50127,85409,61107,83853,61107],
+    rev:[423525,392875,375400,421733,469620,439171],
+    cont:[238341,161335,113626,191329,172271,162606],
+  }},
+  'חיפה_monthly': { months: {
+    dr: [295955,304381,448146,429847,455672,384510],
+    em: [149925,160972,210698,153073,169438,153759],
+    co: [0,0,0,0,0,0],
+    vm: [0,0,113036,133788,115114,113036],
+    rev:[432033,869412,886831,872897,880342,1007326],
+    cont:[-13847,404059,114951,156189,140118,356021],
+  }},
+  'מוצקין_monthly': { months: {
+    dr: [14949,10496,15968,16105,19462,13574],
+    em: [38651,32583,35213,38324,74417,53007],
+    co: [0,0,0,0,0,0],
+    vm: [0,9012,9686,11929,14979,9686],
+    rev:[49908,94246,108673,129999,85021,127703],
+    cont:[-3692,42155,47806,63641,-23837,51437],
+  }},
+};
+
+const MONTHS = ['אוג׳ 25','ספט׳ 25','אוק׳ 25','נוב׳ 25','דצמ׳ 25','ינו׳ 26'];
+
+const GROUPS = {
+  network:  { title:'כל הרשת — סניפים', keys:['כפר סבא','רחובות','באר שבע','חיפה','מוצקין'] },
+  kfar:     { title:'כפר סבא — לפי חודש', monthly:'כפר סבא' },
+  rehovot:  { title:'רחובות — לפי חודש',  monthly:'רחובות' },
+  bs:       { title:'באר שבע — לפי חודש', monthly:'באר שבע' },
+  haifa:    { title:'חיפה — לפי חודש',    monthly:'חיפה' },
+  motzkin:  { title:'מוצקין — לפי חודש',  monthly:'מוצקין' },
+  depts:    { title:'מחלקות כפר סבא — כולן', keys:['חירום','נוירולוגיה','הדמיה','כירורגיה','קרדיולוגיה','אונקולוגיה','הרדמה'] },
+  chirum:   { title:'חירום — לפי חודש',      monthly:'חירום' },
+  neuro:    { title:'נוירולוגיה — לפי חודש', monthly:'נוירולוגיה' },
+  imaging:  { title:'הדמיה — לפי חודש',      monthly:'הדמיה' },
+  surgery:  { title:'כירורגיה — לפי חודש',   monthly:'כירורגיה' },
+  cardio:   { title:'קרדיולוגיה — לפי חודש', monthly:'קרדיולוגיה' },
+  onco:     { title:'אונקולוגיה — לפי חודש', monthly:'אונקולוגיה' },
+  anest:    { title:'הרדמה — לפי חודש',       monthly:'הרדמה' },
+};
+
+let currentGroup = 'network';
+let chart = null;
+let pieChart = null;
+
+const fmt = n => {
+  if (n===null||isNaN(n)) return '—';
+  const a = Math.abs(n);
+  if (a>=1e6) return (n<0?'-':'')+'₪'+(a/1e6).toFixed(2)+'M';
+  if (a>=1e3) return (n<0?'-':'')+'₪'+(a/1e3).toFixed(0)+'K';
+  return (n<0?'-':'')+'₪'+a.toFixed(0);
+};
+const fmtPct = (v,r) => r>0 ? (v/r*100).toFixed(1)+'%' : '—';
+const pn = (v,r) => r>0 ? v/r*100 : 0;
+const sum = arr => arr.reduce((a,b)=>a+(b||0),0);
+
+function buildData(gKey) {
+  const g = GROUPS[gKey];
+  if (g.monthly) {
+    const m = ALL[g.monthly + '_monthly'].months;
+    return MONTHS.map((mo, i) => ({
+      name: mo, color: ALL[g.monthly].color,
+      rev: m.rev[i], dr: m.dr[i], em: m.em[i], co: m.co[i], vm: m.vm[i], cont: m.cont[i]
+    }));
+  }
+  return g.keys.map(k => ({ name: k, ...ALL[k] }));
+}
+
+function setGroup(gKey, el) {
+  currentGroup = gKey;
+  document.querySelectorAll('.fb').forEach(b => b.classList.remove('active'));
+  if (el) el.classList.add('active');
+  renderAll();
+}
+
+function renderAll() {
+  const g = GROUPS[currentGroup];
+  const rows = buildData(currentGroup);
+  document.getElementById('chartTitle').textContent = g.title;
+  renderChart(rows);
+  renderPieChart(rows);
+  renderMiniKpis(rows);
+  renderTable(rows);
+  renderInsights(rows);
+}
+
+function renderChart(rows) {
+  if (chart) chart.destroy();
+  const ctx = document.getElementById('mainChart').getContext('2d');
+
+  // Build 100% stacked data
+  const labels = rows.map(r => r.name);
+  const colors = rows.map(r => r.color);
+
+  const mkDs = (key, label, color) => ({
+    label,
+    data: rows.map(r => {
+      if (!r.rev || r.rev === 0) return 0;
+      return Math.max(0, parseFloat((r[key]/r.rev*100).toFixed(2)));
+    }),
+    backgroundColor: color,
+    stack: 'stack',
+  });
+
+  // Loss segment
+  const lossDs = {
+    label: 'הפסד',
+    data: rows.map(r => {
+      if (!r.rev || r.rev === 0) return 0;
+      return r.cont < 0 ? parseFloat((Math.abs(r.cont)/r.rev*100).toFixed(2)) : 0;
+    }),
+    backgroundColor: '#dc2626',
+    stack: 'stack',
+  };
+
+  const contDs = {
+    label: 'תרומה ישירה',
+    data: rows.map(r => {
+      if (!r.rev || r.rev === 0) return 0;
+      return r.cont > 0 ? parseFloat((r.cont/r.rev*100).toFixed(2)) : 0;
+    }),
+    backgroundColor: '#059669',
+    stack: 'stack',
+  };
+
+  chart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        mkDs('dr', 'שכר רופאים', '#3b6fd4'),
+        mkDs('em', 'שכר עובדים', '#7c3aed'),
+        mkDs('co', 'קבלני משנה', '#0891b2'),
+        mkDs('vm', 'וטמרקט', '#d97706'),
+        contDs,
+        lossDs,
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          rtl: true,
+          backgroundColor: '#152847',
+          titleColor: '#fff',
+          bodyColor: 'rgba(255,255,255,0.82)',
+          borderColor: 'rgba(255,255,255,0.1)',
+          borderWidth: 1,
+          padding: 13,
+          callbacks: {
+            title: items => items[0].label,
+            label: c => {
+              if (c.raw === 0) return null;
+              const row = buildData(currentGroup)[c.dataIndex];
+              const absVal = c.raw / 100 * row.rev;
+              return ` ${c.dataset.label}: ${c.raw.toFixed(1)}%  (${fmt(absVal)})`;
+            },
+            afterBody: items => {
+              const row = buildData(currentGroup)[items[0].dataIndex];
+              return [``, `📊 הכנסות: ${fmt(row.rev)}`];
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          stacked: true,
+          ticks: { color: '#6b7280', font: { family: 'Heebo', size: 11 }, maxRotation: 0 },
+          grid: { display: false },
+        },
+        y: {
+          stacked: true,
+          min: 0, max: 115,
+          ticks: {
+            color: '#6b7280', font: { family: 'Heebo', size: 11 },
+            callback: v => v + '%',
+            stepSize: 20,
+          },
+          grid: { color: '#f0f4fb' },
+        }
+      }
+    }
+  });
+}
+
+function renderMiniKpis(rows) {
+  const totals = rows.reduce((acc, r) => {
+    acc.rev  += r.rev  || 0;
+    acc.dr   += r.dr   || 0;
+    acc.em   += r.em   || 0;
+    acc.vm   += r.vm   || 0;
+    acc.co   += r.co   || 0;
+    acc.cont += r.cont || 0;
+    return acc;
+  }, {rev:0, dr:0, em:0, vm:0, co:0, cont:0});
+
+  const items = [
+    { lbl:'הכנסות סה״כ',    val:fmt(totals.rev),  pct:'',                          c:'#152847' },
+    { lbl:'שכר רופאים',     val:fmt(totals.dr),   pct:fmtPct(totals.dr,totals.rev), c:'#3b6fd4' },
+    { lbl:'שכר עובדים',     val:fmt(totals.em),   pct:fmtPct(totals.em,totals.rev), c:'#7c3aed' },
+    { lbl:'וטמרקט',         val:fmt(totals.vm),   pct:fmtPct(totals.vm,totals.rev), c:'#d97706' },
+    { lbl:'קבלני משנה',     val:fmt(totals.co),   pct:fmtPct(totals.co,totals.rev), c:'#0891b2' },
+    { lbl:'תרומה ישירה',    val:fmt(totals.cont), pct:fmtPct(totals.cont,totals.rev),c: totals.cont>=0?'#059669':'#dc2626' },
+  ];
+  document.getElementById('miniKpis').innerHTML = items.map(it => `
+    <div class="mk">
+      <div class="mk-lbl">${it.lbl}</div>
+      <div class="mk-val" style="color:${it.c}">${it.val}</div>
+      ${it.pct ? `<div class="mk-pct" style="color:${it.c}">${it.pct} מהכנסות</div>` : ''}
+    </div>
+  `).join('');
+}
+
+function renderTable(rows) {
+  let html = '';
+  rows.forEach(r => {
+    const mPct = r.rev > 0 ? r.cont/r.rev*100 : 0;
+    const mClass = mPct >= 40 ? 'cg' : mPct >= 10 ? 'cw' : 'cb';
+    const drPct = pn(r.dr,r.rev), emPct = pn(r.em,r.rev), vmPct = pn(r.vm,r.rev), coPct = pn(r.co,r.rev);
+    const prPct = Math.max(0, pn(r.cont,r.rev));
+
+    const cpill = (val, rev, c) => val
+      ? `<div style="display:inline-flex;align-items:center;gap:0.3rem;padding:0.2rem 0.65rem;border-radius:50px;background:${c}18;color:${c};border:1px solid ${c}30;font-size:0.71rem;font-weight:700">
+          ${fmt(val)}<span style="opacity:0.65">${fmtPct(val,rev)}</span>
+        </div>`
+      : `<span style="color:#d1d5db;font-size:0.72rem">—</span>`;
+
+    html += `<tr>
+      <td><div class="t-name"><span class="t-dot" style="background:${r.color}"></span>${r.name}</div></td>
+      <td class="t-num" style="color:#152847;font-weight:800">${fmt(r.rev)}</td>
+      <td class="tc">${cpill(r.dr, r.rev, '#3b6fd4')}</td>
+      <td class="tc">${cpill(r.em, r.rev, '#7c3aed')}</td>
+      <td class="tc">${cpill(r.vm, r.rev, '#d97706')}</td>
+      <td class="tc">${cpill(r.co, r.rev, '#0891b2')}</td>
+      <td>
+        <div class="ibar-wrap">
+          <div class="ibar-track">
+            <div class="ibar-seg" style="width:${Math.min(drPct,100)}%;background:#3b6fd4"></div>
+            <div class="ibar-seg" style="width:${Math.min(emPct,100)}%;background:#7c3aed"></div>
+            <div class="ibar-seg" style="width:${Math.min(vmPct,100)}%;background:#d97706"></div>
+            <div class="ibar-seg" style="width:${Math.min(coPct,100)}%;background:#0891b2"></div>
+            <div class="ibar-seg" style="width:${Math.min(prPct,100)}%;background:#059669"></div>
+          </div>
+        </div>
+      </td>
+      <td class="tc">
+        <div style="display:inline-flex;align-items:center;padding:0.2rem 0.65rem;border-radius:50px;background:${r.cont<0?'#fef2f2':'#ecfdf5'};color:${r.cont<0?'#991b1b':'#065f46'};border:1px solid ${r.cont<0?'#fecaca':'#a7f3d0'};font-size:0.71rem;font-weight:800">
+          ${fmt(r.cont)}
+        </div>
+      </td>
+      <td class="tc"><span class="chip ${mClass}">${mPct>=0?'+':''}${mPct.toFixed(1)}%</span></td>
+    </tr>`;
+  });
+  document.getElementById('tbody').innerHTML = html;
+}
+
+function renderPieChart(rows) {
+  if (pieChart) pieChart.destroy();
+  const ctx = document.getElementById('pieChart').getContext('2d');
+
+  // Sum all categories across visible rows
+  const totals = rows.reduce((acc, r) => {
+    acc.dr += r.dr || 0;
+    acc.em += r.em || 0;
+    acc.co += r.co || 0;
+    acc.vm += r.vm || 0;
+    acc.cont += Math.max(0, r.cont || 0);
+    return acc;
+  }, { dr:0, em:0, co:0, vm:0, cont:0 });
+
+  const total = totals.dr + totals.em + totals.co + totals.vm + totals.cont;
+
+  // Update subtitle
+  document.getElementById('pieSub').textContent =
+    `סה״כ: ${fmt(total)} • ${GROUPS[currentGroup].monthly ? '6 חודשים' : rows.length + ' יחידות'}`;
+
+  pieChart = new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: ['שכר רופאים', 'שכר עובדים', 'קבלני משנה', 'וטמרקט', 'תרומה ישירה'],
+      datasets: [{
+        data: [totals.dr, totals.em, totals.co, totals.vm, totals.cont],
+        backgroundColor: ['#3b6fd4', '#7c3aed', '#0891b2', '#d97706', '#059669'],
+        borderColor: '#fff',
+        borderWidth: 3,
+        hoverOffset: 8,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom', rtl: true,
+          labels: {
+            color: '#374151', font: { family: 'Heebo', size: 11 },
+            padding: 12, usePointStyle: true, pointStyleWidth: 9,
+            filter: item => item.parsed > 0,
+          }
+        },
+        tooltip: {
+          rtl: true,
+          backgroundColor: '#152847',
+          titleColor: '#fff',
+          bodyColor: 'rgba(255,255,255,0.82)',
+          borderColor: 'rgba(255,255,255,0.1)',
+          borderWidth: 1,
+          padding: 12,
+          callbacks: {
+            label: c => {
+              if (c.parsed === 0) return null;
+              const pct = total > 0 ? (c.parsed / total * 100).toFixed(1) : 0;
+              return ` ${c.label}: ${fmt(c.parsed)}  (${pct}%)`;
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+function renderInsights(rows) {
+  // Find best, worst, and most investment-heavy
+  const valid = rows.filter(r => r.rev > 0);
+  const byMargin = [...valid].sort((a,b) => b.cont/b.rev - a.cont/a.rev);
+  const best = byMargin[0], worst = byMargin[byMargin.length-1];
+  const byDrPct = [...valid].sort((a,b) => b.dr/b.rev - a.dr/a.rev);
+  const heaviestDr = byDrPct[0];
+
+  const bestPct = (best.cont/best.rev*100).toFixed(1);
+  const worstPct = (worst.cont/worst.rev*100).toFixed(1);
+  const drHeavyPct = (heaviestDr.dr/heaviestDr.rev*100).toFixed(1);
+
+  document.getElementById('insightGrid').innerHTML = `
+    <div class="insight-card ic-green">
+      <div class="ic-icon">🏆</div>
+      <div><div class="ic-title">מרווח גבוה ביותר — ${best.name}</div>
+      <div class="ic-body">תרומה ישירה של <strong>${bestPct}%</strong> מהכנסות (${fmt(best.cont)}). זהו הסניף/מחלקה עם ה-ROI הטוב ביותר — מועמד להרחבת השקעה.</div></div>
+    </div>
+    <div class="insight-card ic-red">
+      <div class="ic-icon">⚠️</div>
+      <div><div class="ic-title">מרווח נמוך — ${worst.name}</div>
+      <div class="ic-body">תרומה ישירה של <strong>${worstPct}%</strong>. ${parseFloat(worstPct)<0?'תרומה שלילית — ההוצאות עולות על ההכנסות. דורש בדיקה מיידית.':'מרווח נמוך הדורש שיפור ביעילות תפעולית.'}</div></div>
+    </div>
+    <div class="insight-card ic-blue">
+      <div class="ic-icon">💡</div>
+      <div><div class="ic-title">עלות שכר רופאים גבוהה — ${heaviestDr.name}</div>
+      <div class="ic-body">שכר רופאים עומד על <strong>${drHeavyPct}%</strong> מהכנסות. כדאי לבחון מודל שכר חלופי או הגדלת הכנסות באותו תחום.</div></div>
+    </div>
+  `;
+}
+
+renderAll();
+
+// ─── BRANCH COMPARISON ───
+const BRANCHES_LIST = ['כפר סבא','רחובות','באר שבע','חיפה','מוצקין'];
+let compView = 'revenue';
+let compChart = null;
+
+const BRANCH_COLORS = {
+  'כפר סבא':'#0891b2','רחובות':'#7c3aed','באר שבע':'#059669','חיפה':'#0284c7','מוצקין':'#d97706'
+};
+
+function setCompView(v, el) {
+  compView = v;
+  document.querySelectorAll('.ctab').forEach(b => b.classList.remove('active'));
+  if (el) el.classList.add('active');
+  renderComparison();
+}
+
+function renderComparison() {
+  const branches = BRANCHES_LIST.map(k => ({ name: k, color: BRANCH_COLORS[k], ...ALL[k] }));
+
+  const getVal = (b) => {
+    if (compView === 'margin')  return b.rev > 0 ? b.cont / b.rev * 100 : 0;
+    if (compView === 'revenue') return b.rev;
+    if (compView === 'contrib') return b.cont;
+    if (compView === 'dr')      return b.rev > 0 ? b.dr / b.rev * 100 : 0;
+  };
+  const isPercent = compView === 'margin' || compView === 'dr';
+  const fmtVal = v => isPercent ? v.toFixed(1) + '%' : fmt(v);
+  const labelMap = { margin:'מרווח', revenue:'הכנסות', contrib:'תרומה ישירה', dr:'שכר רופאים %' };
+
+  const vals  = branches.map(b => getVal(b));
+  const maxVal = Math.max(...vals.map(Math.abs));
+  const sorted = branches.map((b,i) => ({ ...b, val: vals[i] })).sort((a,b) => b.val - a.val);
+
+  // Cards
+  document.getElementById('compGrid').innerHTML = sorted.map((b, rank) => {
+    const pct = maxVal > 0 ? Math.max(0, b.val / maxVal * 100) : 0;
+    const col = b.val < 0 ? '#dc2626' : b.color;
+    return `
+      <div class="comp-card" style="--cc:${col}">
+        <div class="cc-rank">${rank+1}</div>
+        <div class="cc-name"><span class="cc-dot"></span>${b.name}</div>
+        <div class="cc-big" style="--ccol:${col}">${fmtVal(b.val)}</div>
+        <div class="cc-lbl">${labelMap[compView]}</div>
+        <div class="cc-bar-wrap">
+          <div class="cc-bar-track">
+            <div class="cc-bar-fill" style="width:${pct}%;background:${col}"></div>
+          </div>
+          <div class="cc-bar-sub">הכנסות: ${fmt(b.rev)}</div>
+        </div>
+      </div>`;
+  }).join('');
+
+  // Horizontal bar chart
+  if (compChart) compChart.destroy();
+  compChart = new Chart(document.getElementById('compChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: sorted.map(b => b.name),
+      datasets: [{
+        label: labelMap[compView],
+        data: sorted.map(b => isPercent ? parseFloat(b.val.toFixed(2)) : b.val),
+        backgroundColor: sorted.map(b => (b.val < 0 ? '#dc2626' : b.color) + 'bb'),
+        borderColor:     sorted.map(b => b.val < 0 ? '#dc2626' : b.color),
+        borderWidth: 2, borderRadius: 8,
+        hoverBackgroundColor: sorted.map(b => b.val < 0 ? '#dc2626' : b.color),
+        barThickness: 28,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          rtl: true, backgroundColor:'#152847', titleColor:'#fff',
+          bodyColor:'rgba(255,255,255,0.85)', borderColor:'rgba(255,255,255,0.1)',
+          borderWidth:1, padding:12,
+          callbacks: {
+            label: c => ` ${labelMap[compView]}: ${fmtVal(c.raw)}`,
+            afterLabel: c => {
+              const b = sorted[c.dataIndex];
+              return [` הכנסות: ${fmt(b.rev)}`, ` תרומה ישירה: ${fmt(b.cont)}`];
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks:{ color:'#94a3b8', font:{family:'Heebo',size:12}, callback: v => isPercent ? v+'%' : fmt(v) },
+          grid:{ color:'#f0f4fb' }
+        },
+        y: {
+          ticks:{ color:'#1e293b', font:{family:'Heebo',size:13,weight:'700'}, padding: 8 },
+          grid:{ display:false }
+        }
+      },
+      layout: { padding: { right: 20 } }
+    }
+  });
+}
+
+
+// ─── CUSTOM COMPARISON BUILDER ───
+const MONTHLY_DATA = {
+  'כפר סבא':  'כפר סבא_monthly',
+  'רחובות':   'רחובות_monthly',
+  'באר שבע':  'באר שבע_monthly',
+  'חיפה':     'חיפה_monthly',
+  'מוצקין':   'מוצקין_monthly',
+  'חירום':    'חירום_monthly',
+  'נוירולוגיה':'נוירולוגיה_monthly',
+  'הדמיה':    'הדמיה_monthly',
+  'כירורגיה': 'כירורגיה_monthly',
+  'קרדיולוגיה':'קרדיולוגיה_monthly',
+  'אונקולוגיה':'אונקולוגיה_monthly',
+  'הרדמה':    'הרדמה_monthly',
+};
+const ENTITY_COLORS = {
+  'כפר סבא':'#0891b2','רחובות':'#7c3aed','באר שבע':'#059669','חיפה':'#0284c7','מוצקין':'#d97706',
+  'חירום':'#ef4444','נוירולוגיה':'#ec4899','הדמיה':'#14b8a6','כירורגיה':'#a855f7',
+  'קרדיולוגיה':'#f43f5e','אונקולוגיה':'#f97316','הרדמה':'#84cc16',
+};
+const MONTHS_LABELS = ['אוג׳ 25','ספט׳ 25','אוק׳ 25','נוב׳ 25','דצמ׳ 25','ינו׳ 26'];
+
+let csMetric = 'cont';
+let csLineChart = null, csBarChart = null;
+
+function toggleSel(el) {
+  el.classList.toggle('active');
+  autoRunComparison();
+}
+
+function setMetric(el) {
+  document.querySelectorAll('.smb').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  csMetric = el.dataset.metric;
+  autoRunComparison();
+}
+
+function autoRunComparison() {
+  const months   = getSelMonths();
+  const entities = getSelEntities();
+  const results  = document.getElementById('csResults');
+  const empty    = document.getElementById('csEmpty');
+  const status   = document.getElementById('csStatus');
+
+  if (!months.length || !entities.length) {
+    results.style.display = 'none';
+    if (empty) empty.style.display = 'flex';
+    status.textContent = !months.length && !entities.length
+      ? 'בחר חודשים וישויות כדי להתחיל'
+      : !months.length ? 'בחר לפחות חודש אחד'
+      : 'בחר לפחות ישות אחת';
+    status.classList.remove('cs-status-active');
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+  status.textContent = `✓ ${entities.length} ישויות • ${months.length} חודשים`;
+  status.classList.add('cs-status-active');
+  runCustomComparison();
+}
+
+function getSelMonths() {
+  return [...document.querySelectorAll('.sch[data-type="month"].active')].map(b => parseInt(b.dataset.val));
+}
+function getSelEntities() {
+  return [...document.querySelectorAll('.sch[data-type="entity"].active')].map(b => b.dataset.val);
+}
+
+function getMonthlyVal(entityName, monthIdx, metric) {
+  const key = MONTHLY_DATA[entityName];
+  if (!key || !ALL[key]) return 0;
+  const m = ALL[key].months;
+  if (metric === 'margin') {
+    const r = m.rev[monthIdx];
+    return r > 0 ? m.cont[monthIdx] / r * 100 : 0;
+  }
+  return m[metric]?.[monthIdx] ?? 0;
+}
+
+function runCustomComparison() {
+  const months   = getSelMonths();
+  const entities = getSelEntities();
+
+  if (!months.length)   { alert('בחר לפחות חודש אחד'); return; }
+  if (!entities.length) { alert('בחר לפחות ישות אחת (סניף או מחלקה)'); return; }
+
+  const metricLabelMap = { cont:'תרומה ישירה', rev:'הכנסות', dr:'שכר רופאים', em:'שכר עובדים', vm:'וטמרקט', margin:'מרווח %' };
+  const isPercent = csMetric === 'margin';
+  const mLabel = metricLabelMap[csMetric];
+  const selMonthLabels = months.map(i => MONTHS_LABELS[i]);
+
+  // Result header
+  document.getElementById('csResultHead').innerHTML =
+    `מציג: <strong>${mLabel}</strong> עבור <strong>${entities.join(', ')}</strong> בחודשים: <strong>${selMonthLabels.join(', ')}</strong>`;
+
+  // ── LINE CHART ──
+  if (csLineChart) csLineChart.destroy();
+  const lineDatasets = entities.map(name => ({
+    label: name,
+    data: months.map(mi => {
+      const v = getMonthlyVal(name, mi, csMetric);
+      return isPercent ? parseFloat(v.toFixed(2)) : Math.round(v);
+    }),
+    borderColor: ENTITY_COLORS[name] || '#888',
+    backgroundColor: (ENTITY_COLORS[name] || '#888') + '22',
+    borderWidth: 2.5, pointRadius: 5, pointHoverRadius: 7,
+    tension: 0.35, fill: false,
+  }));
+
+  csLineChart = new Chart(document.getElementById('csLineChart').getContext('2d'), {
+    type: 'line',
+    data: { labels: selMonthLabels, datasets: lineDatasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position:'top', rtl:true, labels:{ color:'#374151', font:{family:'Heebo',size:11}, padding:12, usePointStyle:true } },
+        tooltip: { rtl:true, backgroundColor:'#152847', titleColor:'#fff', bodyColor:'rgba(255,255,255,0.85)', borderColor:'rgba(255,255,255,0.1)', borderWidth:1, padding:10,
+          callbacks: { label: c => ` ${c.dataset.label}: ${isPercent ? c.raw+'%' : fmt(c.raw)}` }
+        }
+      },
+      scales: {
+        x: { ticks:{ color:'#94a3b8', font:{family:'Heebo',size:11} }, grid:{ color:'#f0f4fb' } },
+        y: { ticks:{ color:'#94a3b8', font:{family:'Heebo',size:11}, callback: v => isPercent ? v+'%' : fmt(v) }, grid:{ color:'#f0f4fb' } }
+      }
+    }
+  });
+
+  // ── BAR CHART (avg over selected months) ──
+  if (csBarChart) csBarChart.destroy();
+  const barVals = entities.map(name => {
+    const vals = months.map(mi => getMonthlyVal(name, mi, csMetric));
+    const s = vals.reduce((a,b)=>a+b,0);
+    return isPercent ? parseFloat((s/months.length).toFixed(2)) : Math.round(s/months.length);
+  });
+
+  csBarChart = new Chart(document.getElementById('csBarChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: entities,
+      datasets: [{
+        label: `ממוצע חודשי — ${mLabel}`,
+        data: barVals,
+        backgroundColor: entities.map(n => (ENTITY_COLORS[n]||'#888') + 'bb'),
+        borderColor: entities.map(n => ENTITY_COLORS[n]||'#888'),
+        borderWidth: 2, borderRadius: 8,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display:false },
+        tooltip: { rtl:true, backgroundColor:'#152847', titleColor:'#fff', bodyColor:'rgba(255,255,255,0.85)', borderColor:'rgba(255,255,255,0.1)', borderWidth:1, padding:10,
+          callbacks: { label: c => ` ממוצע: ${isPercent ? c.raw+'%' : fmt(c.raw)}` }
+        }
+      },
+      scales: {
+        x: { ticks:{ color:'#374151', font:{family:'Heebo',size:11,weight:'700'} }, grid:{ display:false } },
+        y: { ticks:{ color:'#94a3b8', font:{family:'Heebo',size:11}, callback: v => isPercent ? v+'%' : fmt(v) }, grid:{ color:'#f0f4fb' } }
+      }
+    }
+  });
+
+  // ── TABLE ──
+  // Header: entity name | month1 | month2 | ... | ממוצע | סה״כ
+  let thHtml = `<tr><th>ישות</th>${selMonthLabels.map(m=>`<th style="text-align:center">${m}</th>`).join('')}<th style="text-align:center">ממוצע</th><th style="text-align:center">סה״כ</th></tr>`;
+  document.getElementById('csTableHead').innerHTML = thHtml;
+
+  let tbHtml = '';
+  entities.forEach(name => {
+    const vals = months.map(mi => getMonthlyVal(name, mi, csMetric));
+    const total = vals.reduce((a,b)=>a+b,0);
+    const average = total / vals.length;
+    const color = ENTITY_COLORS[name] || '#888';
+    tbHtml += `<tr>
+      <td style="font-weight:800;color:${color};display:flex;align-items:center;gap:0.4rem">
+        <span style="width:8px;height:8px;border-radius:50%;background:${color};display:inline-block;flex-shrink:0"></span>${name}
+      </td>
+      ${vals.map(v => `<td style="text-align:center;font-variant-numeric:tabular-nums">${isPercent ? v.toFixed(1)+'%' : fmt(v)}</td>`).join('')}
+      <td style="text-align:center;font-weight:700;color:#0891b2">${isPercent ? average.toFixed(1)+'%' : fmt(average)}</td>
+      <td style="text-align:center;font-weight:800;color:${isPercent?'#374151':total<0?'#dc2626':'#059669'}">${isPercent ? '—' : fmt(total)}</td>
+    </tr>`;
+  });
+  document.getElementById('csTableBody').innerHTML = tbHtml;
+
+  document.getElementById('csResults').style.display = 'block';
+}
+
+renderComparison();
+
+// ─── UPLOAD GATE ───
+const UPLOAD_HASH = '9a900bc3c5f4a026fee9c4e9b83ef4f0cce2e3e5d6f60a7e5b3d3c2e2a4a5b3'; // SHA-256 of "555"
+
+async function sha256Upload(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+function openUploadGate() {
+  const el = document.getElementById('uploadGate');
+  el.style.display = 'flex';
+  setTimeout(() => document.getElementById('uploadPwInput').focus(), 100);
+}
+function closeUploadGate() {
+  document.getElementById('uploadGate').style.display = 'none';
+  document.getElementById('uploadPwInput').value = '';
+  document.getElementById('uploadPwErr').textContent = '';
+}
+
+async function checkUploadPw() {
+  const input = document.getElementById('uploadPwInput');
+  const err   = document.getElementById('uploadPwErr');
+  const val   = input.value.trim();
+  if (!val) return;
+  const hash = await sha256Upload(val);
+  if (hash === UPLOAD_HASH) {
+    closeUploadGate();
+    document.getElementById('uploadFileInput').click();
+  } else {
+    err.textContent = '❌ סיסמה שגויה';
+    input.style.borderColor = '#dc2626';
+    input.value = '';
+    setTimeout(() => { input.style.borderColor = '#e0e8f5'; }, 1500);
+  }
+}
+
+// ─── FILE HANDLING — SMART PARSER ───
+let fvAllRows = [], fvHeaders = [];
+
+function handleFileUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const wb = XLSX.read(e.target.result, { type: 'array' });
+      window._uploadedWb = wb;
+      processSheet(wb, wb.SheetNames[0], file.name);
+    } catch(err) {
+      alert('שגיאה בקריאת הקובץ: ' + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+  event.target.value = '';
+}
+
+function processSheet(wb, sheetName, fileName) {
+  const ws = wb.Sheets[sheetName];
+  const json = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+  const parsed = parseSheetData(json);
+
+  if (parsed && Object.keys(parsed.entities).length >= 2) {
+    injectParsedData(parsed, fileName, sheetName, wb.SheetNames);
+  } else {
+    // Fallback: raw table view
+    showRawTable(json, fileName, sheetName, wb);
+  }
+}
+
+// ─── SMART PARSER — מותאם לפורמט DASHBOARD_כפר_סבא_וסניפים ───
+function parseSheetData(json) {
+
+  const METRIC_MAP = {
+    'הכנסות':                          'rev',
+    'שכר רופאים':                       'dr',
+    'שכר עובדים':                       'em',
+    'קבלני משנה - ספקים':              'co',
+    'קבלני משנה - רופאים / ספקים':     'co',
+    'קבלני משנה':                       'co',
+    'וטמרקט':                          'vm',
+    'תרומה ישירה':                     'cont',
+  };
+  const SKIP = new Set(['%', 'רווחיות תרומה ישירה', 'בדיקה']);
+
+  const MONTH_NAMES = {
+    1:'ינו׳',2:'פבר׳',3:'מרצ׳',4:'אפר׳',5:'מאי',
+    6:'יונ׳',7:'יול׳',8:'אוג׳',9:'ספט׳',10:'אוק׳',11:'נוב׳',12:'דצמ׳'
+  };
+
+  // Detect if a row is an entity-header row:
+  // col B = entity name (string), cols C–H = month codes like 8.25, 9.25 ... 1.26
+  function isEntityHeader(row) {
+    const name = String(row[1] || '').trim();
+    if (!name || METRIC_MAP[name] || SKIP.has(name)) return false;
+    // Check cols 2-7 look like month codes (e.g. 8.25, 9.25, 1.26)
+    const candidates = row.slice(2, 8).filter(v => v !== null && v !== undefined && v !== '');
+    if (candidates.length < 3) return false;
+    return candidates.every(v => {
+      const n = parseFloat(v);
+      if (isNaN(n)) return false;
+      const month = Math.floor(n <= 12 ? n : n);
+      const yr    = Math.round((n % 1) * 100);
+      return month >= 1 && month <= 12 && (yr === 25 || yr === 26 || yr === 0);
+    });
+  }
+
+  function monthLabel(code) {
+    const n     = parseFloat(code);
+    const month = Math.floor(n);
+    const yr    = Math.round((n % 1) * 100);
+    return `${MONTH_NAMES[month] || '?'} ${yr || ''}`.trim();
+  }
+
+  function safeNum(v) {
+    if (v === null || v === undefined || v === '' || v === '#DIV/0!') return 0;
+    const n = parseFloat(v);
+    return isNaN(n) ? 0 : n;
+  }
+
+  // ── First pass: discover month labels from first entity header ──
+  let monthLabels = [];
+  let dataColStart = 2, dataColCount = 6;
+
+  for (const row of json) {
+    if (isEntityHeader(row)) {
+      const codes = row.slice(2, 9).filter(v => v !== null && v !== undefined && v !== '');
+      monthLabels   = codes.map(monthLabel);
+      dataColCount  = codes.length;
+      break;
+    }
+  }
+  if (!monthLabels.length) return null;
+
+  // ── Second pass: collect entities ──
+  const entities    = {};
+  const entityOrder = [];
+  let   currentEnt  = null;
+
+  for (const row of json) {
+    const col2 = String(row[1] || '').trim();
+    if (!col2) continue;
+
+    if (isEntityHeader(row)) {
+      currentEnt = col2;
+      if (!entities[col2]) {
+        entities[col2] = { rev:[], dr:[], em:[], co:[], vm:[], cont:[] };
+        entityOrder.push(col2);
+      }
+      continue;
+    }
+
+    if (!currentEnt) continue;
+    if (SKIP.has(col2)) continue;
+
+    const metricKey = METRIC_MAP[col2];
+    if (!metricKey) continue;
+
+    // Read dataColCount values starting at col index 2
+    const vals = [];
+    for (let ci = dataColStart; ci < dataColStart + dataColCount; ci++) {
+      vals.push(safeNum(row[ci]));
+    }
+    entities[currentEnt][metricKey] = vals;
+  }
+
+  // Pad missing arrays
+  entityOrder.forEach(name => {
+    const d = entities[name];
+    ['rev','dr','em','co','vm','cont'].forEach(k => {
+      if (!d[k] || d[k].length !== dataColCount)
+        d[k] = new Array(dataColCount).fill(0);
+    });
+  });
+
+  return { entities, entityOrder, monthLabels, dataColCount };
+}
+
+// ─── INJECT PARSED DATA → RE-RENDER FULL DASHBOARD ───
+const AUTO_COLORS = ['#0891b2','#7c3aed','#059669','#0284c7','#d97706','#ef4444','#ec4899','#14b8a6','#a855f7','#f43f5e','#f97316','#84cc16','#e11d48','#0ea5e9'];
+
+// Preset colors for known entities
+const KNOWN_COLORS = {
+  'רשת - מסכם':     '#152847',
+  'כפר סבא מסכם':   '#0891b2',
+  'כפר סבא אחר':    '#64748b',
+  'חירום':           '#ef4444',
+  'נוירולוגיה':      '#ec4899',
+  'הדמיה':           '#14b8a6',
+  'כירורגיה':        '#a855f7',
+  'קרדיולוגיה':      '#f43f5e',
+  'אונקולוגיה':      '#f97316',
+  'הרדמה':           '#84cc16',
+  'רחובות':          '#7c3aed',
+  'באר שבע':         '#059669',
+  'חיפה':            '#0284c7',
+  'מוצקין':          '#d97706',
+};
+
+function injectParsedData(parsed, fileName, sheetName, sheetNames) {
+  const { entities, entityOrder, monthLabels, dataColCount } = parsed;
+
+  // Rebuild MONTHS global
+  while (MONTHS.length) MONTHS.pop();
+  monthLabels.forEach(m => MONTHS.push(m));
+
+  // Clear and rebuild ALL
+  Object.keys(ALL).forEach(k => delete ALL[k]);
+
+  entityOrder.forEach((name, idx) => {
+    const d = entities[name];
+    const color = KNOWN_COLORS[name] || AUTO_COLORS[idx % AUTO_COLORS.length];
+    const totRev  = d.rev.reduce((a,b)=>a+b,0);
+    const totDr   = d.dr.reduce((a,b)=>a+b,0);
+    const totEm   = d.em.reduce((a,b)=>a+b,0);
+    const totCo   = d.co.reduce((a,b)=>a+b,0);
+    const totVm   = d.vm.reduce((a,b)=>a+b,0);
+    const totCont = d.cont.reduce((a,b)=>a+b,0);
+
+    ALL[name] = { type: 'entity', color, rev: totRev, dr: totDr, em: totEm, co: totCo, vm: totVm, cont: totCont };
+    ALL[name + '_monthly'] = { months: { rev: d.rev, dr: d.dr, em: d.em, co: d.co, vm: d.vm, cont: d.cont }};
+
+    // Update MONTHLY_DATA lookup
+    MONTHLY_DATA[name] = name + '_monthly';
+    // Update ENTITY_COLORS
+    ENTITY_COLORS[name] = color;
+  });
+
+  // Rebuild GROUPS
+  Object.keys(GROUPS).forEach(k => delete GROUPS[k]);
+  GROUPS['network'] = { title: `${sheetName} — כל הישויות`, keys: entityOrder };
+  entityOrder.forEach((name, idx) => {
+    GROUPS['e' + idx] = { title: `${name} — לפי חודש`, monthly: name };
+  });
+
+  // Rebuild BRANCHES_LIST for comparison
+  while (BRANCHES_LIST.length) BRANCHES_LIST.pop();
+  entityOrder.forEach(n => {
+    BRANCHES_LIST.push(n);
+    BRANCH_COLORS[n] = ENTITY_COLORS[n];
+  });
+
+  // Rebuild filter buttons
+  rebuildFilterButtons(entityOrder);
+
+  // Update nav period pill
+  if (monthLabels.length >= 2) {
+    document.querySelector('.nav-pill').textContent = `📅 ${monthLabels[0]} — ${monthLabels[monthLabels.length-1]}`;
+  }
+
+  showToast(`✅ "${fileName}" נטען בהצלחה — ${entityOrder.length} ישויות • ${monthLabels.length} חודשים`);
+
+  currentGroup = 'network';
+  renderAll();
+  renderComparison();
+
+  // Reset custom comparison
+  document.querySelectorAll('.sch').forEach(b => b.classList.remove('active'));
+  document.getElementById('csResults').style.display = 'none';
+  document.getElementById('csEmpty').style.display = 'flex';
+  document.getElementById('csStatus').textContent = 'בחר חודשים וישויות כדי להתחיל';
+  document.getElementById('csStatus').classList.remove('cs-status-active');
+  rebuildCustomComparison(entityOrder, monthLabels);
+}
+
+function rebuildFilterButtons(entityOrder) {
+  const filterRow = document.querySelector('.filter-row');
+  filterRow.innerHTML = `
+    <button class="fb active" onclick="setGroup('network', this)">🌐 כל הישויות</button>
+    <div class="gr-label">ישויות</div>
+    ${entityOrder.map((name, idx) =>
+      `<button class="fb" onclick="setGroup('e${idx}', this)">${name}</button>`
+    ).join('')}
+  `;
+}
+
+function rebuildCustomComparison(entityOrder, monthLabels) {
+  // Rebuild month chips
+  document.getElementById('monthChips').innerHTML = monthLabels.map((m, i) =>
+    `<button class="sch" data-type="month" data-val="${i}" onclick="toggleSel(this)">${m}</button>`
+  ).join('');
+
+  // Rebuild entity chips — split into two groups visually
+  const half = Math.ceil(entityOrder.length / 2);
+  document.getElementById('branchChips').innerHTML = entityOrder.slice(0, half).map(name =>
+    `<button class="sch" data-type="entity" data-val="${name}" onclick="toggleSel(this)">${name}</button>`
+  ).join('');
+  document.getElementById('deptChips').innerHTML = entityOrder.slice(half).map(name =>
+    `<button class="sch" data-type="entity" data-val="${name}" onclick="toggleSel(this)">${name}</button>`
+  ).join('');
+
+  // Update col titles
+  document.querySelector('#branchChips').closest('.cs-col').querySelector('.cs-col-title').textContent = '🏥 ישויות (1)';
+  document.querySelector('#deptChips').closest('.cs-col').querySelector('.cs-col-title').textContent = '🔬 ישויות (2)';
+  document.querySelector('#deptChips').closest('.cs-col').querySelector('.cs-hint').textContent = 'לחץ להוסיף להשוואה';
+
+  // Update MONTHLY_DATA mapping
+  entityOrder.forEach(name => { MONTHLY_DATA[name] = name + '_monthly'; });
+}
+
+function showToast(msg) {
+  let t = document.getElementById('dashToast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'dashToast';
+    t.style.cssText = 'position:fixed;bottom:2rem;right:50%;transform:translateX(50%);background:#152847;color:#fff;padding:.75rem 1.5rem;border-radius:50px;font-family:Heebo,sans-serif;font-size:.84rem;font-weight:700;box-shadow:0 4px 20px rgba(0,0,0,.3);z-index:9998;transition:opacity .4s';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.style.opacity = '0'; }, 4000);
+}
+
+// Fallback raw table
+function showRawTable(json, fileName, sheetName, wb) {
+  let headerRowIdx = 0;
+  for (let i = 0; i < Math.min(json.length, 10); i++) {
+    if (json[i].some(c => c !== '')) { headerRowIdx = i; break; }
+  }
+  fvHeaders = json[headerRowIdx].map((h, i) => h !== '' ? String(h) : `עמודה ${i+1}`);
+  fvAllRows = json.slice(headerRowIdx + 1).filter(r => r.some(c => c !== ''));
+
+  const tabs = wb.SheetNames.map((name, i) =>
+    `<button onclick="loadSheet(event,'${name.replace(/'/g,"\\'")}',this)"
+      style="padding:.35rem .9rem;border-radius:50px;border:1.5px solid ${i===0?'#152847':'#e0e8f5'};background:${i===0?'#152847':'#fff'};color:${i===0?'#fff':'#374151'};font-family:'Heebo',sans-serif;font-size:.75rem;font-weight:700;cursor:pointer">
+      ${name}</button>`
+  ).join('');
+  document.getElementById('fvSheetTabs').innerHTML = tabs;
+  document.getElementById('fvTitle').textContent = `📄 ${fileName} — ${sheetName}`;
+  document.getElementById('fvMeta').textContent = `${fvAllRows.length} שורות • ${fvHeaders.length} עמודות`;
+  renderFvTable(fvHeaders, fvAllRows);
+  document.getElementById('fileViewer').style.display = 'flex';
+}
+
+function loadSheet(e, sheetName, btn) {
+  const wb = window._uploadedWb;
+  if (!wb) return;
+  const ws = wb.Sheets[sheetName];
+  const json = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+  let headerRowIdx = 0;
+  for (let i = 0; i < Math.min(json.length, 10); i++) {
+    if (json[i].some(c => c !== '')) { headerRowIdx = i; break; }
+  }
+  fvHeaders = json[headerRowIdx].map((h, i) => h !== '' ? String(h) : `עמודה ${i+1}`);
+  fvAllRows = json.slice(headerRowIdx + 1).filter(r => r.some(c => c !== ''));
+  document.getElementById('fvMeta').textContent = `${fvAllRows.length} שורות • ${fvHeaders.length} עמודות • גליון: ${sheetName}`;
+  document.querySelectorAll('#fvSheetTabs button').forEach(b => { b.style.background='#fff'; b.style.color='#374151'; b.style.borderColor='#e0e8f5'; });
+  btn.style.background='#152847'; btn.style.color='#fff'; btn.style.borderColor='#152847';
+  document.getElementById('fvSearch').value = '';
+  renderFvTable(fvHeaders, fvAllRows);
+}
+
+function renderFvTable(headers, rows) {
+  document.getElementById('fvCount').textContent = `מציג ${rows.length} שורות`;
+  const isNum = v => v !== '' && !isNaN(Number(v));
+  const fmtCell = v => {
+    if (v===''||v===null||v===undefined) return '<span style="color:#d1d5db">—</span>';
+    if (isNum(v)) { const n=Number(v); if(Math.abs(n)>=1000) return `<span style="color:#152847;font-weight:600">${n.toLocaleString('he-IL')}</span>`; if(n<0) return `<span style="color:#dc2626">${n.toLocaleString('he-IL')}</span>`; }
+    return String(v);
+  };
+  const thead = `<thead><tr style="background:#152847;position:sticky;top:0">
+    <th style="padding:.7rem .9rem;font-size:.65rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.6);text-align:right">#</th>
+    ${headers.map(h=>`<th style="padding:.7rem .9rem;font-size:.65rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.7);text-align:right;white-space:nowrap">${h}</th>`).join('')}
+  </tr></thead>`;
+  const tbody = `<tbody>${rows.map((row,ri)=>`
+    <tr style="border-bottom:1px solid #f1f5f9;background:${ri%2===0?'#fff':'#fafbff'}" onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background='${ri%2===0?'#fff':'#fafbff'}'">
+      <td style="padding:.65rem .9rem;font-size:.72rem;color:#94a3b8;text-align:right">${ri+1}</td>
+      ${headers.map((_,ci)=>`<td style="padding:.65rem .9rem;font-size:.81rem;text-align:right;white-space:nowrap">${fmtCell(row[ci])}</td>`).join('')}
+    </tr>`).join('')}</tbody>`;
+  document.getElementById('fvTable').innerHTML = thead + tbody;
+}
+
+function filterFvTable() {
+  const q = document.getElementById('fvSearch').value.toLowerCase();
+  if (!q) { renderFvTable(fvHeaders, fvAllRows); return; }
+  const filtered = fvAllRows.filter(row => row.some(c => String(c).toLowerCase().includes(q)));
+  document.getElementById('fvCount').textContent = `מציג ${filtered.length} מתוך ${fvAllRows.length} שורות`;
+  const tbody = `<tbody>${filtered.map((row,ri)=>`
+    <tr style="border-bottom:1px solid #f1f5f9;background:${ri%2===0?'#fff':'#fafbff'}" onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background='${ri%2===0?'#fff':'#fafbff'}'">
+      <td style="padding:.65rem .9rem;font-size:.72rem;color:#94a3b8">${ri+1}</td>
+      ${fvHeaders.map((_,ci)=>{const v=row[ci];const s=String(v||'');const idx=s.toLowerCase().indexOf(q);return`<td style="padding:.65rem .9rem;font-size:.81rem;text-align:right;white-space:nowrap">${idx>=0?s.slice(0,idx)+`<mark style="background:#fef08a;border-radius:2px">${s.slice(idx,idx+q.length)}</mark>`+s.slice(idx+q.length):s}</td>`;}).join('')}
+    </tr>`).join('')}</tbody>`;
+  const table = document.getElementById('fvTable');
+  table.querySelector('tbody')?.remove();
+  table.insertAdjacentHTML('beforeend', tbody);
+}
+
+function closeFileViewer() { document.getElementById('fileViewer').style.display='none'; }
+
+// Compute correct hash on load and patch
+(async () => {
+  const h = await sha256Upload('555');
+  window._uploadHash = h;
+  // Patch checkUploadPw to use live hash
+  const orig = checkUploadPw;
+  window.checkUploadPw = async function() {
+    const input = document.getElementById('uploadPwInput');
+    const err   = document.getElementById('uploadPwErr');
+    const val   = input.value.trim();
+    if (!val) return;
+    const hash = await sha256Upload(val);
+    if (hash === window._uploadHash) {
+      closeUploadGate();
+      document.getElementById('uploadFileInput').click();
+    } else {
+      err.textContent = '❌ סיסמה שגויה';
+      input.style.borderColor = '#dc2626';
+      input.value = '';
+      setTimeout(() => { input.style.borderColor = '#e0e8f5'; }, 1500);
+    }
+  };
+})();
+
+
+</script>
+</body>
+</html>
