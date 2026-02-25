@@ -740,37 +740,15 @@ footer { text-align: center; padding: 1.8rem 0 1.2rem; color: var(--text4); font
 
     <!-- SELECTORS ROW -->
     <div class="cs-selectors">
-      <!-- Month selector — dropdown style -->
+      <!-- Month selector — chip buttons -->
       <div class="cs-col">
-        <div class="cs-col-title">📅 טווח חודשים</div>
-        <div style="display:flex;flex-direction:column;gap:0.6rem">
-          <div>
-            <div style="font-size:0.67rem;color:var(--text4);font-weight:600;margin-bottom:0.3rem">מחודש</div>
-            <div style="display:flex;gap:0.4rem">
-              <select id="csFromMonth" onchange="autoRunComparison()" class="cs-select">
-                <option value="0">אוג׳</option><option value="1">ספט׳</option><option value="2">אוק׳</option>
-                <option value="3">נוב׳</option><option value="4">דצמ׳</option><option value="5">ינו׳</option>
-              </select>
-              <select id="csFromYear" onchange="autoRunComparison()" class="cs-select" style="max-width:80px">
-                <option value="25">2025</option><option value="26">2026</option>
-              </select>
-            </div>
-          </div>
-          <div>
-            <div style="font-size:0.67rem;color:var(--text4);font-weight:600;margin-bottom:0.3rem">עד חודש</div>
-            <div style="display:flex;gap:0.4rem">
-              <select id="csToMonth" onchange="autoRunComparison()" class="cs-select">
-                <option value="0">אוג׳</option><option value="1">ספט׳</option><option value="2">אוק׳</option>
-                <option value="3">נוב׳</option><option value="4" selected>דצמ׳</option><option value="5">ינו׳</option>
-              </select>
-              <select id="csToYear" onchange="autoRunComparison()" class="cs-select" style="max-width:80px">
-                <option value="25">2025</option><option value="26" selected>2026</option>
-              </select>
-            </div>
-          </div>
-          <button onclick="selectAllMonths()" class="cs-range-btn">כל התקופה</button>
+        <div class="cs-col-title">📅 חודשים</div>
+        <div id="monthChipsWrap" style="display:flex;flex-direction:column;gap:0.5rem"></div>
+        <div style="display:flex;gap:0.4rem;margin-top:0.6rem">
+          <button onclick="selectAllMonths()" class="cs-range-btn">✓ הכל</button>
+          <button onclick="clearAllMonths()" class="cs-range-btn">✕ נקה</button>
         </div>
-        <div class="cs-hint" id="csMonthHint" style="margin-top:0.5rem">בחר טווח חודשים</div>
+        <div class="cs-hint" id="csMonthHint">בחר חודשים</div>
       </div>
 
       <!-- Branch selector -->
@@ -1473,47 +1451,16 @@ function autoRunComparison() {
 }
 
 function getSelMonths() {
-  // Build range from dropdown selectors
-  const fromM = parseInt(document.getElementById('csFromMonth')?.value ?? 0);
-  const fromY = parseInt(document.getElementById('csFromYear')?.value ?? 25);
-  const toM   = parseInt(document.getElementById('csToMonth')?.value ?? 5);
-  const toY   = parseInt(document.getElementById('csToYear')?.value ?? 26);
-
-  // Convert each MONTHS label to {idx, monthNum, year}
-  const result = [];
-  MONTHS.forEach((label, idx) => {
-    // Parse label like "אוג׳ 25" → year=25, find month index
-    const parts = label.split(' ');
-    const yr = parseInt(parts[1]) || 25;
-    // Compare: from <= current <= to  (treat year*12+month as comparable)
-    const fromCode = fromY * 12 + fromM;
-    const toCode   = toY   * 12 + toM;
-    const curCode  = yr    * 12 + idx; // use idx as proxy for ordering
-    // Better: map label index within known month order
-    if (curCode >= fromCode && curCode <= toCode) result.push(idx);
-  });
-
-  // Fallback: if range logic doesn't work cleanly, just use fromM..toM indices
-  if (!result.length) {
-    const from = Math.min(fromM, toM);
-    const to   = Math.max(fromM, toM);
-    for (let i = from; i <= Math.min(to, MONTHS.length-1); i++) result.push(i);
-  }
-  return result;
+  return [...document.querySelectorAll('.sch[data-type="month"].active')].map(b => parseInt(b.dataset.val));
 }
 
 function selectAllMonths() {
-  if (!MONTHS.length) return;
-  // Reset dropdowns to full range
-  const fromSel = document.getElementById('csFromMonth');
-  const toSel   = document.getElementById('csToMonth');
-  if (fromSel) fromSel.value = '0';
-  if (toSel)   toSel.value   = String(MONTHS.length - 1);
-  // Try setting years
-  const fromY = document.getElementById('csFromYear');
-  const toY   = document.getElementById('csToYear');
-  if (fromY) fromY.value = '25';
-  if (toY)   toY.value   = '26';
+  document.querySelectorAll('.sch[data-type="month"]').forEach(b => b.classList.add('active'));
+  autoRunComparison();
+}
+
+function clearAllMonths() {
+  document.querySelectorAll('.sch[data-type="month"]').forEach(b => b.classList.remove('active'));
   autoRunComparison();
 }
 function getSelEntities() {
@@ -1641,7 +1588,12 @@ function runCustomComparison() {
 
 renderComparison();
 
-// ─── UPLOAD GATE ───
+// Build initial month chips from default MONTHS data
+(function initMonthChips() {
+  const entityOrder = Object.keys(ALL).filter(k => !k.includes('_monthly') && ALL[k].rev > 0);
+  rebuildCustomComparison(entityOrder, MONTHS.slice());
+})();
+
 const UPLOAD_HASH = '9a900bc3c5f4a026fee9c4e9b83ef4f0cce2e3e5d6f60a7e5b3d3c2e2a4a5b3'; // SHA-256 of "555"
 
 async function sha256Upload(str) {
@@ -1917,23 +1869,24 @@ function rebuildFilterButtons(entityOrder) {
 }
 
 function rebuildCustomComparison(entityOrder, monthLabels) {
-  // Rebuild month dropdowns
-  const MONTH_NAMES_SHORT = ['ינו׳','פבר׳','מרצ׳','אפר׳','מאי','יונ׳','יול׳','אוג׳','ספט׳','אוק׳','נוב׳','דצמ׳'];
-  const monthOptions = monthLabels.map((label, i) => `<option value="${i}">${label}</option>`).join('');
-  ['csFromMonth','csToMonth'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.innerHTML = monthOptions;
-  });
-  const toEl = document.getElementById('csToMonth');
-  if (toEl) toEl.value = String(monthLabels.length - 1);
-
-  // Detect years present
-  const years = [...new Set(monthLabels.map(l => l.split(' ')[1]).filter(Boolean))];
-  const yearOpts = years.map(y => `<option value="${y}">${20+parseInt(y)}</option>`).join('');
-  ['csFromYear','csToYear'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) { el.innerHTML = yearOpts; if (id === 'csToYear' && years.length > 0) el.value = years[years.length-1]; }
-  });
+  // Build month chips grouped by year
+  const wrap = document.getElementById('monthChipsWrap');
+  if (wrap) {
+    const byYear = {};
+    monthLabels.forEach((label, i) => {
+      const parts = label.trim().split(' ');
+      const yr = parts.length > 1 ? '20' + parts[parts.length - 1] : '?';
+      if (!byYear[yr]) byYear[yr] = [];
+      byYear[yr].push({ label, i });
+    });
+    wrap.innerHTML = Object.entries(byYear).map(([yr, months]) => `
+      <div>
+        <div style="font-size:0.62rem;font-weight:800;letter-spacing:1px;color:var(--text4);margin-bottom:0.3rem">${yr}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:0.35rem">
+          ${months.map(m => `<button class="sch" data-type="month" data-val="${m.i}" onclick="toggleSel(this)">${m.label.split(' ')[0]}</button>`).join('')}
+        </div>
+      </div>`).join('');
+  }
 
   // Rebuild entity chips — split into two groups
   const half = Math.ceil(entityOrder.length / 2);
@@ -1946,8 +1899,6 @@ function rebuildCustomComparison(entityOrder, monthLabels) {
 
   document.querySelector('#branchChips').closest('.cs-col').querySelector('.cs-col-title').textContent = '🏥 ישויות (1)';
   document.querySelector('#deptChips').closest('.cs-col').querySelector('.cs-col-title').textContent = '🔬 ישויות (2)';
-
-  // Update MONTHLY_DATA
   entityOrder.forEach(name => { MONTHLY_DATA[name] = name + '_monthly'; });
 }
 
