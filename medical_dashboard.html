@@ -914,28 +914,6 @@ footer { text-align: center; padding: 1.8rem 0 1.2rem; color: var(--text4); font
     <div class="insight-grid" id="insightGrid"></div>
   </div>
 
-  <!-- BRANCH COMPARISON -->
-  <div class="comparison-section">
-    <div class="comp-head">
-      <div>
-        <div class="comp-title">📊 השוואת ביצועים — כל הסניפים</div>
-        <div class="comp-sub">סה״כ 6 חודשים • אוג׳ 2025 – ינו׳ 2026</div>
-      </div>
-      <div class="comp-tabs" id="compTabs">
-        <button class="ctab active" onclick="setCompView('revenue',this)">הכנסות</button>
-        <button class="ctab" onclick="setCompView('margin',this)">מרווח %</button>
-        <button class="ctab" onclick="setCompView('contrib',this)">תרומה ישירה</button>
-        <button class="ctab" onclick="setCompView('dr',this)">שכר רופאים</button>
-      </div>
-    </div>
-    <div class="comp-grid" id="compGrid"></div>
-    <div class="comp-chart-wrap">
-      <div style="position:relative; height:340px;">
-        <canvas id="compChart"></canvas>
-      </div>
-    </div>
-  </div>
-
   <!-- CUSTOM COMPARISON BUILDER -->
   <div class="custom-section">
     <div class="cs-head">
@@ -1091,6 +1069,28 @@ footer { text-align: center; padding: 1.8rem 0 1.2rem; color: var(--text4); font
       <button onclick="refreshCEO()" style="padding:0.45rem 1.1rem;border-radius:50px;border:1.5px solid var(--border);background:var(--white);font-family:'Heebo',sans-serif;font-size:0.78rem;font-weight:700;color:var(--navy);cursor:pointer">🔄 רענן</button>
     </div>
     <div class="ceo-grid" id="ceoGrid"></div>
+  </div>
+
+  <!-- BRANCH COMPARISON -->
+  <div class="comparison-section">
+    <div class="comp-head">
+      <div>
+        <div class="comp-title">📊 השוואת ביצועים — כל הסניפים</div>
+        <div class="comp-sub">סה״כ 6 חודשים • אוג׳ 2025 – ינו׳ 2026</div>
+      </div>
+      <div class="comp-tabs" id="compTabs">
+        <button class="ctab active" onclick="setCompView('revenue',this)">הכנסות</button>
+        <button class="ctab" onclick="setCompView('margin',this)">מרווח %</button>
+        <button class="ctab" onclick="setCompView('contrib',this)">תרומה ישירה</button>
+        <button class="ctab" onclick="setCompView('dr',this)">שכר רופאים</button>
+      </div>
+    </div>
+    <div class="comp-grid" id="compGrid"></div>
+    <div class="comp-chart-wrap">
+      <div style="position:relative; height:340px;">
+        <canvas id="compChart"></canvas>
+      </div>
+    </div>
   </div>
 
   <footer>MedNet Analytics • אוג׳ 2025 – ינו׳ 2026 • Confidential</footer>
