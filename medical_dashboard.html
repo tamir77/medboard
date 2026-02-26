@@ -1003,7 +1003,7 @@ footer { text-align: center; padding: 1.8rem 0 1.2rem; color: var(--text4); font
   <div class="lb-section">
     <div class="lb-head">
       <div>
-        <div class="lb-title">📋 ביצועי כל הישויות</div>
+        <div class="lb-title">📋 לוח מנהיגים — ביצועי כל הישויות</div>
         <div style="font-size:0.72rem;color:var(--text3);margin-top:0.15rem">לחץ על שורה לפתיחת פאנל תחקיר מפורט</div>
       </div>
       <div class="lb-controls">
@@ -1257,10 +1257,31 @@ function setGroup(gKey, el) {
   renderAll();
 }
 
+// Adapt chart layout based on number of entities
+function adaptChartLayout(count) {
+  const chartArea = document.querySelector('.chart-area');
+  const pieBox    = document.querySelector('.pie-box');
+  const chartWrap = document.querySelector('.chart-wrap');
+  if (!chartArea || !pieBox || !chartWrap) return;
+
+  if (count > 8) {
+    // Many entities: full width bar chart, hide pie
+    chartArea.style.gridTemplateColumns = '1fr';
+    pieBox.style.display = 'none';
+    chartWrap.style.height = Math.min(80 + count * 28, 620) + 'px';
+  } else {
+    // Few entities: restore normal layout
+    chartArea.style.gridTemplateColumns = '';
+    pieBox.style.display = '';
+    chartWrap.style.height = '380px';
+  }
+}
+
 function renderAll() {
   const g = GROUPS[currentGroup];
   const rows = buildData(currentGroup);
   document.getElementById('chartTitle').textContent = g.title;
+  adaptChartLayout(rows.length);
   renderChart(rows);
   renderPieChart(rows);
   renderMiniKpis(rows);
@@ -1842,16 +1863,14 @@ renderComparison();
   rebuildCustomComparison(entityOrder, MONTHS.slice());
 })();
 
-const UPLOAD_HASH = '9a900bc3c5f4a026fee9c4e9b83ef4f0cce2e3e5d6f60a7e5b3d3c2e2a4a5b3'; // SHA-256 of "555"
-
-async function sha256Upload(str) {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
-}
+const UPLOAD_HASH = '9a900bc3c5f4a026fee9c4e9b83ef4f0cce2e3e5d6f60a7e5b3d3c2e2a4a5b3';
+// Safari fix: .click() on file input must happen synchronously within the user gesture.
+// async/await breaks this — Safari drops the gesture by the time await resolves.
+// Solution: synchronous comparison using btoa (good enough for this access level).
+const _PW = btoa('555'); // "NTU1"
 
 function openUploadGate() {
-  const el = document.getElementById('uploadGate');
-  el.classList.remove('modal-hidden');
+  document.getElementById('uploadGate').classList.remove('modal-hidden');
   setTimeout(() => { try { document.getElementById('uploadPwInput').focus(); } catch(e){} }, 200);
 }
 function closeUploadGate() {
@@ -1860,15 +1879,14 @@ function closeUploadGate() {
   document.getElementById('uploadPwErr').textContent = '';
 }
 
-async function checkUploadPw() {
+function checkUploadPw() {
   const input = document.getElementById('uploadPwInput');
   const err   = document.getElementById('uploadPwErr');
   const val   = input.value.trim();
   if (!val) return;
-  const hash = await sha256Upload(val);
-  if (hash === UPLOAD_HASH) {
+  if (btoa(val) === _PW) {
     closeUploadGate();
-    document.getElementById('uploadFileInput').click();
+    document.getElementById('uploadFileInput').click(); // must be sync — Safari requirement
   } else {
     err.textContent = '❌ סיסמה שגויה';
     input.style.borderColor = '#dc2626';
@@ -2093,8 +2111,22 @@ function injectParsedData(parsed, fileName, sheetName, sheetNames) {
   showToast(`✅ "${fileName}" נטען בהצלחה — ${entityOrder.length} ישויות • ${monthLabels.length} חודשים`);
 
   currentGroup = 'network';
-  renderAll();
-  renderComparison();
+
+  // Safari fix: let DOM fully settle before re-rendering charts
+  // Directly calling renderAll() causes Chart.js to read wrong canvas dimensions
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      // Adjust chart layout based on entity count
+      adaptChartLayout(entityOrder.length);
+      renderAll();
+      renderComparison();
+      // Force resize after render so Safari recalculates
+      setTimeout(() => {
+        if (chart) chart.resize();
+        if (pieChart) pieChart.resize();
+      }, 100);
+    }, 50);
+  });
 
   // Reset custom comparison
   document.querySelectorAll('.sch').forEach(b => b.classList.remove('active'));
@@ -2239,30 +2271,6 @@ function filterFvTable() {
 }
 
 function closeFileViewer() { document.getElementById('fileViewer').classList.add('modal-hidden'); }
-
-// Compute correct hash on load and patch
-(async () => {
-  const h = await sha256Upload('555');
-  window._uploadHash = h;
-  // Patch checkUploadPw to use live hash
-  const orig = checkUploadPw;
-  window.checkUploadPw = async function() {
-    const input = document.getElementById('uploadPwInput');
-    const err   = document.getElementById('uploadPwErr');
-    const val   = input.value.trim();
-    if (!val) return;
-    const hash = await sha256Upload(val);
-    if (hash === window._uploadHash) {
-      closeUploadGate();
-      document.getElementById('uploadFileInput').click();
-    } else {
-      err.textContent = '❌ סיסמה שגויה';
-      input.style.borderColor = '#dc2626';
-      input.value = '';
-      setTimeout(() => { input.style.borderColor = '#e0e8f5'; }, 1500);
-    }
-  };
-})();
 
 // ─── CEO COMMAND CENTER ───
 function refreshCEO() { renderCEO(); }
