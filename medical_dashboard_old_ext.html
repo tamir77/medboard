@@ -165,66 +165,6 @@ body { font-family: 'Heebo', sans-serif; background: var(--bg); color: var(--tex
 .nav-btn-upload:hover { background: rgba(255,255,255,0.28) !important; }
 @keyframes popIn { from{opacity:0;transform:scale(0.92)} to{opacity:1;transform:scale(1)} }
 
-/* ── MODAL SYSTEM (iOS-safe) ── */
-.modal-overlay {
-  position: fixed; inset: 0; z-index: 8000;
-  background: rgba(15,30,56,0.72);
-  display: flex; align-items: center; justify-content: center;
-  font-family: 'Heebo', sans-serif; direction: rtl;
-  -webkit-overflow-scrolling: touch;
-}
-.modal-hidden { display: none !important; }
-.modal-box {
-  background: #fff; border-radius: 20px;
-  padding: 2.5rem 2.5rem 2rem;
-  width: calc(100% - 2rem); box-shadow: 0 24px 80px rgba(0,0,0,0.35);
-  animation: popIn 0.25s ease;
-  max-height: 90vh; overflow-y: auto;
-}
-
-/* ── CEO DASHBOARD ── */
-.ceo-section {
-  margin: 0 2rem 0;
-  border-top: 2px solid #e0e8f5;
-  padding: 2rem 0;
-}
-.ceo-title { font-family:'Playfair Display',serif; font-size:1.2rem; font-weight:700; color:var(--navy); margin-bottom:0.15rem; }
-.ceo-sub { font-size:0.72rem; color:var(--text3); margin-bottom:1.5rem; }
-.ceo-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.2rem; }
-@media(max-width:960px){ .ceo-grid{grid-template-columns:1fr 1fr} }
-@media(max-width:600px){ .ceo-grid{grid-template-columns:1fr} }
-
-.ceo-card {
-  background: var(--white); border:1.5px solid var(--border);
-  border-radius:14px; padding:1.2rem 1.3rem;
-  box-shadow:var(--shadow);
-}
-.ceo-card-title { font-size:0.72rem; font-weight:800; letter-spacing:0.8px; text-transform:uppercase; color:var(--text3); margin-bottom:1rem; display:flex; align-items:center; gap:0.4rem; }
-.traffic-row { display:flex; align-items:center; justify-content:space-between; padding:0.5rem 0; border-bottom:1px solid var(--border); }
-.traffic-row:last-child { border-bottom:none; }
-.traffic-name { font-size:0.82rem; font-weight:600; color:var(--text); }
-.traffic-light { width:12px; height:12px; border-radius:50%; flex-shrink:0; }
-.traffic-pct { font-size:0.78rem; font-weight:800; }
-.tl-green  { background:#22c55e; box-shadow:0 0 6px #22c55e88; }
-.tl-yellow { background:#f59e0b; box-shadow:0 0 6px #f59e0b88; }
-.tl-red    { background:#ef4444; box-shadow:0 0 6px #ef444488; }
-.tl-gray   { background:#94a3b8; }
-
-.mom-row { display:flex; align-items:center; justify-content:space-between; padding:0.5rem 0; border-bottom:1px solid var(--border); }
-.mom-row:last-child { border-bottom:none; }
-.mom-name { font-size:0.8rem; font-weight:600; color:var(--text); }
-.mom-delta { font-size:0.78rem; font-weight:800; display:flex; align-items:center; gap:0.25rem; }
-.mom-up   { color:#059669; }
-.mom-down { color:#dc2626; }
-.mom-flat { color:#94a3b8; }
-
-.alert-item { display:flex; align-items:flex-start; gap:0.6rem; padding:0.55rem 0; border-bottom:1px solid var(--border); }
-.alert-item:last-child { border-bottom:none; }
-.alert-icon { font-size:1rem; flex-shrink:0; margin-top:0.05rem; }
-.alert-text { font-size:0.78rem; color:var(--text2); line-height:1.5; }
-.alert-text strong { color:var(--navy); }
-
-
 .band-title { text-align: center; margin-bottom: 2.5rem; }
 .band-eye { font-size: 0.68rem; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.45); margin-bottom: 0.5rem; }
 .band-title h1 { font-family: 'Playfair Display', serif; font-size: 2.4rem; color: #fff; font-weight: 700; line-height: 1.15; letter-spacing: -0.3px; }
@@ -269,7 +209,6 @@ body { font-family: 'Heebo', sans-serif; background: var(--bg); color: var(--tex
 .chart-area { padding: 1.8rem 2rem; display: grid; grid-template-columns: 1.6fr 1fr; gap: 1.5rem; align-items: start; }
 @media(max-width: 900px) { .chart-area { grid-template-columns: 1fr; } }
 .chart-wrap { position: relative; height: 380px; }
-.pie-box { min-width: 0; }
 .pie-wrap { position: relative; height: 380px; }
 .pie-box { background: var(--bg); border: 1px solid var(--border); border-radius: 14px; padding: 1.3rem; }
 .pie-title { font-size: 0.82rem; font-weight: 800; color: var(--navy); margin-bottom: 0.2rem; }
@@ -342,169 +281,6 @@ td { padding: 0.82rem 1rem; font-size: 0.82rem; white-space: nowrap; vertical-al
 
 footer { text-align: center; padding: 1.8rem 0 1.2rem; color: var(--text4); font-size: 0.7rem; border-top: 1px solid var(--border); margin: 0 2rem; }
 
-/* ═══════════ DECISION HEADER ═══════════ */
-.decision-header {
-  background: linear-gradient(135deg,#0f1e38 0%,#152847 50%,#1a3560 100%);
-  padding: 1.8rem 2.5rem 1.5rem; position: relative; overflow: hidden;
-}
-.decision-header::before {
-  content:''; position:absolute; inset:0;
-  background: radial-gradient(ellipse at 30% 50%, rgba(59,111,212,0.15) 0%, transparent 70%);
-  pointer-events:none;
-}
-.dh-label { font-size:0.65rem; font-weight:800; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.45); margin-bottom:0.4rem; }
-.dh-title { font-family:'Playfair Display',serif; font-size:1.5rem; color:#fff; font-weight:700; margin-bottom:0.25rem; }
-.dh-sub   { font-size:0.78rem; color:rgba(255,255,255,0.55); }
-.insight-cards { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-top:1.4rem; }
-@media(max-width:900px){ .insight-cards{grid-template-columns:1fr} }
-.ic {
-  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
-  border-radius:14px; padding:1.2rem 1.3rem; position:relative; overflow:hidden;
-  cursor:pointer; transition:all .2s;
-}
-.ic:hover { background:rgba(255,255,255,0.1); transform:translateY(-2px); }
-.ic::before { content:''; position:absolute; top:0; right:0; left:0; height:3px; background:var(--ic-color); }
-.ic-badge {
-  display:inline-flex; align-items:center; gap:0.3rem;
-  font-size:0.62rem; font-weight:800; letter-spacing:1px; text-transform:uppercase;
-  color:var(--ic-color); background:rgba(255,255,255,0.08); border:1px solid var(--ic-color);
-  padding:0.2rem 0.6rem; border-radius:50px; margin-bottom:0.6rem;
-}
-.ic-who { font-size:1rem; font-weight:800; color:#fff; margin-bottom:0.2rem; }
-.ic-what { font-size:0.74rem; color:rgba(255,255,255,0.65); margin-bottom:0.7rem; line-height:1.5; }
-.ic-drivers {
-  font-size:0.68rem; color:rgba(255,255,255,0.5); margin-bottom:0.85rem;
-  line-height:1.6; background:rgba(0,0,0,0.15); border-radius:8px; padding:0.5rem 0.7rem;
-}
-.ic-cta {
-  display:inline-flex; align-items:center; gap:0.4rem;
-  padding:0.42rem 1rem; border-radius:50px; border:none;
-  background:var(--ic-color); color:#fff;
-  font-family:'Heebo',sans-serif; font-size:0.75rem; font-weight:800;
-  cursor:pointer; transition:all .15s; opacity:0.9;
-}
-.ic-cta:hover { opacity:1; transform:translateX(-2px); }
-
-/* ═══════════ LEADERBOARD ═══════════ */
-.lb-section {
-  margin: 0 2rem 0; border-top: 2px solid var(--border); padding: 2rem 0;
-}
-.lb-head { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.8rem; margin-bottom:1.2rem; }
-.lb-title { font-family:'Playfair Display',serif; font-size:1.05rem; font-weight:700; color:var(--navy); }
-.lb-controls { display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap; }
-.lb-search {
-  padding:0.45rem 0.9rem; border-radius:50px; border:1.5px solid var(--border);
-  font-family:'Heebo',sans-serif; font-size:0.8rem; outline:none; direction:rtl;
-  min-width:160px; background:var(--white);
-}
-.lb-search:focus { border-color:var(--navy); }
-.lb-ftab {
-  padding:0.38rem 0.85rem; border-radius:50px; border:1.5px solid var(--border);
-  background:var(--white); font-family:'Heebo',sans-serif; font-size:0.75rem; font-weight:700;
-  color:var(--text3); cursor:pointer; transition:all .15s;
-}
-.lb-ftab.active { background:var(--navy); border-color:var(--navy); color:#fff; }
-.lb-wrap { border-radius:14px; overflow:hidden; box-shadow:var(--shadow); border:1px solid var(--border); }
-.lb-table { width:100%; border-collapse:collapse; }
-.lb-table thead tr { background:var(--navy); }
-.lb-table th {
-  padding:0.7rem 1rem; font-size:0.63rem; font-weight:800; letter-spacing:1.2px;
-  text-transform:uppercase; color:rgba(255,255,255,0.65); text-align:right;
-  white-space:nowrap; cursor:pointer; user-select:none; transition:color .15s;
-}
-.lb-table th:hover { color:#fff; }
-.lb-table th .sort-icon { opacity:0.35; margin-right:0.3rem; font-size:0.6rem; }
-.lb-table th.sorted .sort-icon { opacity:1; color:#60a5fa; }
-.lb-table td { padding:0.75rem 1rem; font-size:0.82rem; border-bottom:1px solid var(--border); white-space:nowrap; }
-.lb-table tbody tr { cursor:pointer; transition:background .12s; }
-.lb-table tbody tr:last-child td { border-bottom:none; }
-.lb-table tbody tr:hover { background:#eff6ff; }
-.lb-table tbody tr.selected { background:#dbeafe; }
-.lb-entity-name { display:flex; align-items:center; gap:0.5rem; font-weight:800; color:var(--navy); }
-.lb-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
-.lb-badge { display:inline-flex; align-items:center; padding:0.18rem 0.6rem; border-radius:50px; font-size:0.65rem; font-weight:800; }
-.lb-badge.good     { background:#dcfce7; color:#15803d; }
-.lb-badge.watch    { background:#fef9c3; color:#a16207; }
-.lb-badge.critical { background:#fee2e2; color:#b91c1c; }
-.lb-sparkline { display:inline-block; }
-.mom-chip { font-size:0.72rem; font-weight:800; padding:0.15rem 0.45rem; border-radius:4px; }
-.mom-chip.up   { background:#dcfce7; color:#15803d; }
-.mom-chip.down { background:#fee2e2; color:#b91c1c; }
-.mom-chip.flat { background:#f1f5f9; color:#64748b; }
-
-/* ═══════════ DRILLDOWN PANEL ═══════════ */
-.dd-overlay {
-  position:fixed; inset:0; z-index:7500;
-  background:rgba(15,30,56,0.6); backdrop-filter:blur(4px);
-  display:flex; align-items:stretch; justify-content:flex-start;
-}
-.dd-panel {
-  width:min(680px,100vw); height:100vh; overflow-y:auto;
-  background:var(--white); box-shadow:-8px 0 40px rgba(0,0,0,0.25);
-  display:flex; flex-direction:column; animation:slideInRight .28s ease;
-}
-@keyframes slideInRight { from{transform:translateX(-40px);opacity:0} to{transform:translateX(0);opacity:1} }
-.dd-top {
-  background:linear-gradient(135deg,#152847,#1e3a5f);
-  padding:1.4rem 1.6rem; position:sticky; top:0; z-index:10;
-  display:flex; align-items:flex-start; justify-content:space-between;
-}
-.dd-close {
-  background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2);
-  color:#fff; font-size:1rem; padding:0.35rem 0.75rem; border-radius:8px;
-  cursor:pointer; font-family:'Heebo',sans-serif; flex-shrink:0;
-}
-.dd-entity { font-family:'Playfair Display',serif; font-size:1.2rem; color:#fff; font-weight:700; }
-.dd-entity-sub { font-size:0.72rem; color:rgba(255,255,255,0.5); margin-top:0.2rem; }
-.dd-body { padding:1.4rem 1.6rem; flex:1; }
-.dd-section { margin-bottom:1.8rem; }
-.dd-section-title { font-size:0.65rem; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; color:var(--text3); margin-bottom:0.9rem; padding-bottom:0.4rem; border-bottom:1px solid var(--border); }
-.kpi-row { display:grid; grid-template-columns:repeat(3,1fr); gap:0.75rem; }
-@media(max-width:500px){ .kpi-row{grid-template-columns:1fr 1fr} }
-.kpi-box { background:var(--bg); border-radius:10px; padding:0.85rem; border:1px solid var(--border); }
-.kpi-box-label { font-size:0.62rem; font-weight:700; color:var(--text4); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:0.3rem; }
-.kpi-box-val   { font-size:1.15rem; font-weight:900; letter-spacing:-0.5px; color:var(--navy); }
-.kpi-box-delta { font-size:0.68rem; font-weight:700; margin-top:0.2rem; }
-.kpi-box-delta.up   { color:#059669; }
-.kpi-box-delta.down { color:#dc2626; }
-.norm-toggles { display:flex; gap:0.4rem; margin-bottom:1rem; }
-.ntog {
-  padding:0.32rem 0.8rem; border-radius:6px; border:1.5px solid var(--border);
-  background:var(--white); font-family:'Heebo',sans-serif; font-size:0.73rem; font-weight:700;
-  color:var(--text3); cursor:pointer; transition:all .15s;
-}
-.ntog.active { background:var(--navy); border-color:var(--navy); color:#fff; }
-.ntog:disabled { opacity:0.4; cursor:not-allowed; }
-.wf-bar-pos { background:#059669; border-radius:3px; height:28px; display:flex; align-items:center; padding:0 0.5rem; }
-.wf-bar-neg { background:#dc2626; border-radius:3px; height:28px; display:flex; align-items:center; padding:0 0.5rem; }
-.wf-row { display:flex; align-items:center; gap:0.6rem; margin-bottom:0.5rem; font-size:0.78rem; }
-.wf-label { width:130px; flex-shrink:0; font-weight:600; color:var(--text2); text-align:right; }
-.wf-track { flex:1; position:relative; height:28px; background:#f1f5f9; border-radius:3px; overflow:hidden; }
-.wf-fill  { position:absolute; top:0; height:100%; border-radius:3px; transition:width .6s ease; }
-.wf-val   { font-size:0.7rem; font-weight:800; color:var(--text); flex-shrink:0; min-width:65px; text-align:left; }
-
-/* ═══════════ ENHANCED ALERTS ═══════════ */
-.alerts-section {
-  margin: 0 2rem 0; border-top: 2px solid var(--border); padding: 2rem 0;
-}
-.alert-list { display:flex; flex-direction:column; gap:0.6rem; }
-.alert-card {
-  display:flex; align-items:flex-start; gap:0.9rem;
-  background:var(--white); border:1.5px solid var(--border); border-radius:12px;
-  padding:0.9rem 1.1rem; border-right:4px solid var(--ac);
-}
-.alert-card.sev-high   { --ac:#dc2626; }
-.alert-card.sev-medium { --ac:#f59e0b; }
-.alert-card.sev-info   { --ac:#0891b2; }
-.alert-card.sev-good   { --ac:#059669; }
-.ac-icon { font-size:1.1rem; flex-shrink:0; margin-top:0.05rem; }
-.ac-body { flex:1; }
-.ac-title { font-size:0.82rem; font-weight:800; color:var(--navy); margin-bottom:0.2rem; }
-.ac-desc  { font-size:0.74rem; color:var(--text3); line-height:1.5; }
-.ac-meta  { font-size:0.65rem; color:var(--text4); margin-top:0.3rem; font-style:italic; }
-.ac-small-base { display:inline-flex; align-items:center; gap:0.25rem; margin-right:0.4rem; padding:0.12rem 0.45rem; background:#fef9c3; border:1px solid #fde047; border-radius:4px; font-size:0.63rem; font-weight:700; color:#854d0e; }
-
-
 .custom-section {
   margin: 0 2rem 0;
   border-top: 2px dashed var(--border);
@@ -552,25 +328,7 @@ footer { text-align: center; padding: 1.8rem 0 1.2rem; color: var(--text4); font
   background: var(--navy); border-color: var(--navy);
   color: #fff;
 }
-.cs-select {
-  padding: 0.5rem 0.75rem; border-radius: 8px;
-  border: 1.5px solid var(--border); background: var(--white);
-  font-family: 'Heebo', sans-serif; font-size: 0.82rem; font-weight: 600;
-  color: var(--navy); cursor: pointer; flex: 1;
-  -webkit-appearance: none; appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23152847'/%3E%3C/svg%3E");
-  background-repeat: no-repeat; background-position: left 8px center;
-  padding-left: 1.5rem;
-}
-.cs-select:focus { outline: none; border-color: var(--navy); }
-.cs-range-btn {
-  padding: 0.38rem 0.8rem; border-radius: 8px;
-  border: 1.5px solid var(--border2); background: var(--bg);
-  font-family: 'Heebo', sans-serif; font-size: 0.73rem; font-weight: 700;
-  color: var(--text3); cursor: pointer; transition: all 0.15s; text-align: center;
-}
-.cs-range-btn:hover { border-color: var(--navy); color: var(--navy); background: #eff6ff; }
-
+.cs-hint { font-size: 0.65rem; color: var(--text4); margin-top: 0.5rem; }
 
 .cs-col-sm { min-width: 170px; }
 .cs-metrics { display: flex; flex-direction: column; gap: 0.35rem; }
@@ -761,26 +519,26 @@ footer { text-align: center; padding: 1.8rem 0 1.2rem; color: var(--text4); font
 </div>
 
 <!-- UPLOAD PASSWORD MODAL -->
-<div id="uploadGate" class="modal-overlay modal-hidden">
-  <div class="modal-box" style="max-width:380px;text-align:center;position:relative">
+<div id="uploadGate" style="display:none;position:fixed;inset:0;z-index:8000;background:rgba(15,30,56,0.7);backdrop-filter:blur(6px);align-items:center;justify-content:center;font-family:'Heebo',sans-serif;direction:rtl;">
+  <div style="background:#fff;border-radius:20px;padding:2.5rem 2.5rem 2rem;width:100%;max-width:380px;box-shadow:0 24px 80px rgba(0,0,0,0.3);text-align:center;position:relative;animation:popIn .25s ease">
     <div style="width:52px;height:52px;border-radius:14px;background:#eff6ff;border:1.5px solid #bfdbfe;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin:0 auto 1.2rem">📂</div>
     <div style="font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:#152847;margin-bottom:0.3rem">העלאת קובץ</div>
     <div style="font-size:0.76rem;color:#6b7280;margin-bottom:1.6rem">הזן סיסמת ניהול להמשך</div>
     <label style="display:block;font-size:0.68rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#94a3b8;text-align:right;margin-bottom:0.45rem">סיסמה</label>
     <input id="uploadPwInput" type="password" placeholder="••••" autocomplete="off"
-      style="-webkit-text-security:disc;width:100%;padding:0.8rem 1rem;border-radius:10px;border:1.5px solid #e0e8f5;font-family:'Heebo',sans-serif;font-size:1rem;outline:none;text-align:right;letter-spacing:3px;margin-bottom:1rem;transition:border-color .2s;-webkit-appearance:none;appearance:none"
+      style="width:100%;padding:0.8rem 1rem;border-radius:10px;border:1.5px solid #e0e8f5;font-family:'Heebo',sans-serif;font-size:1rem;outline:none;text-align:right;letter-spacing:3px;margin-bottom:1rem;transition:border-color .2s"
       onkeydown="if(event.key==='Enter')checkUploadPw();document.getElementById('uploadPwErr').textContent=''" />
-    <button onclick="checkUploadPw()" style="width:100%;padding:0.85rem;border-radius:10px;border:none;background:#152847;color:#fff;font-family:'Heebo',sans-serif;font-size:0.92rem;font-weight:800;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation">אמת סיסמה →</button>
+    <button onclick="checkUploadPw()" style="width:100%;padding:0.85rem;border-radius:10px;border:none;background:#152847;color:#fff;font-family:'Heebo',sans-serif;font-size:0.92rem;font-weight:800;cursor:pointer;transition:all .2s" onmouseover="this.style.background='#1e3a5f'" onmouseout="this.style.background='#152847'">אמת סיסמה →</button>
     <div id="uploadPwErr" style="margin-top:0.8rem;font-size:0.76rem;color:#dc2626;font-weight:600;min-height:1.2em"></div>
-    <button onclick="closeUploadGate()" style="position:absolute;top:1rem;left:1rem;background:none;border:none;font-size:1.3rem;cursor:pointer;color:#94a3b8;line-height:1;padding:0.4rem;-webkit-tap-highlight-color:transparent">✕</button>
+    <button onclick="closeUploadGate()" style="position:absolute;top:1rem;left:1rem;background:none;border:none;font-size:1.1rem;cursor:pointer;color:#94a3b8;line-height:1">✕</button>
   </div>
 </div>
 
 <!-- UPLOAD FILE PICKER (hidden) -->
-<input id="uploadFileInput" type="file" accept=".xlsx,.xls,.csv,.numbers" style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden" onchange="handleFileUpload(event)" />
+<input id="uploadFileInput" type="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleFileUpload(event)" />
 
 <!-- FILE DATA VIEWER MODAL -->
-<div id="fileViewer" class="modal-overlay modal-hidden" style="align-items:flex-start;overflow-y:auto;padding:2rem">
+<div id="fileViewer" style="display:none;position:fixed;inset:0;z-index:7000;background:rgba(15,30,56,0.75);backdrop-filter:blur(6px);align-items:flex-start;justify-content:center;font-family:'Heebo',sans-serif;direction:rtl;overflow-y:auto;padding:2rem">
   <div style="background:#fff;border-radius:20px;width:100%;max-width:1200px;margin:0 auto;box-shadow:0 24px 80px rgba(0,0,0,0.35);overflow:hidden;animation:popIn .3s ease">
     <!-- Header -->
     <div style="background:linear-gradient(135deg,#152847,#1e3a5f);padding:1.3rem 1.8rem;display:flex;align-items:center;justify-content:space-between">
@@ -800,41 +558,6 @@ footer { text-align: center; padding: 1.8rem 0 1.2rem; color: var(--text4); font
     <!-- Table -->
     <div style="overflow:auto;max-height:60vh">
       <table id="fvTable" style="width:100%;border-collapse:collapse;font-size:0.81rem"></table>
-    </div>
-  </div>
-</div>
-
-<!-- DRILLDOWN PANEL -->
-<div id="ddOverlay" class="dd-overlay modal-hidden" onclick="if(event.target===this)closeDrilldown()">
-  <div class="dd-panel" id="ddPanel">
-    <div class="dd-top">
-      <div>
-        <div class="dd-entity" id="ddEntityName">—</div>
-        <div class="dd-entity-sub" id="ddEntitySub">—</div>
-      </div>
-      <button class="dd-close" onclick="closeDrilldown()">✕ סגור</button>
-    </div>
-    <div class="dd-body">
-      <!-- KPI comparison -->
-      <div class="dd-section">
-        <div class="dd-section-title">📊 השוואת KPI — תקופה נוכחית מול קודמת מול ממוצע רשת</div>
-        <div class="kpi-row" id="ddKpiRow"></div>
-      </div>
-      <!-- Normalization -->
-      <div class="dd-section">
-        <div class="dd-section-title">🔀 Waterfall — פירוק שינוי חודשי</div>
-        <div class="norm-toggles">
-          <button class="ntog active" data-norm="abs" onclick="setNorm(this)">₪ מוחלט</button>
-          <button class="ntog" data-norm="pct" onclick="setNorm(this)">% מהכנסות</button>
-          <button class="ntog" data-norm="unit" onclick="setNorm(this)" disabled title="נדרשים נתוני יחידות — לא זמין">פר יחידה</button>
-        </div>
-        <div id="ddWaterfall"></div>
-      </div>
-      <!-- Monthly trend -->
-      <div class="dd-section">
-        <div class="dd-section-title">📈 מגמה חודשית</div>
-        <div style="position:relative;height:200px"><canvas id="ddTrendChart"></canvas></div>
-      </div>
     </div>
   </div>
 </div>
@@ -905,6 +628,28 @@ footer { text-align: center; padding: 1.8rem 0 1.2rem; color: var(--text4); font
     <div class="insight-grid" id="insightGrid"></div>
   </div>
 
+  <!-- BRANCH COMPARISON -->
+  <div class="comparison-section">
+    <div class="comp-head">
+      <div>
+        <div class="comp-title">📊 השוואת ביצועים — כל הסניפים</div>
+        <div class="comp-sub">סה״כ 6 חודשים • אוג׳ 2025 – ינו׳ 2026</div>
+      </div>
+      <div class="comp-tabs" id="compTabs">
+        <button class="ctab active" onclick="setCompView('revenue',this)">הכנסות</button>
+        <button class="ctab" onclick="setCompView('margin',this)">מרווח %</button>
+        <button class="ctab" onclick="setCompView('contrib',this)">תרומה ישירה</button>
+        <button class="ctab" onclick="setCompView('dr',this)">שכר רופאים</button>
+      </div>
+    </div>
+    <div class="comp-grid" id="compGrid"></div>
+    <div class="comp-chart-wrap">
+      <div style="position:relative; height:340px;">
+        <canvas id="compChart"></canvas>
+      </div>
+    </div>
+  </div>
+
   <!-- CUSTOM COMPARISON BUILDER -->
   <div class="custom-section">
     <div class="cs-head">
@@ -917,15 +662,18 @@ footer { text-align: center; padding: 1.8rem 0 1.2rem; color: var(--text4); font
 
     <!-- SELECTORS ROW -->
     <div class="cs-selectors">
-      <!-- Month selector — chip buttons -->
+      <!-- Month selector -->
       <div class="cs-col">
         <div class="cs-col-title">📅 חודשים</div>
-        <div id="monthChipsWrap" style="display:flex;flex-direction:column;gap:0.5rem"></div>
-        <div style="display:flex;gap:0.4rem;margin-top:0.6rem">
-          <button onclick="selectAllMonths()" class="cs-range-btn">✓ הכל</button>
-          <button onclick="clearAllMonths()" class="cs-range-btn">✕ נקה</button>
+        <div class="cs-chips" id="monthChips">
+          <button class="sch" data-type="month" data-val="0" onclick="toggleSel(this)">אוג׳ 25</button>
+          <button class="sch" data-type="month" data-val="1" onclick="toggleSel(this)">ספט׳ 25</button>
+          <button class="sch" data-type="month" data-val="2" onclick="toggleSel(this)">אוק׳ 25</button>
+          <button class="sch" data-type="month" data-val="3" onclick="toggleSel(this)">נוב׳ 25</button>
+          <button class="sch" data-type="month" data-val="4" onclick="toggleSel(this)">דצמ׳ 25</button>
+          <button class="sch" data-type="month" data-val="5" onclick="toggleSel(this)">ינו׳ 26</button>
         </div>
-        <div class="cs-hint" id="csMonthHint">בחר חודשים</div>
+        <div class="cs-hint">לחץ להסרה/הוספה</div>
       </div>
 
       <!-- Branch selector -->
@@ -1000,91 +748,7 @@ footer { text-align: center; padding: 1.8rem 0 1.2rem; color: var(--text4); font
     </div>
   </div>
 
-  <!-- LEADERBOARD -->
-  <div class="lb-section">
-    <div class="lb-head">
-      <div>
-        <div class="lb-title">📋 לוח מנהיגים — ביצועי כל הישויות</div>
-        <div style="font-size:0.72rem;color:var(--text3);margin-top:0.15rem">לחץ על שורה לפתיחת פאנל תחקיר מפורט</div>
-      </div>
-      <div class="lb-controls">
-        <input class="lb-search" id="lbSearch" placeholder="🔍 חיפוש ישות..." oninput="renderLeaderboard()" />
-        <button class="lb-ftab active" onclick="setLbFilter('all',this)">הכל</button>
-        <button class="lb-ftab" onclick="setLbFilter('branch',this)">סניפים</button>
-        <button class="lb-ftab" onclick="setLbFilter('dept',this)">מחלקות</button>
-      </div>
-    </div>
-    <div class="lb-wrap">
-      <table class="lb-table">
-        <thead>
-          <tr>
-            <th onclick="lbSort('name')"><span class="sort-icon">↕</span>ישות</th>
-            <th onclick="lbSort('rev')"><span class="sort-icon">↕</span>הכנסות</th>
-            <th onclick="lbSort('margin')"><span class="sort-icon">↕</span>מרווח %</th>
-            <th onclick="lbSort('cont')"><span class="sort-icon">↕</span>תרומה ישירה</th>
-            <th onclick="lbSort('drPct')"><span class="sort-icon">↕</span>שכר רופאים %</th>
-            <th onclick="lbSort('mom')"><span class="sort-icon">↕</span>שינוי חודשי</th>
-            <th>מגמה 6 חד׳</th>
-            <th onclick="lbSort('status')"><span class="sort-icon">↕</span>סטטוס</th>
-          </tr>
-        </thead>
-        <tbody id="lbBody"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- ENHANCED ALERTS -->
-  <div class="alerts-section">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;flex-wrap:wrap;gap:0.6rem">
-      <div>
-        <div style="font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;color:var(--navy)">🔔 מערכת התראות חכמה</div>
-        <div style="font-size:0.72rem;color:var(--text3);margin-top:0.15rem">התראות סף + זיהוי אנומליות (z-score)</div>
-      </div>
-      <div style="display:flex;gap:0.4rem">
-        <button class="lb-ftab active" onclick="setAlertFilter('all',this)">הכל</button>
-        <button class="lb-ftab" onclick="setAlertFilter('high',this)">🚨 קריטי</button>
-        <button class="lb-ftab" onclick="setAlertFilter('medium',this)">⚠️ מעקב</button>
-        <button class="lb-ftab" onclick="setAlertFilter('good',this)">✅ חיובי</button>
-      </div>
-    </div>
-    <div class="alert-list" id="alertList"></div>
-  </div>
-
-  <!-- CEO COMMAND CENTER -->
-  <div class="ceo-section">
-    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.8rem;margin-bottom:1.5rem">
-      <div>
-        <div class="ceo-title">🎯 לוח פיקוד — מנכ״ל</div>
-        <div class="ceo-sub">סיכום ביצועים, התראות וכלים לקבלת החלטות מהירה</div>
-      </div>
-      <button onclick="refreshCEO()" style="padding:0.45rem 1.1rem;border-radius:50px;border:1.5px solid var(--border);background:var(--white);font-family:'Heebo',sans-serif;font-size:0.78rem;font-weight:700;color:var(--navy);cursor:pointer">🔄 רענן</button>
-    </div>
-    <div class="ceo-grid" id="ceoGrid"></div>
-  </div>
-
-  <!-- BRANCH COMPARISON -->
-  <div class="comparison-section">
-    <div class="comp-head">
-      <div>
-        <div class="comp-title">📊 השוואת ביצועים — כל הסניפים</div>
-        <div class="comp-sub">סה״כ 6 חודשים • אוג׳ 2025 – ינו׳ 2026</div>
-      </div>
-      <div class="comp-tabs" id="compTabs">
-        <button class="ctab active" onclick="setCompView('revenue',this)">הכנסות</button>
-        <button class="ctab" onclick="setCompView('margin',this)">מרווח %</button>
-        <button class="ctab" onclick="setCompView('contrib',this)">תרומה ישירה</button>
-        <button class="ctab" onclick="setCompView('dr',this)">שכר רופאים</button>
-      </div>
-    </div>
-    <div class="comp-grid" id="compGrid"></div>
-    <div class="comp-chart-wrap">
-      <div id="compChartWrap" style="position:relative; height:340px;">
-        <canvas id="compChart"></canvas>
-      </div>
-    </div>
-  </div>
-
-  <footer>MedNet Analytics • אוג׳ 2025 – ינו׳ 2026 • Confidential</footer>
+  <footer>MedNet Analytics • Book3.xlsx • אוג׳ 2025 – ינו׳ 2026 • Confidential</footer>
 </div>
 </div>
 
@@ -1258,28 +922,10 @@ function setGroup(gKey, el) {
   renderAll();
 }
 
-// Adapt chart layout based on number of entities
-function adaptChartLayout(count) {
-  const pieBox    = document.querySelector('.pie-box');
-  const chartWrap = document.querySelector('.chart-wrap');
-  if (!pieBox || !chartWrap) return;
-
-  if (count > 8) {
-    pieBox.style.display = 'none';
-    chartWrap.style.gridColumn = '1 / -1';
-    chartWrap.style.height = Math.min(120 + count * 32, 680) + 'px';
-  } else {
-    pieBox.style.display = '';
-    chartWrap.style.gridColumn = '';
-    chartWrap.style.height = '380px';
-  }
-}
-
 function renderAll() {
   const g = GROUPS[currentGroup];
   const rows = buildData(currentGroup);
   document.getElementById('chartTitle').textContent = g.title;
-  adaptChartLayout(rows.length);
   renderChart(rows);
   renderPieChart(rows);
   renderMiniKpis(rows);
@@ -1572,15 +1218,7 @@ function setCompView(v, el) {
 }
 
 function renderComparison() {
-  const branches = BRANCHES_LIST.map(k => ({ name: k, color: BRANCH_COLORS[k], ...ALL[k] }))
-                                 .filter(b => b.rev !== undefined);
-
-  // Dynamic height based on entity count
-  const compWrap = document.getElementById('compChartWrap');
-  if (compWrap) {
-    const h = Math.min(Math.max(300, branches.length * 42), 700);
-    compWrap.style.height = h + 'px';
-  }
+  const branches = BRANCHES_LIST.map(k => ({ name: k, color: BRANCH_COLORS[k], ...ALL[k] }));
 
   const getVal = (b) => {
     if (compView === 'margin')  return b.rev > 0 ? b.cont / b.rev * 100 : 0;
@@ -1708,14 +1346,13 @@ function autoRunComparison() {
   const empty    = document.getElementById('csEmpty');
   const status   = document.getElementById('csStatus');
 
-  // Update hint
-  const hint = document.getElementById('csMonthHint');
-  if (hint && months.length) hint.textContent = `${months.length} חודשים נבחרו`;
-
-  if (!entities.length) {
+  if (!months.length || !entities.length) {
     results.style.display = 'none';
     if (empty) empty.style.display = 'flex';
-    status.textContent = 'בחר לפחות ישות אחת';
+    status.textContent = !months.length && !entities.length
+      ? 'בחר חודשים וישויות כדי להתחיל'
+      : !months.length ? 'בחר לפחות חודש אחד'
+      : 'בחר לפחות ישות אחת';
     status.classList.remove('cs-status-active');
     return;
   }
@@ -1727,16 +1364,6 @@ function autoRunComparison() {
 
 function getSelMonths() {
   return [...document.querySelectorAll('.sch[data-type="month"].active')].map(b => parseInt(b.dataset.val));
-}
-
-function selectAllMonths() {
-  document.querySelectorAll('.sch[data-type="month"]').forEach(b => b.classList.add('active'));
-  autoRunComparison();
-}
-
-function clearAllMonths() {
-  document.querySelectorAll('.sch[data-type="month"]').forEach(b => b.classList.remove('active'));
-  autoRunComparison();
 }
 function getSelEntities() {
   return [...document.querySelectorAll('.sch[data-type="entity"].active')].map(b => b.dataset.val);
@@ -1863,36 +1490,34 @@ function runCustomComparison() {
 
 renderComparison();
 
-// Build initial month chips from default MONTHS data
-(function initMonthChips() {
-  const entityOrder = Object.keys(ALL).filter(k => !k.includes('_monthly') && ALL[k].rev > 0);
-  rebuildCustomComparison(entityOrder, MONTHS.slice());
-})();
+// ─── UPLOAD GATE ───
+const UPLOAD_HASH = '9a900bc3c5f4a026fee9c4e9b83ef4f0cce2e3e5d6f60a7e5b3d3c2e2a4a5b3'; // SHA-256 of "555"
 
-const UPLOAD_HASH = '9a900bc3c5f4a026fee9c4e9b83ef4f0cce2e3e5d6f60a7e5b3d3c2e2a4a5b3';
-// Safari fix: .click() on file input must happen synchronously within the user gesture.
-// async/await breaks this — Safari drops the gesture by the time await resolves.
-// Solution: synchronous comparison using btoa (good enough for this access level).
-const _PW = btoa('555'); // "NTU1"
+async function sha256Upload(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
 
 function openUploadGate() {
-  document.getElementById('uploadGate').classList.remove('modal-hidden');
-  setTimeout(() => { try { document.getElementById('uploadPwInput').focus(); } catch(e){} }, 200);
+  const el = document.getElementById('uploadGate');
+  el.style.display = 'flex';
+  setTimeout(() => document.getElementById('uploadPwInput').focus(), 100);
 }
 function closeUploadGate() {
-  document.getElementById('uploadGate').classList.add('modal-hidden');
+  document.getElementById('uploadGate').style.display = 'none';
   document.getElementById('uploadPwInput').value = '';
   document.getElementById('uploadPwErr').textContent = '';
 }
 
-function checkUploadPw() {
+async function checkUploadPw() {
   const input = document.getElementById('uploadPwInput');
   const err   = document.getElementById('uploadPwErr');
   const val   = input.value.trim();
   if (!val) return;
-  if (btoa(val) === _PW) {
+  const hash = await sha256Upload(val);
+  if (hash === UPLOAD_HASH) {
     closeUploadGate();
-    document.getElementById('uploadFileInput').click(); // must be sync — Safari requirement
+    document.getElementById('uploadFileInput').click();
   } else {
     err.textContent = '❌ סיסמה שגויה';
     input.style.borderColor = '#dc2626';
@@ -2117,23 +1742,8 @@ function injectParsedData(parsed, fileName, sheetName, sheetNames) {
   showToast(`✅ "${fileName}" נטען בהצלחה — ${entityOrder.length} ישויות • ${monthLabels.length} חודשים`);
 
   currentGroup = 'network';
-
-  // Safari fix: let DOM fully settle before re-rendering charts
-  // Directly calling renderAll() causes Chart.js to read wrong canvas dimensions
-  requestAnimationFrame(() => {
-    setTimeout(() => {
-      // Adjust chart layout based on entity count
-      adaptChartLayout(entityOrder.length);
-      renderAll();
-      renderComparison();
-      // Force resize after render so Safari recalculates
-      setTimeout(() => {
-        if (chart) chart.resize();
-        if (pieChart) pieChart.resize();
-        if (compChart) compChart.resize();
-      }, 150);
-    }, 50);
-  });
+  renderAll();
+  renderComparison();
 
   // Reset custom comparison
   document.querySelectorAll('.sch').forEach(b => b.classList.remove('active'));
@@ -2156,26 +1766,12 @@ function rebuildFilterButtons(entityOrder) {
 }
 
 function rebuildCustomComparison(entityOrder, monthLabels) {
-  // Build month chips grouped by year
-  const wrap = document.getElementById('monthChipsWrap');
-  if (wrap) {
-    const byYear = {};
-    monthLabels.forEach((label, i) => {
-      const parts = label.trim().split(' ');
-      const yr = parts.length > 1 ? '20' + parts[parts.length - 1] : '?';
-      if (!byYear[yr]) byYear[yr] = [];
-      byYear[yr].push({ label, i });
-    });
-    wrap.innerHTML = Object.entries(byYear).map(([yr, months]) => `
-      <div>
-        <div style="font-size:0.62rem;font-weight:800;letter-spacing:1px;color:var(--text4);margin-bottom:0.3rem">${yr}</div>
-        <div style="display:flex;flex-wrap:wrap;gap:0.35rem">
-          ${months.map(m => `<button class="sch" data-type="month" data-val="${m.i}" onclick="toggleSel(this)">${m.label.split(' ')[0]}</button>`).join('')}
-        </div>
-      </div>`).join('');
-  }
+  // Rebuild month chips
+  document.getElementById('monthChips').innerHTML = monthLabels.map((m, i) =>
+    `<button class="sch" data-type="month" data-val="${i}" onclick="toggleSel(this)">${m}</button>`
+  ).join('');
 
-  // Rebuild entity chips — split into two groups
+  // Rebuild entity chips — split into two groups visually
   const half = Math.ceil(entityOrder.length / 2);
   document.getElementById('branchChips').innerHTML = entityOrder.slice(0, half).map(name =>
     `<button class="sch" data-type="entity" data-val="${name}" onclick="toggleSel(this)">${name}</button>`
@@ -2184,8 +1780,12 @@ function rebuildCustomComparison(entityOrder, monthLabels) {
     `<button class="sch" data-type="entity" data-val="${name}" onclick="toggleSel(this)">${name}</button>`
   ).join('');
 
+  // Update col titles
   document.querySelector('#branchChips').closest('.cs-col').querySelector('.cs-col-title').textContent = '🏥 ישויות (1)';
   document.querySelector('#deptChips').closest('.cs-col').querySelector('.cs-col-title').textContent = '🔬 ישויות (2)';
+  document.querySelector('#deptChips').closest('.cs-col').querySelector('.cs-hint').textContent = 'לחץ להוסיף להשוואה';
+
+  // Update MONTHLY_DATA mapping
   entityOrder.forEach(name => { MONTHLY_DATA[name] = name + '_monthly'; });
 }
 
@@ -2221,7 +1821,7 @@ function showRawTable(json, fileName, sheetName, wb) {
   document.getElementById('fvTitle').textContent = `📄 ${fileName} — ${sheetName}`;
   document.getElementById('fvMeta').textContent = `${fvAllRows.length} שורות • ${fvHeaders.length} עמודות`;
   renderFvTable(fvHeaders, fvAllRows);
-  document.getElementById('fileViewer').classList.remove('modal-hidden');
+  document.getElementById('fileViewer').style.display = 'flex';
 }
 
 function loadSheet(e, sheetName, btn) {
@@ -2277,623 +1877,31 @@ function filterFvTable() {
   table.insertAdjacentHTML('beforeend', tbody);
 }
 
-function closeFileViewer() { document.getElementById('fileViewer').classList.add('modal-hidden'); }
+function closeFileViewer() { document.getElementById('fileViewer').style.display='none'; }
 
-// ─── CEO COMMAND CENTER ───
-function refreshCEO() { renderCEO(); }
-
-function renderCEO() {
-  const grid = document.getElementById('ceoGrid');
-  if (!grid) return;
-  const all = Object.keys(ALL).filter(k => !k.includes('_monthly') && ALL[k].rev > 0);
-  if (!all.length) return;
-
-  // Card 1: Traffic Light
-  const trafficRows = all.map(name => {
-    const d = ALL[name]; const pct = d.cont/d.rev*100;
-    const cls = pct>=40?'tl-green':pct>=15?'tl-yellow':'tl-red';
-    const col = pct>=40?'#059669':pct>=15?'#d97706':'#dc2626';
-    return `<div class="traffic-row">
-      <div style="display:flex;align-items:center;gap:0.5rem"><div class="traffic-light ${cls}"></div><span class="traffic-name">${name}</span></div>
-      <span class="traffic-pct" style="color:${col}">${pct.toFixed(1)}%</span>
-    </div>`;
-  }).join('');
-
-  // Card 2: MoM
-  const lastMonth = MONTHS[MONTHS.length-1]||'', prevMonth = MONTHS[MONTHS.length-2]||'';
-  const momRows = all.map(name => {
-    const mk=MONTHLY_DATA[name]; if(!mk||!ALL[mk]) return null;
-    const m=ALL[mk].months; const n=m.rev.length; if(n<2) return null;
-    const p1=m.rev[n-2]>0?m.cont[n-2]/m.rev[n-2]*100:0;
-    const p2=m.rev[n-1]>0?m.cont[n-1]/m.rev[n-1]*100:0;
-    const d=p2-p1; const arrow=d>0.5?'▲':d<-0.5?'▼':'→';
-    const cls=d>0.5?'mom-up':d<-0.5?'mom-down':'mom-flat';
-    return `<div class="mom-row"><span class="mom-name">${name}</span>
-      <span class="mom-delta ${cls}">${arrow} ${Math.abs(d).toFixed(1)}% <span style="font-size:.65rem;opacity:.6">(${p2.toFixed(1)}%)</span></span></div>`;
-  }).filter(Boolean).join('');
-
-  // Card 3: Alerts
-  const alerts = [];
-  const best = all.reduce((a,b)=>ALL[b].cont/ALL[b].rev>ALL[a].cont/ALL[a].rev?b:a);
-  alerts.push({icon:'🏆',text:`<strong>${best}</strong> — ביצוע מיטבי: ${(ALL[best].cont/ALL[best].rev*100).toFixed(1)}% מרווח`});
-  all.forEach(name=>{
-    const d=ALL[name]; const pct=d.cont/d.rev*100; const drP=d.dr/d.rev*100;
-    if(d.cont<0) alerts.push({icon:'🚨',text:`<strong>${name}</strong> — תרומה שלילית (${fmt(d.cont)})`});
-    else if(pct<10) alerts.push({icon:'⚠️',text:`<strong>${name}</strong> — מרווח ${pct.toFixed(1)}% — נמוך`});
-    if(drP>60) alerts.push({icon:'💰',text:`<strong>${name}</strong> — שכר רופאים ${drP.toFixed(0)}% — גבוה`});
-    const mk=MONTHLY_DATA[name];
-    if(mk&&ALL[mk]){const m=ALL[mk].months;const n=m.rev.length;if(n>=2){
-      const p1=m.rev[n-2]>0?m.cont[n-2]/m.rev[n-2]*100:0, p2=m.rev[n-1]>0?m.cont[n-1]/m.rev[n-1]*100:0;
-      if(p1-p2>10) alerts.push({icon:'📉',text:`<strong>${name}</strong> — ירידה ${(p1-p2).toFixed(1)}% מהחודש הקודם`});
-    }}
-  });
-  const alertsHtml = alerts.slice(0,7).map(a=>`<div class="alert-item"><span class="alert-icon">${a.icon}</span><span class="alert-text">${a.text}</span></div>`).join('');
-
-  // Card 4: KPIs
-  const totRev=all.reduce((s,k)=>s+ALL[k].rev,0), totCont=all.reduce((s,k)=>s+ALL[k].cont,0);
-  const totDr=all.reduce((s,k)=>s+ALL[k].dr,0), avgM=totRev>0?totCont/totRev*100:0;
-  const kpiHtml=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">${[
-    {label:'הכנסות רשת',val:fmt(totRev),color:'#0891b2'},
-    {label:'תרומה ישירה',val:fmt(totCont),color:totCont<0?'#dc2626':'#059669'},
-    {label:'מרווח ממוצע',val:avgM.toFixed(1)+'%',color:avgM<20?'#dc2626':avgM<35?'#d97706':'#059669'},
-    {label:'שכר רופאים',val:fmt(totDr),color:'#7c3aed'},
-  ].map(k=>`<div style="background:var(--bg);border-radius:10px;padding:0.8rem;border:1px solid var(--border)">
-    <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text4);margin-bottom:.3rem">${k.label}</div>
-    <div style="font-size:1.1rem;font-weight:900;color:${k.color};letter-spacing:-.5px">${k.val}</div>
-  </div>`).join('')}</div>`;
-
-  // Card 5: Revenue rank
-  const rankData=all.map(k=>({name:k,rev:ALL[k].rev,pct:ALL[k].cont/ALL[k].rev*100})).sort((a,b)=>b.rev-a.rev);
-  const maxR=rankData[0]?.rev||1;
-  const rankHtml=rankData.map((r,i)=>{
-    const w=(r.rev/maxR*100).toFixed(1);
-    const c=r.pct<0?'#ef4444':r.pct<20?'#f59e0b':r.pct<40?'#0891b2':'#059669';
-    return `<div style="margin-bottom:.5rem">
-      <div style="display:flex;justify-content:space-between;margin-bottom:.15rem">
-        <span style="font-size:.78rem;font-weight:700">${i+1}. ${r.name}</span>
-        <span style="font-size:.72rem;font-weight:800;color:${c}">${r.pct.toFixed(1)}%</span>
-      </div>
-      <div style="height:5px;border-radius:3px;background:#e8eef5"><div style="width:${w}%;height:100%;border-radius:3px;background:${c}"></div></div>
-      <div style="font-size:.65rem;color:var(--text4);margin-top:.1rem">${fmt(r.rev)}</div>
-    </div>`;
-  }).join('');
-
-  // Card 6: Trend sparkline
-  const sparkHtml=`<div style="position:relative;height:185px"><canvas id="ceoBranchTrend"></canvas></div>`;
-
-  grid.innerHTML=`
-    <div class="ceo-card"><div class="ceo-card-title">🚦 מצב מרווחים</div>${trafficRows}</div>
-    <div class="ceo-card"><div class="ceo-card-title">📈 שינוי חודשי (${prevMonth} → ${lastMonth})</div>${momRows}</div>
-    <div class="ceo-card"><div class="ceo-card-title">🔔 התראות</div>${alertsHtml}</div>
-    <div class="ceo-card"><div class="ceo-card-title">📊 KPI רשת</div>${kpiHtml}</div>
-    <div class="ceo-card"><div class="ceo-card-title">🏅 דירוג הכנסות</div>${rankHtml}</div>
-    <div class="ceo-card"><div class="ceo-card-title">📉 טרנד מרווח לאורך זמן</div>${sparkHtml}</div>
-  `;
-
-  setTimeout(()=>{
-    const ctx=document.getElementById('ceoBranchTrend'); if(!ctx) return;
-    const sparkEnts=all.slice(0,6);
-    const ds=sparkEnts.map(name=>{
-      const mk=MONTHLY_DATA[name]; if(!mk||!ALL[mk]) return null;
-      const m=ALL[mk].months;
-      return {label:name,data:m.rev.map((r,i)=>r>0?parseFloat((m.cont[i]/r*100).toFixed(1)):0),
-        borderColor:ENTITY_COLORS[name]||'#888',borderWidth:2,pointRadius:2.5,tension:0.4,fill:false};
-    }).filter(Boolean);
-    new Chart(ctx.getContext('2d'),{type:'line',data:{labels:MONTHS,datasets:ds},options:{
-      responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{position:'bottom',rtl:true,labels:{font:{family:'Heebo',size:10},padding:6,usePointStyle:true}}},
-      scales:{x:{ticks:{color:'#94a3b8',font:{family:'Heebo',size:10}}},
-              y:{ticks:{color:'#94a3b8',font:{family:'Heebo',size:10},callback:v=>v+'%'},grid:{color:'#f0f4fb'}}}
-    }});
-  },80);
-}
-
-setTimeout(renderCEO, 400);
-
-// ═══════════════════════════════════════════════════════════════
-// ── DATA ADAPTER ── thin layer separating data from UI
-// In future: replace getEntityList / getMonthlyData with API calls
-// ═══════════════════════════════════════════════════════════════
-const DataAdapter = (() => {
-  function entities() {
-    return Object.keys(ALL)
-      .filter(k => !k.includes('_monthly') && (ALL[k].rev > 0 || ALL[k].cont !== undefined));
-  }
-  function summary(name) { return ALL[name] || null; }
-  function monthly(name) {
-    const key = MONTHLY_DATA[name] || name + '_monthly';
-    return ALL[key]?.months || null;
-  }
-  function netAvg(metric) {
-    // Average of a metric (as % of rev) across all entities with rev>0
-    const ents = entities().filter(n => ALL[n].rev > 0);
-    if (!ents.length) return 0;
-    const total = ents.reduce((s,n) => s + (ALL[n][metric]||0), 0);
-    const totRev = ents.reduce((s,n) => s + ALL[n].rev, 0);
-    return totRev > 0 ? total / totRev * 100 : 0;
-  }
-  function netTotals() {
-    const ents = entities().filter(n => ALL[n].rev > 0);
-    return ['rev','cont','dr','em','co','vm'].reduce((acc,k) => {
-      acc[k] = ents.reduce((s,n) => s + (ALL[n][k]||0), 0);
-      return acc;
-    }, {});
-  }
-  // Mom: month-over-month margin change (last 2 months)
-  function mom(name) {
-    const m = monthly(name); if (!m || m.rev.length < 2) return null;
-    const n = m.rev.length;
-    const p = m.rev[n-2] > 0 ? m.cont[n-2] / m.rev[n-2] * 100 : 0;
-    const c = m.rev[n-1] > 0 ? m.cont[n-1] / m.rev[n-1] * 100 : 0;
-    return { prev: p, curr: c, delta: c - p,
-             revPrev: m.rev[n-2], revCurr: m.rev[n-1],
-             contPrev: m.cont[n-2], contCurr: m.cont[n-1] };
-  }
-  // Z-score of margin over 6 months
-  function zScore(name) {
-    const m = monthly(name); if (!m) return null;
-    const margins = m.rev.map((r,i) => r > 0 ? m.cont[i]/r*100 : null).filter(v=>v!==null);
-    if (margins.length < 3) return null;
-    const mu = margins.reduce((a,b)=>a+b,0)/margins.length;
-    const sigma = Math.sqrt(margins.reduce((a,b)=>a+(b-mu)**2,0)/margins.length);
-    const last = margins[margins.length-1];
-    return { z: sigma > 0 ? (last-mu)/sigma : 0, mu, sigma, last };
-  }
-  return { entities, summary, monthly, netAvg, netTotals, mom, zScore };
-})();
-
-// ═══════════════════════════════════════════════════════════════
-// ── DECISION HEADER — 3 Actionable Insight Cards
-// ═══════════════════════════════════════════════════════════════
-function renderDecisionHeader() {
-  const el = document.getElementById('insightCards'); if (!el) return;
-  const ents = DataAdapter.entities().filter(n => DataAdapter.summary(n)?.rev > 0);
-  if (!ents.length) return;
-
-  // Update subtitle
-  const totRev = DataAdapter.netTotals().rev;
-  document.getElementById('dhSub').textContent =
-    `${MONTHS[0]} – ${MONTHS[MONTHS.length-1]} • הכנסות רשת: ${fmt(totRev)} • ${ents.length} ישויות`;
-  document.getElementById('dhTitle').textContent = 'ממצאים מרכזיים לתשומת לב';
-
-  const cards = [];
-
-  // ── Card A: Best performer → "Expand" ──
-  const ranked = ents.map(n => {
-    const d = DataAdapter.summary(n);
-    return { name: n, margin: d.rev > 0 ? d.cont/d.rev*100 : 0, rev: d.rev, cont: d.cont };
-  }).sort((a,b) => b.margin - a.margin);
-  const best = ranked[0];
-  const bestColor = '#22c55e';
-  const bestDrivers = _getDrivers(best.name, 'best');
-  cards.push({
-    color: bestColor, badge: '✅ הזדמנות', icon: '🚀',
-    who: best.name,
-    what: `מרווח מוביל: ${best.margin.toFixed(1)}% — ביצועים גבוהים מממוצע הרשת ב-${(best.margin - DataAdapter.netAvg('cont')).toFixed(1)} נקודות`,
-    drivers: bestDrivers,
-    cta: 'הרחב השקעה',
-    ctaFn: `openDrilldown('${best.name.replace(/'/g,"\\'")}')`,
-  });
-
-  // ── Card B: Biggest risk (negative margin or sharpest drop) ──
-  const risks = ents.map(n => {
-    const d = DataAdapter.summary(n);
-    const m = DataAdapter.mom(n);
-    const margin = d.rev > 0 ? d.cont/d.rev*100 : 0;
-    const drop = m ? m.delta : 0;
-    const score = (margin < 0 ? 50 : margin < 15 ? 20 : 0) + (drop < -8 ? 20 : 0);
-    return { name: n, margin, drop, score };
-  }).sort((a,b) => b.score - a.score);
-  const risk = risks[0];
-  const riskColor = risk.margin < 0 ? '#ef4444' : risk.margin < 15 ? '#f59e0b' : '#0891b2';
-  const riskBadge = risk.margin < 0 ? '🚨 קריטי' : risk.margin < 15 ? '⚠️ מעקב' : '📊 מעקב';
-  cards.push({
-    color: riskColor, badge: riskBadge, icon: risk.margin < 0 ? '🚨' : '⚠️',
-    who: risk.name,
-    what: `מרווח ${risk.margin.toFixed(1)}%${risk.drop < -3 ? ` • ירידה של ${Math.abs(risk.drop).toFixed(1)}pp בחודש האחרון` : ''}`,
-    drivers: _getDrivers(risk.name, 'risk'),
-    cta: 'פתח תחקיר',
-    ctaFn: `openDrilldown('${risk.name.replace(/'/g,"\\'")}')`,
-  });
-
-  // ── Card C: Biggest MoM recovery or growth opportunity ──
-  const momWinners = ents.map(n => ({
-    name: n, m: DataAdapter.mom(n)
-  })).filter(x => x.m && x.m.delta > 2).sort((a,b) => b.m.delta - a.m.delta);
-  const opp = momWinners[0] || { name: ranked[1]?.name || ents[1] || ents[0], m: DataAdapter.mom(ranked[1]?.name || ents[0]) };
-  const oppM = DataAdapter.mom(opp.name);
-  cards.push({
-    color: '#0891b2', badge: '📈 מגמה', icon: '📈',
-    who: opp.name,
-    what: oppM && oppM.delta > 0
-      ? `שיפור חודשי: +${oppM.delta.toFixed(1)}pp במרווח (${MONTHS[MONTHS.length-2]}→${MONTHS[MONTHS.length-1]})`
-      : `מרווח יציב: ${((DataAdapter.summary(opp.name)?.cont||0)/(DataAdapter.summary(opp.name)?.rev||1)*100).toFixed(1)}%`,
-    drivers: _getDrivers(opp.name, 'opp'),
-    cta: 'בדוק מודל תגמול',
-    ctaFn: `openDrilldown('${opp.name.replace(/'/g,"\\'")}')`,
-  });
-
-  el.innerHTML = cards.map(c => `
-    <div class="ic" style="--ic-color:${c.color}" onclick="${c.ctaFn}" role="button" tabindex="0" aria-label="תובנה: ${c.who}">
-      <div class="ic-badge">${c.badge}</div>
-      <div class="ic-who">${c.icon} ${c.who}</div>
-      <div class="ic-what">${c.what}</div>
-      <div class="ic-drivers"><strong>גורמים מרכזיים:</strong><br>${c.drivers}</div>
-      <button class="ic-cta" onclick="event.stopPropagation();${c.ctaFn}">${c.cta} →</button>
-    </div>`).join('');
-}
-
-function _getDrivers(name, mode) {
-  const d = DataAdapter.summary(name); if (!d || !d.rev) return '—';
-  const drPct = d.rev > 0 ? d.dr/d.rev*100 : 0;
-  const emPct = d.rev > 0 ? d.em/d.rev*100 : 0;
-  const vmPct = d.rev > 0 ? d.vm/d.rev*100 : 0;
-  const netDr = DataAdapter.netAvg('dr');
-  const parts = [];
-  if (drPct > netDr + 5) parts.push(`שכר רופאים ${drPct.toFixed(0)}% (ממוצע רשת ${netDr.toFixed(0)}%)`);
-  if (vmPct > 8) parts.push(`וטמרקט ${vmPct.toFixed(1)}% מהכנסות`);
-  if (emPct > 30) parts.push(`שכר עובדים ${emPct.toFixed(1)}%`);
-  const m = DataAdapter.mom(name);
-  if (m && Math.abs(m.revCurr - m.revPrev) > 50000)
-    parts.push(`שינוי הכנסות ${fmt(m.revCurr - m.revPrev)}`);
-  return parts.length ? parts.join(' • ') : `מרווח ${(d.rev>0?d.cont/d.rev*100:0).toFixed(1)}%`;
-}
-
-setTimeout(renderDecisionHeader, 350);
-
-// ═══════════════════════════════════════════════════════════════
-// ── LEADERBOARD
-// ═══════════════════════════════════════════════════════════════
-let lbSortKey = 'rev', lbSortDir = -1, lbFilterType = 'all';
-let ddTrendChart = null;
-
-function setLbFilter(type, btn) {
-  lbFilterType = type;
-  document.querySelectorAll('.lb-ftab').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderLeaderboard();
-}
-
-function lbSort(key) {
-  if (lbSortKey === key) lbSortDir *= -1;
-  else { lbSortKey = key; lbSortDir = -1; }
-  document.querySelectorAll('.lb-table th').forEach(th => th.classList.remove('sorted'));
-  const thMap = { name:0, rev:1, margin:2, cont:3, drPct:4, mom:5, status:7 };
-  const idx = thMap[key];
-  if (idx !== undefined) {
-    const ths = document.querySelectorAll('.lb-table th');
-    if (ths[idx]) ths[idx].classList.add('sorted');
-    ths[idx].querySelector('.sort-icon').textContent = lbSortDir > 0 ? '↑' : '↓';
-  }
-  renderLeaderboard();
-}
-
-function renderLeaderboard() {
-  const tbody = document.getElementById('lbBody'); if (!tbody) return;
-  const q = (document.getElementById('lbSearch')?.value || '').trim().toLowerCase();
-  const ents = DataAdapter.entities().filter(n => {
-    const d = DataAdapter.summary(n); if (!d) return false;
-    if (lbFilterType === 'branch' && d.type !== 'branch') return false;
-    if (lbFilterType === 'dept'   && d.type !== 'dept')   return false;
-    if (q && !n.toLowerCase().includes(q)) return false;
-    return true;
-  });
-
-  const rows = ents.map(name => {
-    const d = DataAdapter.summary(name);
-    const margin = d.rev > 0 ? d.cont/d.rev*100 : 0;
-    const drPct  = d.rev > 0 ? d.dr/d.rev*100 : 0;
-    const m = DataAdapter.mom(name);
-    const momVal = m ? m.delta : null;
-    const status = margin < 0 ? 'critical' : margin < 15 ? 'watch' : 'good';
-    return { name, d, margin, drPct, momVal, status };
-  });
-
-  rows.sort((a,b) => {
-    let va, vb;
-    switch (lbSortKey) {
-      case 'name':   va = a.name; vb = b.name; return lbSortDir * va.localeCompare(vb, 'he'); break;
-      case 'rev':    va = a.d.rev;    vb = b.d.rev;    break;
-      case 'margin': va = a.margin;   vb = b.margin;   break;
-      case 'cont':   va = a.d.cont;   vb = b.d.cont;   break;
-      case 'drPct':  va = a.drPct;    vb = b.drPct;    break;
-      case 'mom':    va = a.momVal??-999; vb = b.momVal??-999; break;
-      case 'status': va = {good:0,watch:1,critical:2}[a.status]; vb = {good:0,watch:1,critical:2}[b.status]; break;
-      default: va = 0; vb = 0;
-    }
-    return lbSortDir * ((va||0) - (vb||0));
-  });
-
-  const statusLabel = { good:'✅ טוב', watch:'⚠️ מעקב', critical:'🚨 קריטי' };
-  const statusClass = { good:'good', watch:'watch', critical:'critical' };
-
-  tbody.innerHTML = rows.map(r => {
-    const spark = _sparkline(r.name);
-    const momChip = r.momVal == null ? '<span style="color:#94a3b8">—</span>'
-      : `<span class="mom-chip ${r.momVal>0.5?'up':r.momVal<-0.5?'down':'flat'}">${r.momVal>0?'+':''}${r.momVal.toFixed(1)}pp</span>`;
-    const drColor = r.drPct > 50 ? '#dc2626' : r.drPct > 35 ? '#d97706' : '#374151';
-    return `<tr onclick="openDrilldown('${r.name.replace(/'/g,"\\'")}')">
-      <td><div class="lb-entity-name">
-        <div class="lb-dot" style="background:${r.d.color||'#888'}"></div>${r.name}
-      </div></td>
-      <td style="font-weight:700;color:#152847">${fmt(r.d.rev)}</td>
-      <td><span style="font-weight:800;color:${r.margin<0?'#dc2626':r.margin<15?'#d97706':'#059669'}">${r.margin.toFixed(1)}%</span></td>
-      <td style="font-weight:700;color:${r.d.cont<0?'#dc2626':'#374151'}">${fmt(r.d.cont)}</td>
-      <td style="font-weight:700;color:${drColor}">${r.drPct.toFixed(1)}%</td>
-      <td>${momChip}</td>
-      <td><svg width="70" height="28">${spark}</svg></td>
-      <td><span class="lb-badge ${statusClass[r.status]}">${statusLabel[r.status]}</span></td>
-    </tr>`;
-  }).join('') || `<tr><td colspan="8" style="text-align:center;padding:2rem;color:#94a3b8">אין נתונים</td></tr>`;
-}
-
-function _sparkline(name) {
-  const m = DataAdapter.monthly(name); if (!m) return '';
-  const vals = m.rev.map((r,i) => r > 0 ? m.cont[i]/r*100 : 0);
-  const mn = Math.min(...vals), mx = Math.max(...vals);
-  const range = mx - mn || 1;
-  const pts = vals.map((v,i) => {
-    const x = 2 + i * (66/(vals.length-1||1));
-    const y = 26 - ((v-mn)/range)*22;
-    return `${x.toFixed(1)},${y.toFixed(1)}`;
-  }).join(' ');
-  const lastUp = vals.length > 1 && vals[vals.length-1] > vals[vals.length-2];
-  const color = mn < 0 ? '#ef4444' : lastUp ? '#059669' : '#0891b2';
-  return `<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.8" stroke-linejoin="round"/>`;
-}
-
-setTimeout(renderLeaderboard, 500);
-
-// ═══════════════════════════════════════════════════════════════
-// ── DRILLDOWN PANEL
-// ═══════════════════════════════════════════════════════════════
-let currentDrillName = null;
-let ddNorm = 'abs'; // 'abs' | 'pct'
-
-function openDrilldown(name) {
-  currentDrillName = name;
-  ddNorm = 'abs';
-  document.getElementById('ddOverlay').classList.remove('modal-hidden');
-  document.body.style.overflow = 'hidden';
-  renderDrilldown(name);
-}
-
-function closeDrilldown() {
-  document.getElementById('ddOverlay').classList.add('modal-hidden');
-  document.body.style.overflow = '';
-  if (ddTrendChart) { ddTrendChart.destroy(); ddTrendChart = null; }
-}
-
-function setNorm(btn) {
-  ddNorm = btn.dataset.norm;
-  document.querySelectorAll('.ntog').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  if (currentDrillName) renderDrilldownWaterfall(currentDrillName);
-}
-
-function renderDrilldown(name) {
-  const d = DataAdapter.summary(name); if (!d) return;
-  const m = DataAdapter.monthly(name);
-  document.getElementById('ddEntityName').textContent = name;
-  const typeLabel = d.type === 'branch' ? 'סניף' : d.type === 'dept' ? 'מחלקה' : 'ישות';
-  document.getElementById('ddEntitySub').textContent = `${typeLabel} • לחץ על ישות אחרת ב-Leaderboard למעבר`;
-
-  // ── KPI Row ──
-  const n2 = m ? m.rev.length : 0;
-  const currRev  = m ? m.rev[n2-1] : d.rev/MONTHS.length;
-  const prevRev  = m && n2>=2 ? m.rev[n2-2] : 0;
-  const currCont = m ? m.cont[n2-1] : 0;
-  const prevCont = m && n2>=2 ? m.cont[n2-2] : 0;
-  const currMarg = currRev > 0 ? currCont/currRev*100 : 0;
-  const prevMarg = prevRev > 0 ? prevCont/prevRev*100 : 0;
-  const netMarg  = DataAdapter.netAvg('cont');
-  const totals   = DataAdapter.netTotals();
-  const netRevAvg = totals.rev / (DataAdapter.entities().filter(n=>DataAdapter.summary(n)?.rev>0).length||1) / MONTHS.length;
-
-  const kpis = [
-    { label:'הכנסות (חודש אחרון)', val:fmt(currRev), delta:prevRev>0?((currRev-prevRev)/prevRev*100).toFixed(1):null, benchmark: fmt(netRevAvg), bLabel:'ממוצע רשת' },
-    { label:'תרומה ישירה', val:fmt(currCont), delta:prevCont!==0?((currCont-prevCont)/Math.abs(prevCont)*100).toFixed(1):null, benchmark: null },
-    { label:'מרווח %', val:currMarg.toFixed(1)+'%', delta:(currMarg-prevMarg).toFixed(1), benchmark: netMarg.toFixed(1)+'%', bLabel:'ממוצע רשת' },
-    { label:'שכר רופאים %', val: currRev>0?(m?m.dr[n2-1]:d.dr)/currRev*100>0?((m?m.dr[n2-1]:d.dr)/currRev*100).toFixed(1)+'%':'—':'—', delta:null, benchmark: DataAdapter.netAvg('dr').toFixed(1)+'%', bLabel:'ממוצע רשת' },
-    { label:'שינוי מרווח (MoM)', val:(currMarg-prevMarg>0?'+':'')+((currMarg-prevMarg).toFixed(1))+'pp', delta:null, benchmark:null },
-    { label:'סה״כ 6 חודשים', val:fmt(d.rev), delta:null, benchmark:null },
-  ];
-
-  document.getElementById('ddKpiRow').innerHTML = kpis.map(k => {
-    const dNum = parseFloat(k.delta);
-    const dClass = k.delta == null ? '' : dNum > 0 ? 'up' : dNum < 0 ? 'down' : '';
-    const dText  = k.delta == null ? '' : `${dNum>0?'▲':'▼'} ${Math.abs(dNum).toFixed(1)}${k.label.includes('%')?'pp':'%'}`;
-    return `<div class="kpi-box">
-      <div class="kpi-box-label">${k.label}</div>
-      <div class="kpi-box-val">${k.val}</div>
-      ${dText ? `<div class="kpi-box-delta ${dClass}">${dText} לעומת חודש קודם</div>` : ''}
-      ${k.benchmark ? `<div style="font-size:0.62rem;color:#94a3b8;margin-top:0.2rem">${k.bLabel||''}:  ${k.benchmark}</div>` : ''}
-    </div>`;
-  }).join('');
-
-  // ── Waterfall ──
-  renderDrilldownWaterfall(name);
-
-  // ── Trend Chart ──
-  if (ddTrendChart) { ddTrendChart.destroy(); ddTrendChart = null; }
-  if (m) {
-    setTimeout(() => {
-      const ctx = document.getElementById('ddTrendChart'); if (!ctx) return;
-      ddTrendChart = new Chart(ctx.getContext('2d'), {
-        type: 'line',
-        data: {
-          labels: MONTHS,
-          datasets: [
-            { label:'הכנסות', data:m.rev, borderColor:'#0891b2', borderWidth:2, pointRadius:3.5, tension:0.35, fill:false, yAxisID:'y' },
-            { label:'תרומה ישירה', data:m.cont, borderColor:'#059669', borderWidth:2, pointRadius:3.5, tension:0.35, fill:false, yAxisID:'y' },
-            { label:'מרווח %', data:m.rev.map((r,i)=>r>0?parseFloat((m.cont[i]/r*100).toFixed(1)):0),
-              borderColor:'#f59e0b', borderWidth:2, pointRadius:3, tension:0.35, fill:false, borderDash:[4,3], yAxisID:'y2' },
-          ]
-        },
-        options: {
-          responsive:true, maintainAspectRatio:false,
-          plugins:{ legend:{ position:'bottom', rtl:true, labels:{ font:{family:'Heebo',size:10}, padding:8, usePointStyle:true }}},
-          scales:{
-            y:  { ticks:{color:'#94a3b8',font:{family:'Heebo',size:10},callback:v=>fmt(v)}, grid:{color:'#f0f4fb'} },
-            y2: { position:'left', ticks:{color:'#f59e0b',font:{family:'Heebo',size:10},callback:v=>v+'%'}, grid:{display:false} }
-          }
-        }
-      });
-    }, 50);
-  }
-}
-
-function renderDrilldownWaterfall(name) {
-  const m = DataAdapter.monthly(name); if (!m) return;
-  const n2 = m.rev.length; if (n2 < 2) return;
-  const el = document.getElementById('ddWaterfall'); if (!el) return;
-
-  const prev = { rev:m.rev[n2-2], dr:m.dr[n2-2], em:m.em[n2-2], co:m.co[n2-2], vm:m.vm[n2-2], cont:m.cont[n2-2] };
-  const curr = { rev:m.rev[n2-1], dr:m.dr[n2-1], em:m.em[n2-1], co:m.co[n2-1], vm:m.vm[n2-1], cont:m.cont[n2-1] };
-
-  const rows = [
-    { label:'Δ הכנסות',       val: curr.rev - prev.rev,   color:'#0891b2', base: prev.rev },
-    { label:'Δ שכר רופאים',   val:-(curr.dr  - prev.dr),  color:'#7c3aed', base: prev.dr },
-    { label:'Δ שכר עובדים',   val:-(curr.em  - prev.em),  color:'#a855f7', base: prev.em },
-    { label:'Δ קבלנים',       val:-(curr.co  - prev.co),  color:'#0284c7', base: prev.co },
-    { label:'Δ וטמרקט',       val:-(curr.vm  - prev.vm),  color:'#d97706', base: prev.vm },
-    { label:'שינוי תרומה',    val: curr.cont - prev.cont, color: curr.cont-prev.cont>0?'#059669':'#dc2626', base: prev.cont },
-  ];
-
-  const maxAbs = Math.max(...rows.map(r => Math.abs(r.val)), 1);
-  el.innerHTML = rows.map(r => {
-    let display, pctOfRev;
-    if (ddNorm === 'pct') {
-      pctOfRev = r.base > 0 ? (r.val / r.base * 100) : 0;
-      display = `${r.val >= 0 ? '+' : ''}${pctOfRev.toFixed(1)}%`;
+// Compute correct hash on load and patch
+(async () => {
+  const h = await sha256Upload('555');
+  window._uploadHash = h;
+  // Patch checkUploadPw to use live hash
+  const orig = checkUploadPw;
+  window.checkUploadPw = async function() {
+    const input = document.getElementById('uploadPwInput');
+    const err   = document.getElementById('uploadPwErr');
+    const val   = input.value.trim();
+    if (!val) return;
+    const hash = await sha256Upload(val);
+    if (hash === window._uploadHash) {
+      closeUploadGate();
+      document.getElementById('uploadFileInput').click();
     } else {
-      display = (r.val >= 0 ? '+' : '') + fmt(r.val);
+      err.textContent = '❌ סיסמה שגויה';
+      input.style.borderColor = '#dc2626';
+      input.value = '';
+      setTimeout(() => { input.style.borderColor = '#e0e8f5'; }, 1500);
     }
-    const barPct = (Math.abs(r.val) / maxAbs * 100).toFixed(1);
-    const isPos = r.val >= 0;
-    return `<div class="wf-row">
-      <div class="wf-label">${r.label}</div>
-      <div class="wf-track">
-        <div class="wf-fill" style="width:${barPct}%;background:${r.color};opacity:${isPos?0.85:0.7}"></div>
-      </div>
-      <div class="wf-val" style="color:${r.val<0?'#dc2626':'#059669'}">${display}</div>
-    </div>`;
-  }).join('');
-}
-
-// ═══════════════════════════════════════════════════════════════
-// ── ENHANCED ALERTS — threshold + z-score anomaly detection
-// ═══════════════════════════════════════════════════════════════
-let alertFilterSev = 'all';
-
-function setAlertFilter(sev, btn) {
-  alertFilterSev = sev;
-  document.querySelectorAll('.alerts-section .lb-ftab').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderAlerts();
-}
-
-function renderAlerts() {
-  const el = document.getElementById('alertList'); if (!el) return;
-  const ents = DataAdapter.entities().filter(n => DataAdapter.summary(n)?.rev > 0);
-  const alerts = [];
-
-  ents.forEach(name => {
-    const d = DataAdapter.summary(name);
-    const m = DataAdapter.monthly(name);
-    const margin = d.rev > 0 ? d.cont/d.rev*100 : 0;
-    const drPct  = d.rev > 0 ? d.dr/d.rev*100 : 0;
-    const zs = DataAdapter.zScore(name);
-    const isSmallBase = d.rev < 300000; // flag small base effect
-
-    // ── Threshold alerts ──
-    if (d.cont < 0) {
-      alerts.push({ sev:'high', icon:'🚨', title:`${name} — תרומה ישירה שלילית`,
-        desc:`תרומה: ${fmt(d.cont)} (${margin.toFixed(1)}% מרווח). הגדרה: ישות בהפסד תפעולי ישיר.`,
-        meta: isSmallBase ? 'בסיס קטן: הכנסות נמוכות יחסית — יש להתייחס לאחוזים בזהירות' : '',
-        name });
-    } else if (margin < 15) {
-      alerts.push({ sev: margin < 0 ? 'high' : 'medium', icon:'⚠️', title:`${name} — מרווח נמוך מ-15%`,
-        desc:`מרווח נוכחי: ${margin.toFixed(1)}%. סף קריטי: 20%. ממוצע רשת: ${DataAdapter.netAvg('cont').toFixed(1)}%.`,
-        meta: isSmallBase ? `⚠️ בסיס קטן — הכנסות ${fmt(d.rev)}: שינוי קטן בהכנסות מזיז את האחוז משמעותית` : '',
-        name });
-    }
-
-    if (drPct > 55) {
-      alerts.push({ sev:'medium', icon:'💰', title:`${name} — שכר רופאים גבוה מהממוצע`,
-        desc:`שכר רופאים: ${drPct.toFixed(1)}% מהכנסות. ממוצע רשת: ${DataAdapter.netAvg('dr').toFixed(1)}%. פער: +${(drPct - DataAdapter.netAvg('dr')).toFixed(1)}pp.`,
-        meta: isSmallBase ? '⚠️ בסיס קטן — ייתכן עיוות סטטיסטי' : '',
-        name });
-    }
-
-    // ── MoM drop ──
-    const mom = DataAdapter.mom(name);
-    if (mom && mom.delta < -8) {
-      alerts.push({ sev:'high', icon:'📉', title:`${name} — ירידת מרווח חדה (${MONTHS[MONTHS.length-2]}→${MONTHS[MONTHS.length-1]})`,
-        desc:`ירידה: ${mom.delta.toFixed(1)}pp. מרווח: ${mom.prev.toFixed(1)}%→${mom.curr.toFixed(1)}%.`,
-        meta: isSmallBase ? '⚠️ אפקט בסיס קטן — הכנסות נמוכות מגבירות תנודתיות' : '',
-        name });
-    } else if (mom && mom.delta > 8) {
-      alerts.push({ sev:'good', icon:'🚀', title:`${name} — שיפור מרווח משמעותי`,
-        desc:`עלייה: +${mom.delta.toFixed(1)}pp. מרווח: ${mom.prev.toFixed(1)}%→${mom.curr.toFixed(1)}%.`,
-        meta: isSmallBase ? '⚠️ אפקט בסיס קטן — יש לאמת בנתוני יחידות' : '',
-        name });
-    }
-
-    // ── Z-score anomaly ──
-    if (zs && Math.abs(zs.z) > 1.8) {
-      const dir = zs.z > 0 ? 'חיובית' : 'שלילית';
-      const zSev = zs.z > 0 ? 'good' : 'medium';
-      alerts.push({ sev: zSev, icon: zs.z > 0 ? '📊' : '🔍', title:`${name} — אנומליה סטטיסטית (z=${zs.z.toFixed(1)})`,
-        desc:`מרווח נוכחי ${zs.last.toFixed(1)}% — סטיית תקן ${dir} מהממוצע ההיסטורי (μ=${zs.mu.toFixed(1)}%, σ=${zs.sigma.toFixed(1)}%).`,
-        meta: isSmallBase ? '⚠️ בסיס קטן — z-score עלול לשקף נפח קטן ולא שינוי אמיתי' : 'מבוסס על 6 חודשי היסטוריה',
-        name });
-    }
-  });
-
-  // Best performer (always show)
-  const best = ents.filter(n=>DataAdapter.summary(n).rev>0).reduce((a,b) =>
-    (DataAdapter.summary(b).cont/DataAdapter.summary(b).rev) > (DataAdapter.summary(a).cont/DataAdapter.summary(a).rev) ? b : a, ents[0]);
-  if (best) {
-    const bd = DataAdapter.summary(best);
-    alerts.unshift({ sev:'good', icon:'🏆', title:`${best} — מוביל הרשת`,
-      desc:`מרווח: ${(bd.cont/bd.rev*100).toFixed(1)}% • תרומה: ${fmt(bd.cont)} • הכנסות: ${fmt(bd.rev)}.`, meta:'', name: best });
-  }
-
-  const filtered = alertFilterSev === 'all' ? alerts : alerts.filter(a => a.sev === alertFilterSev);
-
-  if (!filtered.length) {
-    el.innerHTML = `<div style="text-align:center;padding:2rem;color:#94a3b8">אין התראות בקטגוריה זו</div>`;
-    return;
-  }
-
-  el.innerHTML = filtered.map(a => `
-    <div class="alert-card sev-${a.sev}" onclick="openDrilldown('${a.name.replace(/'/g,"\\'")}'); return false;" role="button" tabindex="0">
-      <div class="ac-icon">${a.icon}</div>
-      <div class="ac-body">
-        <div class="ac-title">${a.title}</div>
-        <div class="ac-desc">${a.desc}</div>
-        ${a.meta ? `<div class="ac-meta">${a.meta}</div>` : ''}
-      </div>
-      <button onclick="event.stopPropagation();openDrilldown('${a.name.replace(/'/g,"\\'")}');"
-        style="flex-shrink:0;padding:0.35rem 0.8rem;border-radius:8px;border:1.5px solid var(--ac);background:transparent;color:var(--ac);font-family:'Heebo',sans-serif;font-size:0.73rem;font-weight:800;cursor:pointer;white-space:nowrap">
-        תחקיר ←
-      </button>
-    </div>`).join('');
-}
-
-setTimeout(renderAlerts, 600);
-
-// ── Hook: re-render new sections after file upload ──
-const _origInject = injectParsedData;
-window.injectParsedData = function(...args) {
-  _origInject(...args);
-  setTimeout(() => {
-    renderDecisionHeader();
-    renderLeaderboard();
-    renderAlerts();
-  }, 300);
-};
+  };
+})();
 
 
 </script>
