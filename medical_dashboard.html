@@ -269,6 +269,7 @@ body { font-family: 'Heebo', sans-serif; background: var(--bg); color: var(--tex
 .chart-area { padding: 1.8rem 2rem; display: grid; grid-template-columns: 1.6fr 1fr; gap: 1.5rem; align-items: start; }
 @media(max-width: 900px) { .chart-area { grid-template-columns: 1fr; } }
 .chart-wrap { position: relative; height: 380px; }
+.pie-box { min-width: 0; }
 .pie-wrap { position: relative; height: 380px; }
 .pie-box { background: var(--bg); border: 1px solid var(--border); border-radius: 14px; padding: 1.3rem; }
 .pie-title { font-size: 0.82rem; font-weight: 800; color: var(--navy); margin-bottom: 0.2rem; }
@@ -1077,7 +1078,7 @@ footer { text-align: center; padding: 1.8rem 0 1.2rem; color: var(--text4); font
     </div>
     <div class="comp-grid" id="compGrid"></div>
     <div class="comp-chart-wrap">
-      <div style="position:relative; height:340px;">
+      <div id="compChartWrap" style="position:relative; height:340px;">
         <canvas id="compChart"></canvas>
       </div>
     </div>
@@ -1259,20 +1260,17 @@ function setGroup(gKey, el) {
 
 // Adapt chart layout based on number of entities
 function adaptChartLayout(count) {
-  const chartArea = document.querySelector('.chart-area');
   const pieBox    = document.querySelector('.pie-box');
   const chartWrap = document.querySelector('.chart-wrap');
-  if (!chartArea || !pieBox || !chartWrap) return;
+  if (!pieBox || !chartWrap) return;
 
   if (count > 8) {
-    // Many entities: full width bar chart, hide pie
-    chartArea.style.gridTemplateColumns = '1fr';
     pieBox.style.display = 'none';
-    chartWrap.style.height = Math.min(80 + count * 28, 620) + 'px';
+    chartWrap.style.gridColumn = '1 / -1';
+    chartWrap.style.height = Math.min(120 + count * 32, 680) + 'px';
   } else {
-    // Few entities: restore normal layout
-    chartArea.style.gridTemplateColumns = '';
     pieBox.style.display = '';
+    chartWrap.style.gridColumn = '';
     chartWrap.style.height = '380px';
   }
 }
@@ -1574,7 +1572,15 @@ function setCompView(v, el) {
 }
 
 function renderComparison() {
-  const branches = BRANCHES_LIST.map(k => ({ name: k, color: BRANCH_COLORS[k], ...ALL[k] }));
+  const branches = BRANCHES_LIST.map(k => ({ name: k, color: BRANCH_COLORS[k], ...ALL[k] }))
+                                 .filter(b => b.rev !== undefined);
+
+  // Dynamic height based on entity count
+  const compWrap = document.getElementById('compChartWrap');
+  if (compWrap) {
+    const h = Math.min(Math.max(300, branches.length * 42), 700);
+    compWrap.style.height = h + 'px';
+  }
 
   const getVal = (b) => {
     if (compView === 'margin')  return b.rev > 0 ? b.cont / b.rev * 100 : 0;
@@ -2124,7 +2130,8 @@ function injectParsedData(parsed, fileName, sheetName, sheetNames) {
       setTimeout(() => {
         if (chart) chart.resize();
         if (pieChart) pieChart.resize();
-      }, 100);
+        if (compChart) compChart.resize();
+      }, 150);
     }, 50);
   });
 
