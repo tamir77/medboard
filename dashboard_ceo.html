@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>דשבורד מצטבר רשת – חוות דעת</title>
+<link href="https://fonts.googleapis.com/css2?family=Ledger&family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --orange: #F54B1E;
+    --cream:  #F5EBE1;
+    --dark:   #1E1928;
+    --gray:   #8C8282;
+    --white:  #FFFFFF;
+    --light-border: #E8DDD6;
+    --positive: #2E7D32;
+    --negative: #C62828;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Archivo', Calibri, sans-serif;
+    background: #F2EDE8;
+    color: var(--dark);
+    direction: rtl;
+    min-height: 100vh;
+  }
+
+  /* ─── HEADER ─── */
+  .header {
+    background: var(--dark);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  }
+  .header-title {
+    font-family: 'Ledger', Georgia, serif;
+    color: var(--white);
+    font-size: 22px;
+    letter-spacing: 0.3px;
+  }
+  .header-title span { color: var(--orange); }
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .header-badge {
+    background: var(--orange);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+  }
+  .header-date {
+    color: var(--gray);
+    font-size: 12px;
+  }
+
+  /* ─── CONTROLS BAR ─── */
+  .controls-bar {
+    background: var(--white);
+    border-bottom: 2px solid var(--cream);
+    padding: 12px 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .control-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .control-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gray);
+    white-space: nowrap;
+  }
+  .btn-group {
+    display: flex;
+    border: 1.5px solid var(--light-border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .btn-group button {
+    background: none;
+    border: none;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-family: 'Archivo', sans-serif;
+    cursor: pointer;
+    color: var(--dark);
+    transition: all 0.15s;
+    border-left: 1px solid var(--light-border);
+  }
+  .btn-group button:last-child { border-left: none; }
+  .btn-group button.active {
+    background: var(--orange);
+    color: white;
+    font-weight: 600;
+  }
+  .btn-group button:not(.active):hover { background: var(--cream); }
+
+  select {
+    font-family: 'Archivo', sans-serif;
+    font-size: 12px;
+    border: 1.5px solid var(--light-border);
+    border-radius: 6px;
+    padding: 6px 12px;
+    color: var(--dark);
+    background: white;
+    cursor: pointer;
+    outline: none;
+  }
+
+  /* ─── MAIN LAYOUT ─── */
+  .main {
+    padding: 24px 32px;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+
+  /* ─── SECTION TITLE ─── */
+  .section-title {
+    font-family: 'Ledger', Georgia, serif;
+    font-size: 16px;
+    color: var(--dark);
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--orange);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::before {
+    content: '';
+    width: 4px;
+    height: 18px;
+    background: var(--orange);
+    border-radius: 2px;
+  }
+
+  /* ─── KPI CARDS ─── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .kpi-card {
+    background: var(--white);
+    border-radius: 10px;
+    padding: 18px 20px;
+    border: 1.5px solid var(--light-border);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+  }
+  .kpi-card::after {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--orange);
+    border-radius: 0 10px 10px 0;
+  }
+  .kpi-label {
+    font-size: 11px;
+    color: var(--gray);
+    font-weight: 600;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .kpi-value {
+    font-family: 'Ledger', Georgia, serif;
+    font-size: 26px;
+    color: var(--dark);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .kpi-sub {
+    font-size: 11px;
+    color: var(--gray);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .kpi-change {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 10px;
+  }
+  .kpi-change.pos { background: #E8F5E9; color: var(--positive); }
+  .kpi-change.neg { background: #FFEBEE; color: var(--negative); }
+  .kpi-icon {
+    position: absolute;
+    top: 14px;
+    left: 16px;
+    font-size: 22px;
+    opacity: 0.15;
+  }
+
+  /* ─── CHART GRID ─── */
+  .chart-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-bottom: 18px;
+  }
+  .chart-grid-3 {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 18px;
+    margin-bottom: 18px;
+  }
+
+  .chart-card {
+    background: var(--white);
+    border-radius: 10px;
+    padding: 20px 22px;
+    border: 1.5px solid var(--light-border);
+  }
+  .chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .chart-title {
+    font-family: 'Ledger', Georgia, serif;
+    font-size: 14px;
+    color: var(--dark);
+  }
+  .chart-subtitle {
+    font-size: 11px;
+    color: var(--gray);
+    margin-top: 2px;
+  }
+  .chart-container {
+    position: relative;
+  }
+
+  /* ─── BRANCH TABLE ─── */
+  .table-card {
+    background: var(--white);
+    border-radius: 10px;
+    border: 1.5px solid var(--light-border);
+    overflow: hidden;
+    margin-bottom: 18px;
+  }
+  .table-card table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+    table-layout: fixed;
+  }
+  .table-card thead th {
+    background: var(--dark);
+    color: white;
+    padding: 10px 14px;
+    text-align: right;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .table-card thead th:first-child {
+    background: var(--orange);
+    width: 140px;
+  }
+  .table-card tbody tr:nth-child(even) { background: var(--cream); }
+  .table-card tbody tr:hover { background: #EDE3D8; }
+  .table-card tbody td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--light-border);
+    color: var(--dark);
+    text-align: right;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .table-card tbody td:first-child {
+    font-weight: 700;
+    color: var(--orange);
+    width: 140px;
+  }
+  .td-num { text-align: right; font-variant-numeric: tabular-nums; }
+  .td-pos { color: var(--positive); font-weight: 600; }
+  .td-neg { color: var(--negative); font-weight: 600; }
+
+  /* ─── BRANCH SELECTOR TABS ─── */
+  .branch-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .branch-tab {
+    background: var(--cream);
+    border: 1.5px solid var(--light-border);
+    color: var(--dark);
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 12px;
+    font-family: 'Archivo', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-weight: 600;
+  }
+  .branch-tab.active {
+    background: var(--orange);
+    border-color: var(--orange);
+    color: white;
+  }
+  .branch-tab:not(.active):hover {
+    background: #EDE3D8;
+  }
+
+  /* ─── FOOTER ─── */
+  .footer {
+    text-align: center;
+    padding: 20px;
+    color: var(--gray);
+    font-size: 11px;
+    border-top: 1px solid var(--light-border);
+    margin-top: 10px;
+  }
+
+  /* ─── WATERFALL BAR ─── */
+  .waterfall-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .waterfall-label {
+    width: 150px;
+    font-size: 12px;
+    text-align: right;
+    color: var(--dark);
+    flex-shrink: 0;
+  }
+  .waterfall-bar-wrap {
+    flex: 1;
+    height: 22px;
+    background: var(--cream);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+  }
+  .waterfall-bar {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.4s ease;
+  }
+  .waterfall-value {
+    width: 100px;
+    font-size: 12px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--dark);
+    flex-shrink: 0;
+  }
+
+  /* ─── PERIOD PILL ─── */
+  .period-pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .period-pill.actual { background: #E3F2FD; color: #1565C0; }
+  .period-pill.budget { background: #FFF3E0; color: #E65100; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-title">דשבורד מצטבר <span>רשת חוות דעת</span></div>
+  <div class="header-right">
+    <span class="period-pill actual">ביצוע 2024–2025</span>
+    <span class="period-pill budget">תקציב 2026</span>
+    <span class="header-badge">מנכ״ל</span>
+    <span class="header-date" id="todayDate"></span>
+  </div>
+</header>
+
+<!-- CONTROLS BAR -->
+<div class="controls-bar">
+  <div class="control-group">
+    <span class="control-label">שנה:</span>
+    <div class="btn-group" id="yearBtns">
+      <button onclick="setYear('all')" class="active">הכל</button>
+      <button onclick="setYear('2024')">2024</button>
+      <button onclick="setYear('2025')">2025</button>
+      <button onclick="setYear('2026')">2026</button>
+    </div>
+  </div>
+  <div class="control-group">
+    <span class="control-label">תצוגה:</span>
+    <div class="btn-group" id="viewBtns">
+      <button onclick="setView('monthly')" class="active">חודשי</button>
+      <button onclick="setView('quarterly')">רבעוני</button>
+    </div>
+  </div>
+  <div class="control-group">
+    <span class="control-label">מדד עיקרי:</span>
+    <select id="metricSelect" onchange="updateCharts()">
+      <option value="הכנסות">הכנסות</option>
+      <option value="EBITDA">EBITDA</option>
+      <option value="רווח גולמי">רווח גולמי</option>
+      <option value="רווח תפעולי">רווח תפעולי</option>
+      <option value="עלות ההכנסות">עלות ההכנסות</option>
+    </select>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+
+  <!-- KPI CARDS -->
+  <div class="kpi-grid" id="kpiGrid">
+    <div class="kpi-card">
+      <div class="kpi-icon">₪</div>
+      <div class="kpi-label">סה״כ הכנסות – 2025</div>
+      <div class="kpi-value" id="kpi-revenue">–</div>
+      <div class="kpi-sub">
+        <span class="kpi-change pos" id="kpi-revenue-chg">–</span>
+        <span>לעומת 2024</span>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">📈</div>
+      <div class="kpi-label">EBITDA – 2025</div>
+      <div class="kpi-value" id="kpi-ebitda">–</div>
+      <div class="kpi-sub">
+        <span class="kpi-change pos" id="kpi-ebitda-chg">–</span>
+        <span>לעומת 2024</span>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">💰</div>
+      <div class="kpi-label">רווח גולמי – 2025</div>
+      <div class="kpi-value" id="kpi-gross">–</div>
+      <div class="kpi-sub">
+        <span class="kpi-change pos" id="kpi-gross-chg">–</span>
+        <span>לעומת 2024</span>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">📊</div>
+      <div class="kpi-label">רווח תפעולי – 2025</div>
+      <div class="kpi-value" id="kpi-op">–</div>
+      <div class="kpi-sub">
+        <span class="kpi-change pos" id="kpi-op-chg">–</span>
+        <span>לעומת 2024</span>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">%</div>
+      <div class="kpi-label">שולי EBITDA – 2025</div>
+      <div class="kpi-value" id="kpi-margin">–</div>
+      <div class="kpi-sub">
+        <span class="kpi-change" id="kpi-margin-chg">–</span>
+        <span>לעומת 2024</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOP CHARTS ROW -->
+  <div class="chart-grid-3">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">מגמת הכנסות רשת</div>
+          <div class="chart-subtitle" id="revSubtitle">סה״כ חודשי לפי תקופה</div>
+        </div>
+        <div class="btn-group">
+          <button onclick="setChartType('line')" id="btnLine" class="active">קו</button>
+          <button onclick="setChartType('bar')" id="btnBar">עמודות</button>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="revenueChart" height="260"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">השוואה שנתית</div>
+          <div class="chart-subtitle">לפי מדד נבחר</div>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="annualChart" height="260"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- BRANCH CHARTS -->
+  <div class="section-title">ניתוח לפי סניף</div>
+  <div class="branch-tabs" id="branchTabs">
+    <button class="branch-tab active" onclick="setBranch('all')">כל הרשת</button>
+    <button class="branch-tab" onclick="setBranch('כפר סבא')">כפר סבא</button>
+    <button class="branch-tab" onclick="setBranch('באר שבע')">באר שבע</button>
+    <button class="branch-tab" onclick="setBranch('רחובות')">רחובות</button>
+    <button class="branch-tab" onclick="setBranch('מוצקין')">מוצקין</button>
+    <button class="branch-tab" onclick="setBranch('מי וט')">מי וט</button>
+  </div>
+
+  <div class="chart-grid-2">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title" id="branchChartTitle">מגמה חודשית – כל הרשת</div>
+          <div class="chart-subtitle">הכנסות, רווח גולמי ו-EBITDA</div>
+        </div>
+      </div>
+      <canvas id="branchTrendChart" height="240"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">השוואת סניפים</div>
+          <div class="chart-subtitle" id="branchCompSubtitle">לפי מדד נבחר – 2025</div>
+        </div>
+      </div>
+      <canvas id="branchCompChart" height="240"></canvas>
+    </div>
+  </div>
+
+  <!-- QUARTERLY TABLE -->
+  <div class="section-title">סיכום רבעוני – כל הרשת</div>
+  <div class="table-card">
+    <table id="quarterlyTable">
+      <thead>
+        <tr>
+          <th>מדד</th>
+          <th>Q1 2024</th><th>Q2 2024</th><th>Q3 2024</th><th>Q4 2024</th>
+          <th style="background:#B03C18">Q1 2025</th><th style="background:#B03C18">Q2 2025</th><th style="background:#B03C18">Q3 2025</th><th style="background:#B03C18">Q4 2025</th>
+          <th style="background:#7A2E10">Q1 2026</th>
+        </tr>
+      </thead>
+      <tbody id="quarterlyBody"></tbody>
+    </table>
+  </div>
+
+  <!-- BRANCH BREAKDOWN TABLE -->
+  <div class="section-title">פירוט סניפים – <span id="tableYearLabel">2025</span></div>
+  <div class="table-card">
+    <table id="branchTable">
+      <thead>
+        <tr id="branchTableHead"></tr>
+      </thead>
+      <tbody id="branchTableBody"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<footer class="footer">
+  חוות דעת – דשבורד מנהלים | נתונים: תקציב לאחר התאמות 2024–2026 | עודכן אוטומטית מהנתונים הפיננסיים
+</footer>
+
+<script>
+// ═══════════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════════
+const RAW = {
+  "dates": ["2024-01","2024-02","2024-03","2024-04","2024-05","2024-06","2024-07","2024-08","2024-09","2024-10","2024-11","2024-12","2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07","2026-08","2026-09","2026-10","2026-11","2026-12"],
+  "branches": {
+    "כפר סבא": {"הכנסות":[2964320,2766470,2946902,2907146,2949326,2929618,3157491,3000993,3490544,3120515,3236397,3512175,3471247,3325686,3678631,3424365,3722905,3461475,3937414,3952636,3426858,3623836,4263519,4048512,3768811,3564782,0,0,0,0,0,0,0,0,0,0],"עלות ההכנסות":[1891149,1908369,2240950,2097614,2110918,2074292,2205769,2377039,2407535,2520239,2153549,2498875,2328974,2028231,2495071,2437750,2433309,2301965,2536262,2537227,2496891,2468691,2527107,2649630,2498319,2306580,0,0,0,0,0,0,0,0,0,0],"רווח גולמי":[1073170,858101,705952,809531,838409,855326,951722,623954,1083010,600277,1082848,1013300,1142274,1297455,1183560,986616,1289596,1159509,1401152,1415410,929967,1155145,1736413,1398882,1270492,1258202,0,0,0,0,0,0,0,0,0,0],"הנהלה וכלליות":[541115,550720,536705,678674,693753,509932,726260,572017,969319,419040,832150,836665,666415,554470,667251,503344,530697,466812,593588,458800,631552,373255,670407,1382823,0,0,0,0,0,0,0,0,0,0,0,0],"רווח תפעולי":[532055,307381,169247,130858,144656,345394,225462,51937,113691,181237,250699,176634,475859,742986,516309,483272,758899,692697,807564,956610,298415,781890,1066006,16059,1270492,1258202,0,0,0,0,0,0,0,0,0,0],"EBITDA":[633709,409036,270902,232512,246311,447049,327117,153592,215345,282892,352353,278289,576891,844017,617340,584303,859930,793728,908595,1057641,399447,882922,1167038,117090,1270492,1258202,0,0,0,0,0,0,0,0,0,0]},
+    "באר שבע": {"הכנסות":[391662,355212,394013,349849,405056,384636,399102,359812,380467,348937,371167,391971,351793,317111,373696,354802,388700,423973,493907,445796,407542,386885,439068,480961,439171,432954,0,0,0,0,0,0,0,0,0,0],"עלות ההכנסות":[278600,291564,277147,261216,319169,285896,298062,250537,243846,265830,260186,278221,263477,197633,273226,264681,246889,291908,356951,318797,280703,299794,254227,324321,276565,249179,0,0,0,0,0,0,0,0,0,0],"רווח גולמי":[113063,63648,116866,88634,85886,98741,101040,109275,136621,83107,110981,113750,88316,119477,100470,90121,141811,132065,136956,126999,126839,87091,184841,156640,162606,183775,0,0,0,0,0,0,0,0,0,0],"הנהלה וכלליות":[70275,19861,28582,27823,31421,26256,24585,28768,30667,27243,24034,36320,44163,80526,31098,40558,31408,32492,56995,62827,40279,40168,42831,51601,0,0,0,0,0,0,0,0,0,0,0,0],"רווח תפעולי":[42788,43787,88283,60811,54465,72484,76455,80507,105954,55863,86947,77430,44153,38951,69372,49563,110403,99572,79960,64172,86560,46922,142010,105039,162606,183775,0,0,0,0,0,0,0,0,0,0],"EBITDA":[40373,41371,85868,58396,52050,70069,74040,78091,103539,53448,84532,75015,46653,41451,71872,52063,112903,102072,82460,66672,89060,49422,144510,107539,162606,183775,0,0,0,0,0,0,0,0,0,0]},
+    "רחובות": {"הכנסות":[748073,625554,775328,850918,1062728,994256,1071389,1010219,1001013,948429,892631,808509,804929,787364,922558,945662,1036797,901552,1050450,985635,871520,891890,878701,916096,773180,776809,0,0,0,0,0,0,0,0,0,0],"עלות ההכנסות":[580411,571196,597778,670322,710703,658529,778535,770577,799591,739876,695200,657127,654180,672363,730333,739868,814561,738977,844059,868976,777374,756450,750419,748907,668829,630291,0,0,0,0,0,0,0,0,0,0],"רווח גולמי":[167662,54358,177549,180596,352025,335727,292854,239642,201422,208553,197431,151383,150749,115000,192224,205794,222236,162575,206391,116659,94147,135440,128282,167189,104351,146518,0,0,0,0,0,0,0,0,0,0],"הנהלה וכלליות":[55698,105994,128422,104112,131233,107257,134227,111426,145236,155770,184762,140068,128775,133030,111315,98242,106721,113898,89549,70024,87484,42734,109610,104177,0,0,0,0,0,0,0,0,0,0,0,0],"רווח תפעולי":[111964,-51637,49127,76484,220792,228470,158627,128216,56186,52783,12669,11315,21974,-18030,80910,107552,115515,48676,116842,46635,6663,92705,18672,63012,104351,146518,0,0,0,0,0,0,0,0,0,0],"EBITDA":[120288,-43313,57451,84808,229116,236793,166950,136539,64510,61106,20992,19638,30297,-9706,89233,115875,123838,57000,125166,54958,14986,101029,26995,71336,104351,146518,0,0,0,0,0,0,0,0,0,0]},
+    "מי וט": {"הכנסות":[418609,402695,501746,425860,667579,474808,525350,564225,755891,666205,668539,734243,800209,720618,814487,847858,979074,883592,955102,915770,880136,913280,904745,934483,1007326,880429,0,0,0,0,0,0,0,0,0,0],"עלות ההכנסות":[318811,313297,317708,356084,380817,372303,501866,465187,570013,686044,639516,620699,675314,678275,691722,751099,752470,721567,776751,737172,792206,859220,796972,819394,651305,650349,0,0,0,0,0,0,0,0,0,0],"רווח גולמי":[99798,89398,184038,69775,286762,102505,23484,99037,185878,-19839,29023,113543,124895,42343,122765,96758,226604,162026,178350,178598,87930,54060,107772,115089,356021,230080,0,0,0,0,0,0,0,0,0,0],"הנהלה וכלליות":[56951,35612,60724,48096,71252,39895,46702,50910,86810,47318,118031,47410,73776,91895,68930,65859,70722,50656,66921,90895,58127,62098,61934,75571,0,0,0,0,0,0,0,0,0,0,0,0],"רווח תפעולי":[42847,53786,123315,21680,215510,62610,-23218,48127,99068,-67158,-89007,66134,51119,-49553,53835,30899,155882,111370,111429,87703,29803,-8038,45839,39518,356021,230080,0,0,0,0,0,0,0,0,0,0],"EBITDA":[44717,55656,125185,23550,217380,64480,-21348,49998,100938,-65288,-87137,68004,52989,-47683,55705,32769,157752,113240,113300,89573,31673,-6168,47709,41389,356021,230080,0,0,0,0,0,0,0,0,0,0]},
+    "מוצקין": {"הכנסות":[0,0,0,0,0,0,0,0,0,0,123288,123288,67712.71,118464.41,219105.09,138963.56,142471.19,112900,141908.48,111174.58,104838.13,118905.09,120349.15,132511.86,127703.39,134377,0,0,0,0,0,0,0,0,0,0],"עלות ההכנסות":[0,0,0,0,0,0,0,0,0,0,71656.07,62937.84,61883.66,63312.86,77012.94,84148.03,65510.83,72157.68,87777.36,78815.95,81616.74,71849.19,69585.13,65791.71,76266.87,64635.96,0,0,0,0,0,0,0,0,0,0],"רווח גולמי":[0,0,0,0,0,0,0,0,0,0,51631.93,60350.16,5829.05,55151.55,142092.15,54815.53,76960.36,40742.32,54131.12,32358.63,23221.39,47055.9,50764.02,66720.15,51436.52,69741.04,0,0,0,0,0,0,0,0,0,0],"הנהלה וכלליות":[0,0,0,0,0,0,0,0,0,0,9361,6000,7583.72,16786.03,10824.78,10698.94,9975.28,7053.82,13129.27,24773.52,14852.33,17780.47,26144.29,17569.65,0,0,0,0,0,0,0,0,0,0,0,0],"רווח תפעולי":[0,0,0,0,0,0,0,0,0,0,42270.93,54350.16,-1754.67,38365.52,131267.37,44116.59,66985.08,33688.5,41001.85,7585.11,8369.06,29275.43,24619.73,49150.5,51436.52,69741.04,0,0,0,0,0,0,0,0,0,0],"EBITDA":[0,0,0,0,0,0,0,0,0,0,42270.93,54350.16,-1754.67,38365.52,131267.37,44116.59,66985.08,33688.5,41001.85,7585.11,8369.06,29275.43,24619.73,49150.5,51436.52,69741.04,0,0,0,0,0,0,0,0,0,0]}
+  },
+  "network_total": {
+    "הכנסות":[4522665,4149930,4617988,4533773,5084689,4783318,5153332,4935249,5627916,5084086,5292023,5570187,5495892,5269243,6008477,5711651,6269947,5783492,6578781,6411012,5690895,5934796,6606382,6512564,6116192,5789351,0,0,0,0,0,0,0,0,0,0],
+    "עלות ההכנסות":[3068971,3084425,3433583,3385236,3521607,3391019,3784232,3863341,4020985,4211989,3820107,4117860,3983828,3639815,4267366,4277547,4312741,4126575,4601801,4540988,4428790,4456005,4398310,4608043,4171285,3901036,0,0,0,0,0,0,0,0,0,0],
+    "רווח גולמי":[1453693,1065505,1184406,1148537,1563082,1392298,1369100,1071908,1606931,872097,1471916,1452326,1512064,1629427,1741111,1434104,1957206,1656916,1976980,1870024,1262105,1478791,2208072,1904521,1944907,1888315,0,0,0,0,0,0,0,0,0,0],
+    "הנהלה וכלליות":[724039,712188,754433,858703,927658,683340,931774,763121,1232032,649371,1168337,1066463,920713,876708,889418,718703,749523,670913,820182,707320,832294,536036,910926,1631741,0,0,0,0,0,0,0,0,0,0,0,0],
+    "רווח תפעולי":[729654,353318,429973,289833,635424,708958,437326,308787,374899,222726,303578,385863,591351,752720,851693,715401,1207683,986003,1156798,1162704,429810,942756,1297146,272780,1944907,1888315,0,0,0,0,0,0,0,0,0,0],
+    "EBITDA":[839087,462750,539405,399266,744857,818391,546759,418220,484332,332159,413011,495296,705076,866445,965418,829127,1321408,1099729,1270523,1276429,543536,1056481,1410871,386505,1944907,1888315,0,0,0,0,0,0,0,0,0,0]
+  },
+  "quarterly": {
+    "הכנסה":{"Q1 2024":13290584,"Q2 2024":14401779,"Q3 2024":15716496,"Q4 2024":15946295,"Q1 2025":16773612,"Q2 2025":17765089,"Q3 2025":18680687,"Q4 2025":19053742,"Q1 2026":11905543},
+    "עלות מכר":{"Q1 2024":9586980,"Q2 2024":10297862,"Q3 2024":11668557,"Q4 2024":12149956,"Q1 2025":11891010,"Q2 2025":12716862,"Q3 2025":13571579,"Q4 2025":13462358,"Q1 2026":8072321},
+    "רווח גולמי":{"Q1 2024":3703604,"Q2 2024":4103917,"Q3 2024":4047939,"Q4 2024":3796339,"Q1 2025":4882602,"Q2 2025":5048227,"Q3 2025":5109108,"Q4 2025":5591384,"Q1 2026":3833222},
+    "הנהלה וכלליות":{"Q1 2024":2190660,"Q2 2024":2469702,"Q3 2024":2926927,"Q4 2024":2884172,"Q1 2025":2686838,"Q2 2025":2139139,"Q3 2025":2359796,"Q4 2025":3078703,"Q1 2026":0},
+    "רווח תפעולי":{"Q1 2024":1512945,"Q2 2024":1634215,"Q3 2024":1121012,"Q4 2024":912167,"Q1 2025":2195763,"Q2 2025":2909088,"Q3 2025":2749312,"Q4 2025":2512682,"Q1 2026":3833222},
+    "EBITDA":{"Q1 2024":1841243,"Q2 2024":1962513,"Q3 2024":1449310,"Q4 2024":1240466,"Q1 2025":2536939,"Q2 2025":3250263,"Q3 2025":3090488,"Q4 2025":2853857,"Q1 2026":3833222}
+  }
+};
+
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+let state = {
+  year: 'all',
+  view: 'monthly',
+  metric: 'הכנסות',
+  branch: 'all',
+  chartType: 'line'
+};
+
+const MONTH_LABELS = {
+  '01':'ינואר','02':'פברואר','03':'מרץ','04':'אפריל','05':'מאי','06':'יוני',
+  '07':'יולי','08':'אוגוסט','09':'ספטמבר','10':'אוקטובר','11':'נובמבר','12':'דצמבר'
+};
+const ORANGE = '#F54B1E';
+const DARK   = '#1E1928';
+const CREAM  = '#F5EBE1';
+const GRAY   = '#8C8282';
+const BRANCH_COLORS = {
+  'כפר סבא': '#F54B1E',
+  'באר שבע': '#1E1928',
+  'רחובות':  '#8C8282',
+  'מוצקין':  '#5B8A6B',
+  'מי וט':   '#D4874A'
+};
+
+// ═══════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════
+function fmt(n) {
+  if (n === null || n === undefined) return '—';
+  const abs = Math.abs(n);
+  if (abs >= 1e6) return (n < 0 ? '-' : '') + '₪' + (abs/1e6).toFixed(1) + 'M';
+  if (abs >= 1e3) return (n < 0 ? '-' : '') + '₪' + (abs/1e3).toFixed(0) + 'K';
+  return '₪' + n.toFixed(0);
+}
+
+function fmtFull(n) {
+  if (n === null || n === undefined) return '—';
+  return (n < 0 ? '-' : '') + '₪' + Math.abs(n).toLocaleString('he-IL', {maximumFractionDigits:0});
+}
+
+function pct(n) { return (n >= 0 ? '+' : '') + (n * 100).toFixed(1) + '%'; }
+
+function getFilteredDates() {
+  return RAW.dates.filter(d => {
+    if (state.year === 'all') return true;
+    return d.startsWith(state.year);
+  });
+}
+
+function getDataSlice(arr) {
+  return RAW.dates.reduce((acc, d, i) => {
+    if (state.year === 'all' || d.startsWith(state.year)) acc.push(arr[i]);
+    return acc;
+  }, []);
+}
+
+function getNetworkSlice(metric) {
+  const key = metric === 'הכנסות' ? 'הכנסות' : metric;
+  const arr = RAW.network_total[key] || RAW.network_total['הכנסות'];
+  return getDataSlice(arr);
+}
+
+function sumYear(arr, year) {
+  let total = 0;
+  RAW.dates.forEach((d, i) => {
+    if (d.startsWith(year) && arr[i] > 0) total += arr[i];
+  });
+  return total;
+}
+
+function getMonthLabel(dateStr) {
+  const parts = dateStr.split('-');
+  return MONTH_LABELS[parts[1]] + ' ' + parts[0];
+}
+
+// ═══════════════════════════════════════════
+//  CHART INSTANCES
+// ═══════════════════════════════════════════
+let chartRevenue = null;
+let chartAnnual  = null;
+let chartBranchTrend = null;
+let chartBranchComp  = null;
+
+function destroyChart(c) { if (c) { c.destroy(); } return null; }
+
+// ═══════════════════════════════════════════
+//  KPI CALCULATION
+// ═══════════════════════════════════════════
+function updateKPIs() {
+  const net = RAW.network_total;
+  const rev25 = sumYear(net['הכנסות'], '2025');
+  const rev24 = sumYear(net['הכנסות'], '2024');
+  const ebd25 = sumYear(net['EBITDA'], '2025');
+  const ebd24 = sumYear(net['EBITDA'], '2024');
+  const grp25 = sumYear(net['רווח גולמי'], '2025');
+  const grp24 = sumYear(net['רווח גולמי'], '2024');
+  const op25  = sumYear(net['רווח תפעולי'], '2025');
+  const op24  = sumYear(net['רווח תפעולי'], '2024');
+
+  const setKpi = (id, val, chgId, chg, unit='') => {
+    document.getElementById(id).textContent = unit + fmt(val);
+    const el = document.getElementById(chgId);
+    const r = (chg - 1);
+    el.textContent = pct(r);
+    el.className = 'kpi-change ' + (r >= 0 ? 'pos' : 'neg');
+  };
+
+  setKpi('kpi-revenue', rev25, 'kpi-revenue-chg', rev24 > 0 ? rev25/rev24 : 1);
+  setKpi('kpi-ebitda',  ebd25, 'kpi-ebitda-chg',  ebd24 > 0 ? ebd25/ebd24 : 1);
+  setKpi('kpi-gross',   grp25, 'kpi-gross-chg',   grp24 > 0 ? grp25/grp24 : 1);
+  setKpi('kpi-op',      op25,  'kpi-op-chg',      op24  > 0 ? op25/op24  : 1);
+
+  const margin25 = rev25 > 0 ? ebd25/rev25 : 0;
+  const margin24 = rev24 > 0 ? ebd24/rev24 : 0;
+  document.getElementById('kpi-margin').textContent = (margin25*100).toFixed(1) + '%';
+  const mEl = document.getElementById('kpi-margin-chg');
+  const mDiff = margin25 - margin24;
+  mEl.textContent = (mDiff >= 0 ? '+' : '') + (mDiff*100).toFixed(1) + 'נק"ב';
+  mEl.className = 'kpi-change ' + (mDiff >= 0 ? 'pos' : 'neg');
+}
+
+// ═══════════════════════════════════════════
+//  REVENUE TREND CHART
+// ═══════════════════════════════════════════
+function updateRevenueChart() {
+  chartRevenue = destroyChart(chartRevenue);
+  const dates = getFilteredDates();
+  const metric = state.metric;
+  const arr = RAW.network_total[metric] || RAW.network_total['הכנסות'];
+  const vals = getDataSlice(arr).map(v => v > 0 ? v : null);
+  const labels = dates.map(d => {
+    const p = d.split('-');
+    return MONTH_LABELS[p[1]] + "'"+p[0].slice(2);
+  });
+
+  // Add 2024 comparison line if showing 2025/all
+  const datasets = [{
+    label: metric,
+    data: vals,
+    borderColor: ORANGE,
+    backgroundColor: state.chartType === 'bar' ? ORANGE + 'CC' : ORANGE + '20',
+    borderWidth: 2.5,
+    fill: state.chartType === 'line',
+    tension: 0.35,
+    pointRadius: 3,
+    pointHoverRadius: 6,
+  }];
+
+  const ctx = document.getElementById('revenueChart').getContext('2d');
+  chartRevenue = new Chart(ctx, {
+    type: state.chartType,
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      interaction: { intersect: false, mode: 'index' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          rtl: true,
+          callbacks: {
+            label: ctx => ' ' + fmt(ctx.raw)
+          }
+        }
+      },
+      scales: {
+        x: { ticks: { font: { family:'Archivo', size:10 }, color: GRAY, maxRotation: 45 }, grid: { display: false } },
+        y: {
+          ticks: { font: { family:'Archivo', size:10 }, color: GRAY,
+            callback: v => fmt(v) },
+          grid: { color: CREAM }
+        }
+      }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════
+//  ANNUAL COMPARISON CHART
+// ═══════════════════════════════════════════
+function updateAnnualChart() {
+  chartAnnual = destroyChart(chartAnnual);
+  const metric = state.metric;
+  const arr = RAW.network_total[metric] || RAW.network_total['הכנסות'];
+  const y2024 = sumYear(arr, '2024');
+  const y2025 = sumYear(arr, '2025');
+  const y2026 = sumYear(arr, '2026');
+
+  const ctx = document.getElementById('annualChart').getContext('2d');
+  chartAnnual = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['2024', '2025', '2026 (חלקי)'],
+      datasets: [{
+        data: [y2024, y2025, y2026 || null],
+        backgroundColor: [DARK, ORANGE, ORANGE + '80'],
+        borderRadius: 6,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: { label: ctx => ' ' + fmtFull(ctx.raw) }
+        }
+      },
+      scales: {
+        x: { ticks: { font: { family:'Archivo', size:11 }, color: DARK }, grid: { display: false } },
+        y: { ticks: { font: { family:'Archivo', size:10 }, color: GRAY, callback: v => fmt(v) }, grid: { color: CREAM } }
+      }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════
+//  BRANCH TREND CHART
+// ═══════════════════════════════════════════
+function updateBranchTrendChart() {
+  chartBranchTrend = destroyChart(chartBranchTrend);
+  const dates = getFilteredDates();
+  const labels = dates.map(d => {
+    const p = d.split('-');
+    return MONTH_LABELS[p[1]] + "'"+p[0].slice(2);
+  });
+
+  let datasets = [];
+  if (state.branch === 'all') {
+    const metrics = ['הכנסות', 'רווח גולמי', 'EBITDA'];
+    const colors  = [ORANGE, DARK, GRAY];
+    metrics.forEach((m, i) => {
+      const arr = RAW.network_total[m] || [];
+      datasets.push({
+        label: m,
+        data: getDataSlice(arr).map(v => v > 0 ? v : null),
+        borderColor: colors[i],
+        backgroundColor: colors[i] + '20',
+        borderWidth: 2,
+        tension: 0.35,
+        fill: false,
+        pointRadius: 2,
+      });
+    });
+    document.getElementById('branchChartTitle').textContent = 'מגמה חודשית – כל הרשת';
+  } else {
+    const branchData = RAW.branches[state.branch];
+    const metrics = ['הכנסות', 'רווח גולמי', 'EBITDA'];
+    const colors  = [ORANGE, DARK, GRAY];
+    metrics.forEach((m, i) => {
+      datasets.push({
+        label: m,
+        data: getDataSlice(branchData[m]).map(v => v !== 0 ? v : null),
+        borderColor: colors[i],
+        backgroundColor: colors[i] + '20',
+        borderWidth: 2,
+        tension: 0.35,
+        fill: false,
+        pointRadius: 2,
+      });
+    });
+    document.getElementById('branchChartTitle').textContent = 'מגמה חודשית – ' + state.branch;
+  }
+
+  const ctx = document.getElementById('branchTrendChart').getContext('2d');
+  chartBranchTrend = new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      interaction: { intersect: false, mode: 'index' },
+      plugins: {
+        legend: { position: 'top', rtl: true, labels: { font: { family:'Archivo', size:11 }, color: DARK, boxWidth: 12 } },
+        tooltip: { rtl: true, callbacks: { label: ctx => ctx.dataset.label + ': ' + fmt(ctx.raw) } }
+      },
+      scales: {
+        x: { ticks: { font: { family:'Archivo', size:10 }, color: GRAY, maxRotation: 45 }, grid: { display: false } },
+        y: { ticks: { font: { family:'Archivo', size:10 }, color: GRAY, callback: v => fmt(v) }, grid: { color: CREAM } }
+      }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════
+//  BRANCH COMPARISON CHART
+// ═══════════════════════════════════════════
+function updateBranchCompChart() {
+  chartBranchComp = destroyChart(chartBranchComp);
+  const metric = state.metric;
+  const yr = (state.year === 'all') ? '2025' : state.year;
+  document.getElementById('branchCompSubtitle').textContent = 'לפי ' + metric + ' – ' + yr;
+
+  const branches = ['כפר סבא', 'באר שבע', 'רחובות', 'מוצקין', 'מי וט'];
+  const vals = branches.map(b => {
+    const arr = RAW.branches[b][metric] || [];
+    return sumYear(arr, yr);
+  });
+
+  const ctx = document.getElementById('branchCompChart').getContext('2d');
+  chartBranchComp = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: branches,
+      datasets: [{
+        data: vals,
+        backgroundColor: branches.map(b => BRANCH_COLORS[b]),
+        borderRadius: 6,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      indexAxis: 'y',
+      plugins: {
+        legend: { display: false },
+        tooltip: { rtl: true, callbacks: { label: ctx => ' ' + fmtFull(ctx.raw) } }
+      },
+      scales: {
+        x: { ticks: { font: { family:'Archivo', size:10 }, color: GRAY, callback: v => fmt(v) }, grid: { color: CREAM } },
+        y: { ticks: { font: { family:'Archivo', size:12, weight:'600' }, color: DARK }, grid: { display: false } }
+      }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════
+//  QUARTERLY TABLE
+// ═══════════════════════════════════════════
+function updateQuarterlyTable() {
+  const quarters = ['Q1 2024','Q2 2024','Q3 2024','Q4 2024','Q1 2025','Q2 2025','Q3 2025','Q4 2025','Q1 2026'];
+  const metrics  = ['הכנסה','רווח גולמי','הנהלה וכלליות','רווח תפעולי','EBITDA'];
+
+  const tbody = document.getElementById('quarterlyBody');
+  tbody.innerHTML = '';
+  metrics.forEach(m => {
+    const row = document.createElement('tr');
+    const data = RAW.quarterly[m];
+    let html = `<td>${m}</td>`;
+    quarters.forEach(q => {
+      const v = data ? (data[q] || 0) : 0;
+      const cls = v < 0 ? 'td-neg td-num' : 'td-num';
+      html += `<td class="${cls}">${v !== 0 ? fmtFull(v) : '—'}</td>`;
+    });
+    row.innerHTML = html;
+    tbody.appendChild(row);
+  });
+}
+
+// ═══════════════════════════════════════════
+//  BRANCH BREAKDOWN TABLE
+// ═══════════════════════════════════════════
+function updateBranchTable() {
+  const yr = (state.year === 'all') ? '2025' : state.year;
+  document.getElementById('tableYearLabel').textContent = yr;
+
+  const branches = ['כפר סבא', 'באר שבע', 'רחובות', 'מוצקין', 'מי וט'];
+  const metrics  = ['הכנסות','עלות ההכנסות','רווח גולמי','הנהלה וכלליות','רווח תפעולי','EBITDA'];
+
+  const thead = document.getElementById('branchTableHead');
+  thead.innerHTML = '<th>מדד</th>' + branches.map(b => `<th>${b}</th>`).join('') + '<th>סה״כ</th>';
+
+  const tbody = document.getElementById('branchTableBody');
+  tbody.innerHTML = '';
+  metrics.forEach(m => {
+    const row = document.createElement('tr');
+    const vals = branches.map(b => sumYear(RAW.branches[b][m] || [], yr));
+    const total = vals.reduce((a, b) => a + b, 0);
+    const cls = m === 'הכנסות' ? '' : '';
+    let html = `<td>${m}</td>`;
+    vals.forEach(v => {
+      const c = v < 0 ? 'td-neg td-num' : 'td-num';
+      html += `<td class="${c}">${fmtFull(v)}</td>`;
+    });
+    const tc = total < 0 ? 'td-neg td-num' : 'td-num';
+    html += `<td class="${tc}" style="font-weight:700">${fmtFull(total)}</td>`;
+    row.innerHTML = html;
+    tbody.appendChild(row);
+  });
+}
+
+// ═══════════════════════════════════════════
+//  STATE SETTERS
+// ═══════════════════════════════════════════
+function setYear(y) {
+  state.year = y;
+  document.querySelectorAll('#yearBtns button').forEach(b => b.classList.toggle('active', b.textContent === (y === 'all' ? 'הכל' : y)));
+  updateCharts();
+}
+
+function setView(v) {
+  state.view = v;
+  document.querySelectorAll('#viewBtns button').forEach(b => b.classList.toggle('active', (v === 'monthly' && b.textContent === 'חודשי') || (v === 'quarterly' && b.textContent === 'רבעוני')));
+  updateCharts();
+}
+
+function setChartType(t) {
+  state.chartType = t;
+  document.getElementById('btnLine').classList.toggle('active', t === 'line');
+  document.getElementById('btnBar').classList.toggle('active',  t === 'bar');
+  updateRevenueChart();
+}
+
+function setBranch(b) {
+  state.branch = b;
+  document.querySelectorAll('.branch-tab').forEach(el => {
+    const name = el.getAttribute('onclick').replace("setBranch('","").replace("')","");
+    el.classList.toggle('active', name === b);
+  });
+  updateBranchTrendChart();
+  updateBranchCompChart();
+}
+
+function updateCharts() {
+  state.metric = document.getElementById('metricSelect').value;
+  updateRevenueChart();
+  updateAnnualChart();
+  updateBranchTrendChart();
+  updateBranchCompChart();
+  updateQuarterlyTable();
+  updateBranchTable();
+}
+
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+document.getElementById('todayDate').textContent = new Date().toLocaleDateString('he-IL', { day:'2-digit', month:'long', year:'numeric' });
+
+updateKPIs();
+updateRevenueChart();
+updateAnnualChart();
+updateBranchTrendChart();
+updateBranchCompChart();
+updateQuarterlyTable();
+updateBranchTable();
+</script>
+</body>
+</html>
