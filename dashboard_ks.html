@@ -6,6 +6,7 @@
 <title>דשבורד מצטבר – כפר סבא</title>
 <link href="https://fonts.googleapis.com/css2?family=Ledger&family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root {
   --orange:#F54B1E; --cream:#F5EBE1; --dark:#1E1928; --gray:#8C8282;
@@ -91,18 +92,23 @@ tbody td:first-child{font-weight:700;color:var(--orange)}
 .td-subtotal{background:#EDE3D8!important;font-weight:700}
 .td-future{background:var(--future)!important;color:#1565C0}
 
-/* FUTURE INPUT */
-.future-section{background:#fff;border-radius:10px;border:2px dashed var(--future-border);padding:20px;margin-bottom:16px}
-.future-title{font-family:'Ledger',Georgia,serif;font-size:14px;color:var(--future-border);margin-bottom:4px}
-.future-desc{font-size:12px;color:var(--gray);margin-bottom:16px}
-.future-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
-.future-group{border:1px solid var(--border);border-radius:8px;overflow:hidden}
-.future-group-head{background:var(--dark);color:#fff;padding:7px 12px;font-size:11px;font-weight:700}
-.future-field{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-bottom:1px solid var(--border)}
-.future-field:last-child{border-bottom:none}
-.future-field label{font-size:11px;color:var(--gray);flex:1}
-.future-field input{width:110px;border:1px solid var(--border);border-radius:4px;padding:4px 7px;font-size:12px;font-family:'Archivo',sans-serif;text-align:right;color:var(--dark);background:var(--future)}
-.future-field input:focus{outline:none;border-color:var(--future-border)}
+/* UPLOAD SECTION */
+.upload-section{background:#fff;border-radius:10px;border:2px dashed var(--future-border);padding:24px;margin-bottom:16px}
+.upload-title{font-family:'Ledger',Georgia,serif;font-size:15px;color:var(--future-border);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.upload-desc{font-size:12px;color:var(--gray);margin-bottom:18px;line-height:1.6}
+.upload-drop{border:2px dashed #90CAF9;border-radius:10px;padding:28px 20px;text-align:center;
+  background:#F3F8FF;cursor:pointer;transition:all .2s;position:relative}
+.upload-drop:hover,.upload-drop.drag-over{border-color:var(--future-border);background:#E3F2FD}
+.upload-drop input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-icon{font-size:32px;margin-bottom:8px}
+.upload-drop-label{font-size:13px;font-weight:600;color:var(--future-border);display:block}
+.upload-drop-sub{font-size:11px;color:var(--gray);margin-top:4px;display:block}
+.upload-status{margin-top:14px;padding:10px 14px;border-radius:8px;font-size:12px;font-weight:600;display:none}
+.upload-status.ok{background:#E8F5E9;color:#2E7D32;display:block}
+.upload-status.err{background:#FFEBEE;color:#C62828;display:block}
+.upload-status.loading{background:#FFF8E1;color:#E65100;display:block}
+.upload-mapping{margin-top:14px;font-size:11px;color:var(--gray);line-height:1.7}
+.upload-mapping strong{color:var(--dark)}
 .btn-save{background:var(--orange);color:#fff;border:none;padding:8px 20px;border-radius:6px;font-size:13px;font-family:'Archivo',sans-serif;font-weight:700;cursor:pointer;margin-top:12px}
 .btn-save:hover{background:#d63d15}
 
@@ -284,12 +290,32 @@ footer{text-align:center;padding:16px;color:var(--gray);font-size:11px;border-to
     </div>
   </div>
 
-  <!-- FUTURE DATA ENTRY -->
-  <div class="future-section" id="futureSection">
-    <div class="future-title">📝 עדכון נתונים עתידיים – 2026</div>
-    <div class="future-desc">הכנס נתוני הכנסה לכל מחלקה לחודשים הבאים. הגרפים יתעדכנו אוטומטית לאחר שמירה.</div>
-    <div id="futureInputGrid" class="future-grid"></div>
-    <button class="btn-save" onclick="saveFutureData()">שמור ועדכן גרפים ▸</button>
+  <!-- FILE UPLOAD -->
+  <div class="upload-section" id="uploadSection">
+    <div class="upload-title">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      עדכון נתונים – העלאת קובץ Excel
+    </div>
+    <div class="upload-desc">
+      העלה את הקובץ <strong>קובץ הרכבה לתקציב קבוצת חוות דעת 2026.xlsx</strong> (או גרסה מעודכנת שלו).<br>
+      הדשבורד יקרא אוטומטית את הגליון <strong>דשבורד מצטבר כפר סבא</strong> ויעדכן את כל הגרפים והטבלאות.
+    </div>
+    <div class="upload-drop" id="uploadDrop"
+         ondragover="event.preventDefault();this.classList.add('drag-over')"
+         ondragleave="this.classList.remove('drag-over')"
+         ondrop="handleDrop(event)">
+      <input type="file" accept=".xlsx,.xls" onchange="handleFileInput(event)">
+      <div class="upload-icon">📂</div>
+      <span class="upload-drop-label">גרור קובץ לכאן או לחץ לבחירה</span>
+      <span class="upload-drop-sub">תומך בקבצי .xlsx / .xls</span>
+    </div>
+    <div class="upload-status" id="uploadStatus"></div>
+    <div class="upload-mapping">
+      <strong>מה נקרא מהקובץ:</strong>
+      מחלקות — חרום, כירורגיה, הדמיה, נוירולוגיה, קרדיולוגיה, אופטלמולוגיה, דרמטולוגיה, אונקולוגיה, אחר |
+      מדדים — הכנסה, הוצאות שכר, ציוד רפואי, קבלני משנה, עלות המכר, רווח גולמי |
+      רמת סניף — הנהלה וכלליות, רווח תפעולי, פחת, EBITDA
+    </div>
   </div>
 
 </div>
@@ -319,7 +345,7 @@ const BRANCH = {
   "הנהלה וכלליות":[541115.49,550720.24,536704.52,678673.65,693752.60,509931.50,726259.80,572017.23,969319.32,419040.38,832150.22,836665.02,666415.21,554470.44,667250.65,503344.33,530697.01,466812.22,593587.94,458800.31,631551.96,373254.98,670406.92,1382822.92,0,0,0,0,0,0,0,0,0,0,0,0],
   "רווח תפעולי":[532054.83,307381.20,169247.41,130857.75,144656.19,345394.08,225462.21,51937.41,113690.73,181236.53,250698.69,176634.10,475858.78,742986.17,516308.77,483271.59,758899.21,692696.81,807564.42,956609.72,298414.50,781890.26,1066005.78,16058.67,0,0,0,0,0,0,0,0,0,0,0,0],
   "פחת והפחתות":[101654.5,101654.5,101654.5,101654.5,101654.5,101654.5,101654.5,101654.5,101654.5,101654.5,101654.5,101654.5,101654.5,101654.5,101654.5,101654.5,101654.5,101654.5,101654.5,101654.5,101654.5,101654.5,101654.5,101654.5,0,0,0,0,0,0,0,0,0,0,0,0],
-  "EBITDA":[633709.33,409035.70,270901.91,232512.25,246310.69,447048.58,327116.71,153591.91,215345.23,282890.03,352353.19,278288.60,577513.28,844640.67,617963.27,584926.09,860553.71,794351.31,909218.92,1058264.22,400069.00,883544.76,1167660.28,117713.17,0,0,0,0,0,0,0,0,0,0,0,0]
+  "EBITDA":[633709.33,409035.70,270901.91,232512.25,246310.69,447048.58,327116.71,153591.91,215345.23,282891.03,352353.19,278288.60,577513.28,844640.67,617963.27,584926.09,860553.71,794351.31,909218.92,1058264.22,400069.00,883544.76,1167660.28,117713.17,0,0,0,0,0,0,0,0,0,0,0,0]
 };
 
 // Compute total revenue/cogs/gross from depts
@@ -340,8 +366,7 @@ function computeTotals() {
 computeTotals();
 
 // Future data storage (in-memory)
-const FUTURE = {};
-const FUTURE_MONTHS = DATES.slice(26).filter(d => d); // March 2026 onwards
+// (manual future entry removed — use Excel upload instead)
 
 // ══════════════════════════════════════════
 //  STATE
@@ -746,54 +771,114 @@ function updateMonthlyTable() {
 }
 
 // ══════════════════════════════════════════
-//  FUTURE DATA ENTRY
+//  EXCEL FILE UPLOAD
 // ══════════════════════════════════════════
-function buildFutureInputs() {
-  const grid = document.getElementById('futureInputGrid');
-  grid.innerHTML='';
-  const futureDates = DATES.slice(26).filter(d=>d);
-  if(!futureDates.length){
-    document.getElementById('futureSection').style.display='none';
-    return;
-  }
 
-  // Show by month, group by dept
-  const depts = Object.keys(DEPTS_RAW);
-  futureDates.slice(0,6).forEach(d=>{
-    const p=d.split('-');
-    const lbl=HEB_MONTHS[p[1]]+' '+p[0];
-    let html=`<div class="future-group"><div class="future-group-head">${lbl}</div>`;
-    depts.forEach(dept=>{
-      const key=d+'_'+dept;
-      const cur=FUTURE[key]||'';
-      html+=`<div class="future-field">
-        <label>${dept}</label>
-        <input type="number" id="fi_${key}" value="${cur}" placeholder="₪ הכנסה">
-      </div>`;
-    });
-    html+=`</div>`;
-    grid.innerHTML+=html;
-  });
+// Dept row mapping in Excel (0-indexed): [startRow, dept name in dashboard]
+const DEPT_ROWS = [
+  [1,  'חרום'],
+  [8,  'כירורגיה'],
+  [15, 'הדמיה'],
+  [22, 'נוירולוגיה'],
+  [29, 'קרדיולוגיה'],
+  [36, 'אופטלמולוגיה'],
+  [43, 'דרמטולוגיה'],
+  [50, 'אונקולוגיה'],
+  [57, 'אחר'],
+];
+const METRIC_OFFSETS = ['הכנסה','הוצאות שכר','ציוד רפואי מתכלה','קבלני משנה','סה"כ עלות המכר','רווח גולמי'];
+// Branch-level rows (0-indexed):  64=הנהלה, 66=רווח תפעולי, 67=פחת, 68=EBITDA
+const BRANCH_ROWS = { 'הנהלה וכלליות':64, 'רווח תפעולי':66, 'פחת והפחתות':67, 'EBITDA':68 };
+const SHEET_NAME = 'דשבורד מצטבר כפר סבא';
+const DATA_COL_START = 2; // Column C = index 2
+const DATA_COL_COUNT = 36; // 36 months (2024-01 to 2026-12)
+
+function setUploadStatus(msg, type) {
+  const el = document.getElementById('uploadStatus');
+  el.textContent = msg;
+  el.className = 'upload-status ' + type;
 }
 
-function saveFutureData() {
-  const futureDates = DATES.slice(26).filter(d=>d);
-  const depts = Object.keys(DEPTS_RAW);
-  futureDates.slice(0,6).forEach(d=>{
-    depts.forEach(dept=>{
-      const key=d+'_'+dept;
-      const el=document.getElementById('fi_'+key);
-      if(el){
-        const v=parseFloat(el.value)||0;
-        FUTURE[key]=v;
-        const i=DATES.indexOf(d);
-        if(i>=0 && v>0) DEPTS_RAW[dept]['הכנסה'][i]=v;
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('uploadDrop').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) parseExcelFile(file);
+}
+
+function handleFileInput(e) {
+  const file = e.target.files[0];
+  if (file) parseExcelFile(file);
+}
+
+function parseExcelFile(file) {
+  if (!file.name.match(/\.(xlsx|xls)$/i)) {
+    setUploadStatus('⚠ יש לבחור קובץ Excel בפורמט .xlsx או .xls', 'err');
+    return;
+  }
+  setUploadStatus('⏳ קורא את הקובץ...', 'loading');
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const wb   = XLSX.read(data, { type: 'array', cellDates: false });
+
+      if (!wb.SheetNames.includes(SHEET_NAME)) {
+        setUploadStatus(`⚠ הגליון "${SHEET_NAME}" לא נמצא בקובץ. גליונות זמינים: ${wb.SheetNames.join(', ')}`, 'err');
+        return;
       }
-    });
-  });
-  computeTotals();
-  updateAll();
-  alert('הנתונים נשמרו! הגרפים עודכנו.');
+
+      const ws   = wb.Sheets[SHEET_NAME];
+      const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: 0 });
+
+      let updated = 0, warnings = [];
+
+      // Read dept data
+      for (const [startRow, deptName] of DEPT_ROWS) {
+        if (!DEPTS_RAW[deptName]) { warnings.push(`מחלקה לא מוכרת: ${deptName}`); continue; }
+        METRIC_OFFSETS.forEach((metric, mi) => {
+          const rowIdx = startRow + mi;
+          if (rowIdx >= rows.length) return;
+          const row = rows[rowIdx];
+          const vals = [];
+          for (let c = DATA_COL_START; c < DATA_COL_START + DATA_COL_COUNT; c++) {
+            const v = row[c];
+            vals.push(typeof v === 'number' ? v : 0);
+          }
+          DEPTS_RAW[deptName][metric] = vals;
+          updated++;
+        });
+      }
+
+      // Read branch-level rows
+      for (const [key, rowIdx] of Object.entries(BRANCH_ROWS)) {
+        if (rowIdx >= rows.length) continue;
+        const row = rows[rowIdx];
+        const vals = [];
+        for (let c = DATA_COL_START; c < DATA_COL_START + DATA_COL_COUNT; c++) {
+          const v = row[c];
+          vals.push(typeof v === 'number' ? v : 0);
+        }
+        BRANCH[key] = vals;
+        updated++;
+      }
+
+      // Recompute derived totals
+      computeTotals();
+      updateAll();
+
+      const warn = warnings.length ? ` | אזהרות: ${warnings.join('; ')}` : '';
+      setUploadStatus(
+        `✓ הקובץ עודכן בהצלחה! ${updated} סדרות נתונים נטענו מ-"${file.name}"${warn}`,
+        'ok'
+      );
+    } catch (err) {
+      setUploadStatus(`✗ שגיאה בקריאת הקובץ: ${err.message}`, 'err');
+    }
+  };
+  reader.onerror = () => setUploadStatus('✗ שגיאה בטעינת הקובץ', 'err');
+  reader.readAsArrayBuffer(file);
 }
 
 // ══════════════════════════════════════════
@@ -847,7 +932,6 @@ function updateAll() {
 // ══════════════════════════════════════════
 document.getElementById('todayDate').textContent = new Date().toLocaleDateString('he-IL',{day:'2-digit',month:'long',year:'numeric'});
 populateMonthSelects();
-buildFutureInputs();
 updateAll();
 </script>
 </body>
