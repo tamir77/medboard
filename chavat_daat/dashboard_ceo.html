@@ -610,10 +610,10 @@
     </div>
 
     <div id="uploadContent">
-      <!-- GitHub Token Row -->
+      <!-- Password Row -->
       <div class="gh-token-row">
-        <span style="font-size:12px;font-weight:600">🔑 GitHub Token:</span>
-        <input type="password" id="ghTokenInput" class="gh-token-input" placeholder="ghp_xxxxxxxxxxxx" dir="ltr">
+        <span style="font-size:12px;font-weight:600">🔑 סיסמה:</span>
+        <input type="password" id="ghTokenInput" class="gh-token-input" placeholder="הזן סיסמה" dir="ltr">
         <button class="gh-token-btn" onclick="saveGhToken()">שמור</button>
         <span id="ghTokenStatus" class="gh-token-status"></span>
       </div>
@@ -1186,6 +1186,7 @@ const GH_OWNER  = 'tamir77';
 const GH_REPO   = 'medboard';
 const GH_BRANCH = 'main';
 const GH_PATH   = 'chavat_daat/data_ceo.json';
+const TOKEN_PREFIX = 'ghp_QWP7RABnOwFH1flMQQnpES5rfiMhtX';
 
 // Sheet name has double-space
 const SHEET_NAME = 'דשבורד  מצטבר רשת';
@@ -1208,31 +1209,32 @@ const QUARTERLY_LABELS = ['Q1 2024','Q2 2024','Q3 2024','Q4 2024','Q1 2025','Q2 
 function saveGhToken() {
   const t = document.getElementById('ghTokenInput').value.trim();
   const st = document.getElementById('ghTokenStatus');
-  if (!t) { st.textContent = '⚠ Enter a token'; st.style.color = '#B45309'; return; }
-  localStorage.setItem('gh_token_ceo', t);
+  if (!t) { st.textContent = '⚠ הזן סיסמה'; st.style.color = '#B45309'; return; }
+  localStorage.setItem('gh_pass_ceo', t);
   document.getElementById('ghTokenInput').value = '';
-  st.textContent = '✓ Saved';
+  st.textContent = '✓ נשמר';
   st.style.color = '#2E7D32';
   document.getElementById('uploadArea').style.display = 'block';
 }
 
 function getGhTokenStatus() {
-  const t = localStorage.getItem('gh_token_ceo');
+  const t = localStorage.getItem('gh_pass_ceo');
   const st = document.getElementById('ghTokenStatus');
   if (!st) return;
   if (t) {
-    st.textContent = '✓ Token active';
+    st.textContent = '✓ סיסמה פעילה';
     st.style.color = '#2E7D32';
     document.getElementById('uploadArea').style.display = 'block';
   } else {
-    st.textContent = '⚠ Enter token to unlock upload';
+    st.textContent = '⚠ הזן סיסמה לפתיחת העלאה';
     st.style.color = '#B45309';
     document.getElementById('uploadArea').style.display = 'none';
   }
 }
 
 async function saveToGitHub() {
-  const token = localStorage.getItem('gh_token_ceo');
+  const pass = localStorage.getItem('gh_pass_ceo');
+  const token = pass ? TOKEN_PREFIX + pass : null;
   if (!token) return false;
   const payload = JSON.stringify({ branches: RAW.branches, network_total: RAW.network_total, quarterly: RAW.quarterly, updated: new Date().toISOString() });
   const content = btoa(unescape(encodeURIComponent(payload)));

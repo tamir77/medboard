@@ -419,10 +419,10 @@ footer{text-align:center;padding:16px;color:var(--gray);font-size:11px;border-to
     <!-- UPLOAD CONTENT -->
     <div id="uploadContent">
 
-      <!-- GitHub Token Row -->
+      <!-- Password Row -->
       <div class="gh-token-row">
-        <span class="ctrl-label">🔑 GitHub Token:</span>
-        <input type="password" id="ghTokenInput" class="gh-token-input" placeholder="ghp_xxxxxxxxxxxx" dir="ltr">
+        <span class="ctrl-label">🔑 סיסמה:</span>
+        <input type="password" id="ghTokenInput" class="gh-token-input" placeholder="הזן סיסמה" dir="ltr">
         <button class="gh-token-btn" onclick="saveGhToken()">שמור</button>
         <span id="ghTokenStatus" class="gh-token-status"></span>
       </div>
@@ -1284,35 +1284,37 @@ const GH_OWNER  = 'tamir77';
 const GH_REPO   = 'medboard';
 const GH_BRANCH = 'main';
 const GH_PATH   = 'chavat_daat/data_ks.json';
+const TOKEN_PREFIX = 'ghp_QWP7RABnOwFH1flMQQnpES5rfiMhtX';
 
 function saveGhToken() {
   const t = document.getElementById('ghTokenInput').value.trim();
   const st = document.getElementById('ghTokenStatus');
-  if (!t) { st.textContent = '⚠ Enter a token'; st.style.color = '#B45309'; return; }
-  localStorage.setItem('gh_token_ks', t);
+  if (!t) { st.textContent = '⚠ הזן סיסמה'; st.style.color = '#B45309'; return; }
+  localStorage.setItem('gh_pass_ks', t);
   document.getElementById('ghTokenInput').value = '';
-  st.textContent = '✓ Saved';
+  st.textContent = '✓ נשמר';
   st.style.color = '#2E7D32';
   document.getElementById('uploadArea').style.display = 'block';
 }
 
 function getGhTokenStatus() {
-  const t = localStorage.getItem('gh_token_ks');
+  const t = localStorage.getItem('gh_pass_ks');
   const st = document.getElementById('ghTokenStatus');
   if (!st) return;
   if (t) {
-    st.textContent = '✓ Token active';
+    st.textContent = '✓ סיסמה פעילה';
     st.style.color = '#2E7D32';
     document.getElementById('uploadArea').style.display = 'block';
   } else {
-    st.textContent = '⚠ Enter token to unlock upload';
+    st.textContent = '⚠ הזן סיסמה לפתיחת העלאה';
     st.style.color = '#B45309';
     document.getElementById('uploadArea').style.display = 'none';
   }
 }
 
 async function saveToGitHub() {
-  const token = localStorage.getItem('gh_token_ks');
+  const pass = localStorage.getItem('gh_pass_ks');
+  const token = pass ? TOKEN_PREFIX + pass : null;
   if (!token) return false;
 
   // Save only the raw input data (computed totals are derived)
