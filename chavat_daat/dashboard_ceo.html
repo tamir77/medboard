@@ -647,7 +647,7 @@ const BRANCH_COLORS = {
 function fmt(n) {
   if (n === null || n === undefined) return '—';
   const abs = Math.abs(n);
-  if (abs >= 1e6) return (n < 0 ? '-' : '') + '₪' + (abs/1e6).toFixed(1) + 'M';
+  if (abs >= 1e6) return (n < 0 ? '-' : '') + '₪' + (abs/1e6).toFixed(2) + 'M';
   if (abs >= 1e3) return (n < 0 ? '-' : '') + '₪' + (abs/1e3).toFixed(0) + 'K';
   return '₪' + n.toFixed(0);
 }
@@ -1121,17 +1121,33 @@ function updateCharts() {
 }
 
 // ═══════════════════════════════════════════
+//  GITHUB JSON LOADER
+// ═══════════════════════════════════════════
+async function loadDataFromJSON() {
+  try {
+    const r = await fetch('data_ceo.json?v=' + Date.now());
+    if (!r.ok) return;
+    const d = await r.json();
+    if (d.branches)      Object.assign(RAW.branches,      d.branches);
+    if (d.network_total) Object.assign(RAW.network_total, d.network_total);
+    if (d.quarterly)     Object.assign(RAW.quarterly,     d.quarterly);
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════
 document.getElementById('todayDate').textContent = new Date().toLocaleDateString('he-IL', { day:'2-digit', month:'long', year:'numeric' });
 
-updateKPIs();
-updateRevenueChart();
-updateAnnualChart();
-updateBranchTrendChart();
-updateBranchCompChart();
-updateQuarterlyTable();
-updateBranchTable();
+loadDataFromJSON().then(() => {
+  updateKPIs();
+  updateRevenueChart();
+  updateAnnualChart();
+  updateBranchTrendChart();
+  updateBranchCompChart();
+  updateQuarterlyTable();
+  updateBranchTable();
+});
 </script>
 </body>
 </html>

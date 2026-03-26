@@ -118,6 +118,12 @@ tbody td:first-child{font-weight:700;color:var(--orange)}
 .upload-lock-btn{padding:7px 18px;background:var(--future-border);color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;transition:background .15s}
 .upload-lock-btn:hover{background:#1053A0}
 .upload-lock-err{font-size:12px;color:#C62828;font-weight:600;min-height:18px}
+.upload-status.warn{background:#FFF8E1;color:#B45309;display:block}
+.gh-token-row{display:flex;align-items:center;gap:8px;margin-bottom:14px;padding:10px 14px;background:#F3F8FF;border-radius:8px;border:1px solid #90CAF9;flex-wrap:wrap}
+.gh-token-input{padding:6px 10px;border:1.5px solid #90CAF9;border-radius:6px;font-size:12px;width:220px;font-family:monospace;direction:ltr}
+.gh-token-input:focus{outline:none;border-color:var(--future-border)}
+.gh-token-btn{padding:6px 14px;background:var(--future-border);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer}
+.gh-token-status{font-size:11px;font-weight:600}
 .btn-save{background:var(--orange);color:#fff;border:none;padding:8px 20px;border-radius:6px;font-size:13px;font-family:'Archivo',sans-serif;font-weight:700;cursor:pointer;margin-top:12px}
 .btn-save:hover{background:#d63d15}
 
@@ -410,22 +416,18 @@ footer{text-align:center;padding:16px;color:var(--gray);font-size:11px;border-to
       עדכון נתונים – העלאת קובץ Excel
     </div>
 
-    <!-- PASSWORD GATE -->
-    <div id="uploadLock">
-      <div class="upload-lock">
-        <div class="upload-lock-icon">🔒</div>
-        <div class="upload-lock-label">יש להזין סיסמה כדי לעדכן נתונים</div>
-        <div class="upload-lock-row">
-          <input type="password" id="uploadPwInput" class="upload-lock-input" placeholder="סיסמה"
-                 onkeydown="if(event.key==='Enter')checkUploadPassword()">
-          <button class="upload-lock-btn" onclick="checkUploadPassword()">כניסה</button>
-        </div>
-        <div class="upload-lock-err" id="uploadPwErr"></div>
-      </div>
-    </div>
+    <!-- UPLOAD CONTENT -->
+    <div id="uploadContent">
 
-    <!-- UPLOAD CONTENT (hidden until password OK) -->
-    <div id="uploadContent" style="display:none">
+      <!-- GitHub Token Row -->
+      <div class="gh-token-row">
+        <span class="ctrl-label">🔑 GitHub Token:</span>
+        <input type="password" id="ghTokenInput" class="gh-token-input" placeholder="ghp_xxxxxxxxxxxx" dir="ltr">
+        <button class="gh-token-btn" onclick="saveGhToken()">שמור</button>
+        <span id="ghTokenStatus" class="gh-token-status"></span>
+      </div>
+
+      <div id="uploadArea" style="display:none">
       <div class="upload-desc">
         העלה את הקובץ <strong>קובץ הרכבה לתקציב קבוצת חוות דעת 2026.xlsx</strong> (או גרסה מעודכנת שלו).<br>
         הדשבורד יקרא אוטומטית את הגליון <strong>דשבורד מצטבר כפר סבא</strong> ויעדכן את כל הגרפים והטבלאות.
@@ -446,6 +448,7 @@ footer{text-align:center;padding:16px;color:var(--gray);font-size:11px;border-to
         מדדים — הכנסה, הוצאות שכר, ציוד רפואי, קבלני משנה, עלות המכר, רווח גולמי |
         רמת סניף — הנהלה וכלליות, רווח תפעולי, פחת, EBITDA
       </div>
+      </div><!-- /uploadArea -->
     </div>
   </div>
 
@@ -522,7 +525,7 @@ const HEB_MONTHS = {
 function fmt(n) {
   if (!n && n !== 0) return '—';
   const a = Math.abs(n);
-  if (a >= 1e6) return (n<0?'-':'')+'₪'+(a/1e6).toFixed(1)+'M';
+  if (a >= 1e6) return (n<0?'-':'')+'₪'+(a/1e6).toFixed(2)+'M';
   if (a >= 1e3) return (n<0?'-':'')+'₪'+(a/1e3).toFixed(0)+'K';
   return (n<0?'-':'')+'₪'+a.toFixed(0);
 }
@@ -1275,6 +1278,91 @@ function updateMonthlyTable() {
 }
 
 // ══════════════════════════════════════════
+//  GITHUB API CONFIG
+// ══════════════════════════════════════════
+const GH_OWNER  = 'tamir77';
+const GH_REPO   = 'medboard';
+const GH_BRANCH = 'main';
+const GH_PATH   = 'chavat_daat/data_ks.json';
+
+function saveGhToken() {
+  const t = document.getElementById('ghTokenInput').value.trim();
+  const st = document.getElementById('ghTokenStatus');
+  if (!t) { st.textContent = '⚠ Enter a token'; st.style.color = '#B45309'; return; }
+  localStorage.setItem('gh_token_ks', t);
+  document.getElementById('ghTokenInput').value = '';
+  st.textContent = '✓ Saved';
+  st.style.color = '#2E7D32';
+  document.getElementById('uploadArea').style.display = 'block';
+}
+
+function getGhTokenStatus() {
+  const t = localStorage.getItem('gh_token_ks');
+  const st = document.getElementById('ghTokenStatus');
+  if (!st) return;
+  if (t) {
+    st.textContent = '✓ Token active';
+    st.style.color = '#2E7D32';
+    document.getElementById('uploadArea').style.display = 'block';
+  } else {
+    st.textContent = '⚠ Enter token to unlock upload';
+    st.style.color = '#B45309';
+    document.getElementById('uploadArea').style.display = 'none';
+  }
+}
+
+async function saveToGitHub() {
+  const token = localStorage.getItem('gh_token_ks');
+  if (!token) return false;
+
+  // Save only the raw input data (computed totals are derived)
+  const payload = JSON.stringify({
+    DEPTS_RAW,
+    BRANCH_RAW: {
+      'הנהלה וכלליות': BRANCH['הנהלה וכלליות'] || [],
+      'רווח תפעולי':   BRANCH['רווח תפעולי']   || [],
+      'פחת והפחתות':   BRANCH['פחת והפחתות']   || [],
+      'EBITDA':         BRANCH['EBITDA']         || []
+    },
+    updated: new Date().toISOString()
+  });
+
+  const content = btoa(unescape(encodeURIComponent(payload)));
+  const apiUrl  = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}`;
+  const headers = { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json', 'Content-Type': 'application/json' };
+
+  // Get current file SHA (needed to update existing file)
+  let sha;
+  try {
+    const r = await fetch(apiUrl, { headers });
+    if (r.ok) sha = (await r.json()).sha;
+  } catch(e) {}
+
+  const body = { message: 'Update data_ks.json via dashboard', content, branch: GH_BRANCH };
+  if (sha) body.sha = sha;
+
+  try {
+    const res = await fetch(apiUrl, { method: 'PUT', headers, body: JSON.stringify(body) });
+    return res.ok;
+  } catch(e) { return false; }
+}
+
+async function loadDataFromJSON() {
+  try {
+    const r = await fetch('data_ks.json?v=' + Date.now());
+    if (!r.ok) return;
+    const d = await r.json();
+    if (d.DEPTS_RAW) Object.assign(DEPTS_RAW, d.DEPTS_RAW);
+    if (d.BRANCH_RAW) {
+      ['הנהלה וכלליות','רווח תפעולי','פחת והפחתות','EBITDA'].forEach(k => {
+        if (d.BRANCH_RAW[k]) BRANCH[k] = d.BRANCH_RAW[k];
+      });
+    }
+    computeTotals();
+  } catch(e) {}
+}
+
+// ══════════════════════════════════════════
 //  EXCEL FILE UPLOAD
 // ══════════════════════════════════════════
 
@@ -1297,19 +1385,6 @@ const SHEET_NAME = 'דשבורד מצטבר כפר סבא';
 const DATA_COL_START = 2; // Column C = index 2
 const DATA_COL_COUNT = 36; // 36 months (2024-01 to 2026-12)
 
-function checkUploadPassword() {
-  const val = document.getElementById('uploadPwInput').value;
-  const errEl = document.getElementById('uploadPwErr');
-  if (val === 'o12345') {
-    document.getElementById('uploadLock').style.display = 'none';
-    document.getElementById('uploadContent').style.display = 'block';
-    errEl.textContent = '';
-  } else {
-    errEl.textContent = '❌ סיסמה שגויה, נסה שוב';
-    document.getElementById('uploadPwInput').value = '';
-    document.getElementById('uploadPwInput').focus();
-  }
-}
 
 function setUploadStatus(msg, type) {
   const el = document.getElementById('uploadStatus');
@@ -1337,7 +1412,7 @@ function parseExcelFile(file) {
   setUploadStatus('⏳ קורא את הקובץ...', 'loading');
 
   const reader = new FileReader();
-  reader.onload = function(e) {
+  reader.onload = async function(e) {
     try {
       const data = new Uint8Array(e.target.result);
       const wb   = XLSX.read(data, { type: 'array', cellDates: false });
@@ -1387,9 +1462,13 @@ function parseExcelFile(file) {
       updateAll();
 
       const warn = warnings.length ? ` | אזהרות: ${warnings.join('; ')}` : '';
+      setUploadStatus(`⏳ שומר נתונים ל-GitHub...`, 'loading');
+      const saved = await saveToGitHub();
       setUploadStatus(
-        `✓ הקובץ עודכן בהצלחה! ${updated} סדרות נתונים נטענו מ-"${file.name}"${warn}`,
-        'ok'
+        saved
+          ? `✓ הקובץ עודכן ונשמר ב-GitHub! ${updated} סדרות נטענו מ-"${file.name}"${warn}`
+          : `✓ הקובץ עודכן! ${updated} סדרות נטענו${warn} | ⚠ לא נשמר ל-GitHub (בדוק טוקן)`,
+        saved ? 'ok' : 'warn'
       );
     } catch (err) {
       setUploadStatus(`✗ שגיאה בקריאת הקובץ: ${err.message}`, 'err');
@@ -1451,11 +1530,16 @@ function updateAll() {
 //  INIT
 // ══════════════════════════════════════════
 document.getElementById('todayDate').textContent = new Date().toLocaleDateString('he-IL',{day:'2-digit',month:'long',year:'numeric'});
-populateMonthCheckboxes();
-populateQuarterCheckboxes();
-updateAll();
-updateMonthCompChart();
-updateQuarterlyComp();
+
+// Load remote data first, then render
+loadDataFromJSON().then(() => {
+  populateMonthCheckboxes();
+  populateQuarterCheckboxes();
+  updateAll();
+  updateMonthCompChart();
+  updateQuarterlyComp();
+  getGhTokenStatus();
+});
 </script>
 </body>
 </html>
