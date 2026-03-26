@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>דשבורד מצטבר – כפר סבא</title>
+<link href="https://fonts.googleapis.com/css2?family=Ledger&family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root {
+  --orange:#F54B1E; --cream:#F5EBE1; --dark:#1E1928; --gray:#8C8282;
+  --white:#FFFFFF; --border:#E8DDD6; --pos:#2E7D32; --neg:#C62828;
+  --future:#E3F2FD; --future-border:#1565C0;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Archivo',Calibri,sans-serif;background:#F2EDE8;color:var(--dark);direction:rtl;min-height:100vh}
+
+/* HEADER */
+.header{background:var(--dark);padding:0 28px;display:flex;align-items:center;justify-content:space-between;height:60px;box-shadow:0 2px 12px rgba(0,0,0,.3)}
+.header-title{font-family:'Ledger',Georgia,serif;color:#fff;font-size:20px}
+.header-title span{color:var(--orange)}
+.header-meta{display:flex;align-items:center;gap:12px}
+.pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.5px}
+.pill-act{background:#E3F2FD;color:#1565C0}
+.pill-bud{background:#FFF3E0;color:#E65100}
+.pill-ceo{background:var(--orange);color:#fff}
+
+/* CONTROLS */
+.controls{background:#fff;border-bottom:2px solid var(--cream);padding:10px 28px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.ctrl-label{font-size:11px;font-weight:700;color:var(--gray);white-space:nowrap}
+.btn-group{display:flex;border:1.5px solid var(--border);border-radius:6px;overflow:hidden}
+.btn-group button{background:none;border:none;padding:5px 12px;font-size:12px;font-family:'Archivo',sans-serif;cursor:pointer;color:var(--dark);transition:all .15s;border-left:1px solid var(--border)}
+.btn-group button:last-child{border-left:none}
+.btn-group button.active{background:var(--orange);color:#fff;font-weight:700}
+.btn-group button:not(.active):hover{background:var(--cream)}
+select{font-family:'Archivo',sans-serif;font-size:12px;border:1.5px solid var(--border);border-radius:6px;padding:5px 10px;color:var(--dark);background:#fff;cursor:pointer;outline:none}
+
+/* MAIN */
+.main{padding:20px 28px;max-width:1700px;margin:0 auto}
+
+/* SEC TITLE */
+.sec-title{font-family:'Ledger',Georgia,serif;font-size:15px;color:var(--dark);margin-bottom:12px;padding-bottom:7px;border-bottom:2px solid var(--orange);display:flex;align-items:center;gap:8px}
+.sec-title::before{content:'';width:4px;height:16px;background:var(--orange);border-radius:2px;flex-shrink:0}
+
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:22px}
+.kpi{background:#fff;border-radius:10px;padding:16px 18px;border:1.5px solid var(--border);position:relative;overflow:hidden;transition:transform .15s,box-shadow .15s}
+.kpi:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.1)}
+.kpi::after{content:'';position:absolute;top:0;right:0;width:4px;height:100%;background:var(--orange);border-radius:0 10px 10px 0}
+.kpi-lbl{font-size:10px;color:var(--gray);font-weight:700;margin-bottom:7px;text-transform:uppercase;letter-spacing:.4px}
+.kpi-val{font-family:'Ledger',Georgia,serif;font-size:24px;color:var(--dark);line-height:1;margin-bottom:5px}
+.kpi-sub{font-size:11px;color:var(--gray);display:flex;align-items:center;gap:4px}
+.badge{font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px}
+.badge.pos{background:#E8F5E9;color:var(--pos)}
+.badge.neg{background:#FFEBEE;color:var(--neg)}
+
+/* GRID */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.g3{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px}
+.card{background:#fff;border-radius:10px;padding:18px 20px;border:1.5px solid var(--border)}
+.card-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
+.card-title{font-family:'Ledger',Georgia,serif;font-size:14px;color:var(--dark)}
+.card-sub{font-size:11px;color:var(--gray);margin-top:2px}
+
+/* DEPT TABS */
+.dept-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.dept-tab{background:var(--cream);border:1.5px solid var(--border);color:var(--dark);border-radius:20px;padding:5px 14px;font-size:11px;font-family:'Archivo',sans-serif;cursor:pointer;transition:all .15s;font-weight:600}
+.dept-tab.active{background:var(--orange);border-color:var(--orange);color:#fff}
+.dept-tab:not(.active):hover{background:#EDE3D8}
+
+/* COMPARISON SELECTOR */
+.compare-row{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.compare-label{font-size:12px;font-weight:700;color:var(--dark)}
+.month-badge{display:inline-flex;align-items:center;gap:6px;background:var(--cream);border:1.5px solid var(--orange);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:600;color:var(--orange)}
+.month-badge select{background:none;border:none;font-size:12px;font-weight:700;color:var(--orange);padding:0;cursor:pointer;outline:none}
+.vs-label{font-size:12px;color:var(--gray);font-weight:600}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px;table-layout:auto}
+thead th{background:var(--dark);color:#fff;padding:9px 12px;text-align:right;font-weight:700;font-size:11px;white-space:nowrap;position:sticky;top:0;z-index:2}
+thead th:first-child{background:var(--orange);min-width:130px}
+thead th.future-col{background:#1565C0}
+tbody tr:nth-child(even){background:var(--cream)}
+tbody tr:hover{background:#EDE3D8}
+tbody td{padding:8px 12px;border-bottom:1px solid var(--border);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+tbody td:first-child{font-weight:700;color:var(--orange)}
+.td-pos{color:var(--pos);font-weight:700}
+.td-neg{color:var(--neg);font-weight:700}
+.td-total{background:var(--dark)!important;color:#fff!important;font-weight:700}
+.td-subtotal{background:#EDE3D8!important;font-weight:700}
+.td-future{background:var(--future)!important;color:#1565C0}
+
+/* UPLOAD SECTION */
+.upload-section{background:#fff;border-radius:10px;border:2px dashed var(--future-border);padding:24px;margin-bottom:16px}
+.upload-title{font-family:'Ledger',Georgia,serif;font-size:15px;color:var(--future-border);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.upload-desc{font-size:12px;color:var(--gray);margin-bottom:18px;line-height:1.6}
+.upload-drop{border:2px dashed #90CAF9;border-radius:10px;padding:28px 20px;text-align:center;
+  background:#F3F8FF;cursor:pointer;transition:all .2s;position:relative}
+.upload-drop:hover,.upload-drop.drag-over{border-color:var(--future-border);background:#E3F2FD}
+.upload-drop input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-icon{font-size:32px;margin-bottom:8px}
+.upload-drop-label{font-size:13px;font-weight:600;color:var(--future-border);display:block}
+.upload-drop-sub{font-size:11px;color:var(--gray);margin-top:4px;display:block}
+.upload-status{margin-top:14px;padding:10px 14px;border-radius:8px;font-size:12px;font-weight:600;display:none}
+.upload-status.ok{background:#E8F5E9;color:#2E7D32;display:block}
+.upload-status.err{background:#FFEBEE;color:#C62828;display:block}
+.upload-status.loading{background:#FFF8E1;color:#E65100;display:block}
+.upload-mapping{margin-top:14px;font-size:11px;color:var(--gray);line-height:1.7}
+.upload-mapping strong{color:var(--dark)}
+.upload-lock{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:28px 20px;text-align:center}
+.upload-lock-icon{font-size:36px}
+.upload-lock-label{font-size:13px;color:var(--gray);font-weight:600}
+.upload-lock-row{display:flex;align-items:center;gap:8px;direction:ltr}
+.upload-lock-input{padding:7px 12px;border:1.5px solid #90CAF9;border-radius:7px;font-size:14px;outline:none;width:160px;text-align:center;letter-spacing:2px}
+.upload-lock-input:focus{border-color:var(--future-border)}
+.upload-lock-btn{padding:7px 18px;background:var(--future-border);color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;transition:background .15s}
+.upload-lock-btn:hover{background:#1053A0}
+.upload-lock-err{font-size:12px;color:#C62828;font-weight:600;min-height:18px}
+.btn-save{background:var(--orange);color:#fff;border:none;padding:8px 20px;border-radius:6px;font-size:13px;font-family:'Archivo',sans-serif;font-weight:700;cursor:pointer;margin-top:12px}
+.btn-save:hover{background:#d63d15}
+
+/* MULTI-SELECT COMPARISON PANELS */
+.cmp-panel{flex:1;min-width:210px;max-width:310px}
+.cmp-panel-title{font-size:12px;font-weight:700;padding:5px 10px;border-radius:5px;margin-bottom:6px}
+.cmp-panel-title.side-a{background:#FEE8E1;color:#F54B1E;border-right:3px solid #F54B1E}
+.cmp-panel-title.side-b{background:#E3F2FD;color:#1565C0;border-right:3px solid #1565C0}
+.cmp-checkboxes{border:1.5px solid var(--border);border-radius:8px;padding:6px 8px;max-height:170px;overflow-y:auto;background:#FAFAFA}
+.cmp-cb-row{display:flex;align-items:center;gap:6px;padding:3px 4px;border-radius:4px;cursor:pointer;transition:background .1s;user-select:none}
+.cmp-cb-row:hover{background:var(--cream)}
+.cmp-cb-row input[type=checkbox]{cursor:pointer;width:13px;height:13px;flex-shrink:0;accent-color:var(--orange)}
+.cmp-cb-row.side-b input[type=checkbox]{accent-color:#1565C0}
+.cmp-cb-label{font-size:11px;color:var(--dark);cursor:pointer;flex:1}
+.cmp-actions{display:flex;gap:5px;margin-top:5px}
+.cmp-action-btn{font-size:10px;padding:2px 8px;border:1px solid var(--border);border-radius:4px;background:none;cursor:pointer;color:var(--gray);font-family:'Archivo',sans-serif}
+.cmp-action-btn:hover{background:var(--cream)}
+.cmp-summary{font-size:10px;color:var(--gray);margin-top:3px;min-height:14px}
+.vs-divider{display:flex;align-items:center;padding:0 10px;font-size:15px;color:var(--gray);font-weight:700;align-self:center;margin-top:24px}
+.sec-local-ctrl{display:flex;align-items:center;gap:6px}
+
+/* FOOTER */
+footer{text-align:center;padding:16px;color:var(--gray);font-size:11px;border-top:1px solid var(--border);margin-top:8px}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-title">דשבורד מצטבר – <span>כפר סבא</span></div>
+  <div class="header-meta">
+    <span class="pill pill-act">ביצוע 2024–2025</span>
+    <span class="pill pill-bud">תקציב 2026</span>
+    <span class="pill pill-ceo">מנכ״ל</span>
+    <span style="font-size:11px;color:var(--gray)" id="todayDate"></span>
+  </div>
+</header>
+
+<div class="controls">
+  <div style="display:flex;align-items:center;gap:8px">
+    <span class="ctrl-label">שנה:</span>
+    <div class="btn-group" id="yearBtns">
+      <button onclick="setYear('all')">הכל</button>
+      <button onclick="setYear('2024')">2024</button>
+      <button onclick="setYear('2025')" class="active">2025</button>
+      <button onclick="setYear('2026')">2026</button>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <span class="ctrl-label">מדד:</span>
+    <select id="metricSel" onchange="updateAll()">
+      <option value="הכנסה">הכנסה</option>
+      <option value="רווח גולמי">רווח גולמי</option>
+      <option value="סה&quot;כ עלות המכר">סה״כ עלות המכר</option>
+      <option value="הוצאות שכר">הוצאות שכר</option>
+      <option value="קבלני משנה">קבלני משנה</option>
+      <option value="ציוד רפואי מתכלה">ציוד רפואי מתכלה</option>
+    </select>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <span class="ctrl-label">תצוגה:</span>
+    <div class="btn-group" id="viewBtns">
+      <button onclick="setView('monthly')" class="active">חודשי</button>
+      <button onclick="setView('quarterly')">רבעוני</button>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- KPIs -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-lbl">הכנסות 2025</div>
+      <div class="kpi-val" id="kpi-rev">—</div>
+      <div class="kpi-sub"><span class="badge pos" id="kpi-rev-chg">—</span><span>לעומת 2024</span></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-lbl">EBITDA 2025</div>
+      <div class="kpi-val" id="kpi-ebd">—</div>
+      <div class="kpi-sub"><span class="badge pos" id="kpi-ebd-chg">—</span><span>לעומת 2024</span></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-lbl">רווח גולמי 2025</div>
+      <div class="kpi-val" id="kpi-grp">—</div>
+      <div class="kpi-sub"><span class="badge pos" id="kpi-grp-chg">—</span><span>לעומת 2024</span></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-lbl">רווח תפעולי 2025</div>
+      <div class="kpi-val" id="kpi-opr">—</div>
+      <div class="kpi-sub"><span class="badge pos" id="kpi-opr-chg">—</span><span>לעומת 2024</span></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-lbl">מחלקה מובילה 2025</div>
+      <div class="kpi-val" id="kpi-top" style="font-size:18px">—</div>
+      <div class="kpi-sub" id="kpi-top-val">—</div>
+    </div>
+  </div>
+
+  <!-- TOP CHARTS -->
+  <div class="g3">
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title" id="trendTitle">מגמת הכנסות חודשית – כפר סבא</div>
+          <div class="card-sub" id="trendSub">לפי מחלקה</div>
+        </div>
+        <div class="btn-group">
+          <button id="btnLine" onclick="setChartType('line')">קו</button>
+          <button id="btnBar" onclick="setChartType('bar')" class="active">עמודות</button>
+        </div>
+      </div>
+      <canvas id="trendChart" height="250"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">השוואה שנתית</div>
+          <div class="card-sub" id="annualSub">לפי מדד נבחר</div>
+        </div>
+      </div>
+      <canvas id="annualChart" height="250"></canvas>
+    </div>
+  </div>
+
+  <!-- DEPT COMPARISON -->
+  <div class="sec-title">השוואת מחלקות</div>
+  <div class="dept-tabs" id="deptTabs">
+    <button class="dept-tab active" onclick="setDept('all')">כל המחלקות</button>
+    <button class="dept-tab" onclick="setDept('חרום')">חרום</button>
+    <button class="dept-tab" onclick="setDept('כירורגיה')">כירורגיה</button>
+    <button class="dept-tab" onclick="setDept('הדמיה')">הדמיה</button>
+    <button class="dept-tab" onclick="setDept('נוירולוגיה')">נוירולוגיה</button>
+    <button class="dept-tab" onclick="setDept('קרדיולוגיה')">קרדיולוגיה</button>
+    <button class="dept-tab" onclick="setDept('אופטלמולוגיה')">אופטלמולוגיה</button>
+    <button class="dept-tab" onclick="setDept('דרמטולוגיה')">דרמטולוגיה</button>
+    <button class="dept-tab" onclick="setDept('אונקולוגיה')">אונקולוגיה</button>
+    <button class="dept-tab" onclick="setDept('אחר')">אחר</button>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title" id="deptBarTitle">השוואת הכנסות לפי מחלקה</div>
+          <div class="card-sub" id="deptBarSub">שנה נבחרת</div>
+        </div>
+      </div>
+      <canvas id="deptBarChart" height="240"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title" id="deptTrendTitle">מגמה – מחלקה נבחרת</div>
+          <div class="card-sub">הכנסה, עלות ורווח גולמי</div>
+        </div>
+      </div>
+      <canvas id="deptTrendChart" height="240"></canvas>
+    </div>
+  </div>
+
+  <!-- MONTH COMPARISON -->
+  <div class="sec-title" style="flex-wrap:wrap;gap:8px">
+    <span>השוואת חודשים</span>
+    <div class="sec-local-ctrl">
+      <span class="ctrl-label">מדד:</span>
+      <select id="metricMonthComp" onchange="updateMonthComp();updateMonthCompChart()">
+        <option value="הכנסה">הכנסה</option>
+        <option value="רווח גולמי">רווח גולמי</option>
+        <option value="סה&quot;כ עלות המכר">סה״כ עלות המכר</option>
+        <option value="הוצאות שכר">הוצאות שכר</option>
+        <option value="קבלני משנה">קבלני משנה</option>
+        <option value="ציוד רפואי מתכלה">ציוד רפואי מתכלה</option>
+      </select>
+    </div>
+  </div>
+  <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:flex-start">
+    <div class="cmp-panel">
+      <div class="cmp-panel-title side-a">קבוצה א׳</div>
+      <div class="cmp-checkboxes" id="cbGroupA"></div>
+      <div class="cmp-actions">
+        <button class="cmp-action-btn" onclick="selectAllCb('cbGroupA',true)">הכל</button>
+        <button class="cmp-action-btn" onclick="selectAllCb('cbGroupA',false)">נקה</button>
+      </div>
+      <div class="cmp-summary" id="summaryA"></div>
+    </div>
+    <div class="vs-divider">VS</div>
+    <div class="cmp-panel">
+      <div class="cmp-panel-title side-b">קבוצה ב׳</div>
+      <div class="cmp-checkboxes" id="cbGroupB"></div>
+      <div class="cmp-actions">
+        <button class="cmp-action-btn" onclick="selectAllCb('cbGroupB',true)">הכל</button>
+        <button class="cmp-action-btn" onclick="selectAllCb('cbGroupB',false)">נקה</button>
+      </div>
+      <div class="cmp-summary" id="summaryB"></div>
+    </div>
+    <div style="flex:1;min-width:100px;align-self:center;text-align:center;padding:8px">
+      <div id="compDiff" style="font-size:20px;font-weight:700"></div>
+    </div>
+  </div>
+  <div class="g2" style="margin-bottom:16px">
+    <div class="card">
+      <div class="card-title" style="margin-bottom:12px;font-family:'Ledger',Georgia,serif;font-size:14px">השוואת קבוצות – לפי מחלקה</div>
+      <canvas id="monthCompChart" height="230"></canvas>
+    </div>
+    <div class="card">
+      <div class="tbl-wrap">
+        <table id="monthCompTable"></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUARTERLY TABLE -->
+  <div class="sec-title" style="flex-wrap:wrap;gap:8px">
+    <span>סיכום רבעוני</span>
+    <div class="sec-local-ctrl">
+      <span class="ctrl-label">מדד להשוואה:</span>
+      <select id="metricQuarterly" onchange="updateQuarterlyComp()">
+        <option value="הכנסות">הכנסות</option>
+        <option value="עלות המכר">עלות המכר</option>
+        <option value="רווח גולמי">רווח גולמי</option>
+        <option value="רווח תפעולי">רווח תפעולי</option>
+        <option value="EBITDA">EBITDA</option>
+      </select>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:12px">
+    <div class="tbl-wrap">
+      <table id="quarterlyTable"></table>
+    </div>
+  </div>
+  <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;align-items:flex-start">
+    <div class="cmp-panel">
+      <div class="cmp-panel-title side-a">קבוצה א׳ – רבעונים</div>
+      <div class="cmp-checkboxes" id="cbQGroupA"></div>
+      <div class="cmp-actions">
+        <button class="cmp-action-btn" onclick="selectAllCbQ('cbQGroupA',true)">הכל</button>
+        <button class="cmp-action-btn" onclick="selectAllCbQ('cbQGroupA',false)">נקה</button>
+      </div>
+    </div>
+    <div class="vs-divider">VS</div>
+    <div class="cmp-panel">
+      <div class="cmp-panel-title side-b">קבוצה ב׳ – רבעונים</div>
+      <div class="cmp-checkboxes" id="cbQGroupB"></div>
+      <div class="cmp-actions">
+        <button class="cmp-action-btn" onclick="selectAllCbQ('cbQGroupB',true)">הכל</button>
+        <button class="cmp-action-btn" onclick="selectAllCbQ('cbQGroupB',false)">נקה</button>
+      </div>
+    </div>
+    <div style="flex:1;min-width:100px;align-self:center;text-align:center;padding:8px">
+      <div id="qCompDiff" style="font-size:20px;font-weight:700"></div>
+    </div>
+  </div>
+  <div class="g2" style="margin-bottom:16px">
+    <div class="card">
+      <div class="card-title" style="margin-bottom:12px;font-family:'Ledger',Georgia,serif;font-size:14px">השוואת רבעונים</div>
+      <canvas id="quarterlyCompChart" height="230"></canvas>
+    </div>
+    <div class="card">
+      <div class="tbl-wrap">
+        <table id="quarterlyCompTable"></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- FULL MONTHLY TABLE -->
+  <div class="sec-title" style="flex-wrap:wrap;gap:8px">
+    <span>פירוט <span id="tableViewLbl">חודשי</span> לפי מחלקה – <span id="tableYearLbl">כל השנים</span> – <span id="tableMetricLbl">הכנסה</span></span>
+    <div class="sec-local-ctrl">
+      <span class="ctrl-label">מדד:</span>
+      <select id="metricMonthly" onchange="updateMonthlyTable()">
+        <option value="הכנסה">הכנסה</option>
+        <option value="רווח גולמי">רווח גולמי</option>
+        <option value="סה&quot;כ עלות המכר">סה״כ עלות המכר</option>
+        <option value="הוצאות שכר">הוצאות שכר</option>
+        <option value="קבלני משנה">קבלני משנה</option>
+        <option value="ציוד רפואי מתכלה">ציוד רפואי מתכלה</option>
+      </select>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:16px">
+    <div class="tbl-wrap" style="max-height:420px;overflow-y:auto">
+      <table id="monthlyTable"></table>
+    </div>
+  </div>
+
+  <!-- FILE UPLOAD -->
+  <div class="upload-section" id="uploadSection">
+    <div class="upload-title">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      עדכון נתונים – העלאת קובץ Excel
+    </div>
+
+    <!-- PASSWORD GATE -->
+    <div id="uploadLock">
+      <div class="upload-lock">
+        <div class="upload-lock-icon">🔒</div>
+        <div class="upload-lock-label">יש להזין סיסמה כדי לעדכן נתונים</div>
+        <div class="upload-lock-row">
+          <input type="password" id="uploadPwInput" class="upload-lock-input" placeholder="סיסמה"
+                 onkeydown="if(event.key==='Enter')checkUploadPassword()">
+          <button class="upload-lock-btn" onclick="checkUploadPassword()">כניסה</button>
+        </div>
+        <div class="upload-lock-err" id="uploadPwErr"></div>
+      </div>
+    </div>
+
+    <!-- UPLOAD CONTENT (hidden until password OK) -->
+    <div id="uploadContent" style="display:none">
+      <div class="upload-desc">
+        העלה את הקובץ <strong>קובץ הרכבה לתקציב קבוצת חוות דעת 2026.xlsx</strong> (או גרסה מעודכנת שלו).<br>
+        הדשבורד יקרא אוטומטית את הגליון <strong>דשבורד מצטבר כפר סבא</strong> ויעדכן את כל הגרפים והטבלאות.
+      </div>
+      <div class="upload-drop" id="uploadDrop"
+           ondragover="event.preventDefault();this.classList.add('drag-over')"
+           ondragleave="this.classList.remove('drag-over')"
+           ondrop="handleDrop(event)">
+        <input type="file" accept=".xlsx,.xls" onchange="handleFileInput(event)">
+        <div class="upload-icon">📂</div>
+        <span class="upload-drop-label">גרור קובץ לכאן או לחץ לבחירה</span>
+        <span class="upload-drop-sub">תומך בקבצי .xlsx / .xls</span>
+      </div>
+      <div class="upload-status" id="uploadStatus"></div>
+      <div class="upload-mapping">
+        <strong>מה נקרא מהקובץ:</strong>
+        מחלקות — חרום, כירורגיה, הדמיה, נוירולוגיה, קרדיולוגיה, אופטלמולוגיה, דרמטולוגיה, אונקולוגיה, אחר |
+        מדדים — הכנסה, הוצאות שכר, ציוד רפואי, קבלני משנה, עלות המכר, רווח גולמי |
+        רמת סניף — הנהלה וכלליות, רווח תפעולי, פחת, EBITDA
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>חוות דעת – סניף כפר סבא | דשבורד מחלקתי | נתונים: תקציב לאחר התאמות 2024–2026</footer>
+
+<script>
+// ══════════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════════
+const DATES = ["2024-01","2024-02","2024-03","2024-04","2024-05","2024-06","2024-07","2024-08","2024-09","2024-10","2024-11","2024-12","2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07","2026-08","2026-09","2026-10","2026-11","2026-12"];
+
+const DEPTS_RAW = {
+  "חרום":{"הכנסה":[1102555.56,998069.23,1083423.08,1186470.09,1167106.84,1122353.85,1217034.11,1094764.2,1408773.3,1310862.3,1401327.23,1689661.84,1642264.06,1504451.99,1713671.08,1598041.97,1808718.42,1690948.72,1829117.66,1869038.78,1581068.5,1647406.93,2109456.79,2136190.52,1568003.39,1465456.45,0,0,0,0,0,0,0,0,0,0],"הוצאות שכר":[516140.17,579373.17,814562.17,607526.17,625399.17,581936.17,678551.17,676009.17,796882.17,880040.17,750316.17,961022.17,883427.01,826682.01,1054430.01,918516.01,886750.01,836022.01,918516.01,957628.01,833182.01,905510.01,1078568.01,1306548.01,0,0,0,0,0,0,0,0,0,0,0,0],"ציוד רפואי מתכלה":[220207.78,203754.53,217363.51,295260.85,311995.92,249116.64,320009.74,341620.0,396481.79,455068.78,309671.71,489742.77,359617.42,278427.13,317975.41,408513.46,423432.88,330498.56,440413.73,437337.83,447897.3,374451.89,345282.52,425613.3,0,0,0,0,0,0,0,0,0,0,0,0],"קבלני משנה":[44332.91,61589.87,43136.59,69351.46,43466.92,70571.34,74082.77,113855.47,80720.19,45478.47,47116.24,63099.9,73726.08,69461.21,87832.55,55701.43,50636.81,49226.28,85756.54,43483.3,60823.09,62226.56,56640.08,52975.72,0,0,0,0,0,0,0,0,0,0,0,0],"סה\"כ עלות המכר":[780680.86,844717.57,1075062.27,972138.48,980862.01,901624.15,1072643.68,1131484.64,1274084.15,1380587.42,1107104.12,1513864.84,1316770.51,1174570.35,1460237.97,1382730.9,1360819.7,1215746.85,1444686.28,1438449.14,1341902.4,1342188.46,1480490.61,1785137.03,0,0,0,0,0,0,0,0,0,0,0,0],"רווח גולמי":[321874.7,153351.66,8360.81,214331.61,186244.83,220729.7,144390.43,-36720.44,134689.15,-69725.12,294223.11,175797.0,325493.55,329881.64,253433.11,215311.07,447898.72,475201.87,384431.38,430589.64,239166.1,305218.47,628966.18,351053.49,0,0,0,0,0,0,0,0,0,0,0,0]},
+  "כירורגיה":{"הכנסה":[595601.74,595293.24,579603.37,535016.22,583416.29,536813.12,618483.38,585430.39,666843.84,571975.28,592003.35,665581.39,625867.19,579893.44,683820.67,645688.44,694773.85,643819.52,711278.25,732219.34,600424.38,574946.81,687219.3,667949.14,652049.97,588984.26,0,0,0,0,0,0,0,0,0,0],"הוצאות שכר":[171501.27,178795.27,200751.27,202713.27,200242.27,191001.27,207671.27,200284.27,213441.27,224553.27,212393.27,227625.27,249393.97,209680.97,246882.97,234668.97,224540.97,216394.97,230948.97,225820.97,218676.97,225832.97,253884.97,282052.97,0,0,0,0,0,0,0,0,0,0,0,0],"ציוד רפואי מתכלה":[54547.23,49984.69,160341.47,78635.96,113565.19,101703.12,98044.88,113629.62,97416.27,89765.76,89993.29,91720.62,100065.83,112892.06,112048.66,100451.49,109760.52,102208.88,109978.57,130847.04,116116.62,113561.26,100659.71,139015.41,0,0,0,0,0,0,0,0,0,0,0,0],"קבלני משנה":[9889.55,12476.73,17166.27,38298.42,18811.0,14060.94,25530.57,26393.76,21791.55,14897.83,23234.72,12660.25,26218.48,21011.56,33826.33,29028.3,26817.62,22742.45,20944.88,27978.48,22547.03,26820.75,22742.45,29012.45,0,0,0,0,0,0,0,0,0,0,0,0],"סה\"כ עלות המכר":[235938.05,241256.69,378259.01,319647.65,332618.46,306765.33,331246.72,340307.65,332649.09,329216.86,325621.28,331006.14,375678.28,343584.59,392757.96,364148.76,361119.11,341346.3,361872.42,384646.49,357340.62,366215.0,377287.13,450080.83,0,0,0,0,0,0,0,0,0,0,0,0],"רווח גולמי":[359663.69,354036.55,201344.36,215368.57,250797.83,230047.79,287236.66,245122.74,334194.75,242758.42,266382.07,334575.25,250188.91,236308.85,291062.71,281539.68,333654.74,302473.22,349405.83,347572.85,243083.76,208731.81,309932.17,217868.31,0,0,0,0,0,0,0,0,0,0,0,0]},
+  "הדמיה":{"הכנסה":[545467.45,494100.0,528624.77,496462.41,549234.68,541024.42,601636.58,541819.82,575869.11,525049.78,519374.74,585234.85,588948.91,540022.66,612028.83,540490.53,567337.17,548497.55,593065.02,581088.58,535218.0,534551.25,549124.77,603231.0,562175.54,521249.76,0,0,0,0,0,0,0,0,0,0],"הוצאות שכר":[216756.41,221054.41,218274.41,209101.41,208266.41,202882.41,215456.41,206956.41,218106.41,221056.41,213846.41,229306.41,245246.41,220136.41,238916.41,231116.41,218366.41,218516.41,230516.41,228516.41,219316.41,221766.41,234516.41,267216.41,0,0,0,0,0,0,0,0,0,0,0,0],"ציוד רפואי מתכלה":[6428.44,5888.07,16173.3,11328.2,28258.21,19609.76,29068.2,37419.17,30127.79,21892.13,17682.65,29310.88,28157.5,17944.26,20095.3,27741.05,25820.74,22459.32,26219.07,28574.0,19965.54,19165.07,21948.66,20655.44,0,0,0,0,0,0,0,0,0,0,0,0],"קבלני משנה":[17268.47,29285.44,-1906.64,4807.56,-7112.29,-6736.34,1898.46,3929.74,3459.79,5741.03,5019.54,4416.7,2764.15,3124.59,-2003.4,1060.46,-2133.36,-1618.8,-3490.19,-5225.77,-2268.72,-3551.6,-3015.71,-6386.71,0,0,0,0,0,0,0,0,0,0,0,0],"סה\"כ עלות המכר":[240453.32,256227.92,232541.07,225237.17,229412.33,215755.83,246422.07,247305.32,251693.99,248689.57,236548.6,263034.0,276168.06,241205.26,256008.31,259917.92,242053.79,239357.0,253245.29,251864.64,237013.23,237379.88,253449.36,281485.14,0,0,0,0,0,0,0,0,0,0,0,0],"רווח גולמי":[305014.13,237872.08,296083.7,271225.24,319822.35,325268.59,355214.51,294514.5,324175.12,276360.21,282826.14,322200.85,312780.85,298817.4,356020.52,280572.61,325283.38,309140.55,339819.73,329223.94,298204.77,297171.37,295675.41,321745.86,0,0,0,0,0,0,0,0,0,0,0,0]},
+  "נוירולוגיה":{"הכנסה":[477909.38,484568.43,589723.1,513073.46,616726.1,540726.85,658083.48,641929.11,689456.39,590073.62,572793.63,612890.08,638499.18,608213.73,705244.64,643636.79,719779.32,691312.47,697162.98,648048.93,591088.09,603823.58,690985.74,749492.32,718437.74,700416.55,0,0,0,0,0,0,0,0,0,0],"הוצאות שכר":[177180.0,181480.0,165843.0,178125.0,183005.0,175485.0,181600.0,175175.0,183700.0,190875.0,178000.0,190700.0,196750.0,187950.0,201000.0,197400.0,202800.0,196950.0,201600.0,201600.0,194550.0,202500.0,214875.0,240525.0,0,0,0,0,0,0,0,0,0,0,0,0],"ציוד רפואי מתכלה":[22696.55,24914.15,49574.13,32931.28,39244.63,35897.91,48540.55,52875.86,56419.44,42264.09,44609.93,44753.19,45524.17,39344.11,52613.67,45000.0,52898.34,50706.08,62313.09,60038.62,48640.49,52636.33,45754.57,59527.09,0,0,0,0,0,0,0,0,0,0,0,0],"קבלני משנה":[68614.51,81310.9,83116.61,96563.7,87866.9,88832.04,107282.09,90987.55,107375.44,78499.67,82706.81,82897.64,90866.0,82944.0,105093.0,77244.0,104592.0,88236.0,99288.0,93870.0,79506.0,89856.0,98148.0,109068.0,0,0,0,0,0,0,0,0,0,0,0,0],"סה\"כ עלות המכר":[268491.06,287705.05,298533.74,307620.0,310116.53,300214.95,337422.64,318038.41,347494.88,311638.76,305316.74,318350.83,333140.17,310238.11,358706.67,319644.0,360290.34,335892.08,363201.09,355508.62,322696.49,344992.33,358777.57,409120.09,0,0,0,0,0,0,0,0,0,0,0,0],"רווח גולמי":[209418.32,196863.38,291189.36,205453.46,306609.57,240511.9,320660.84,323890.7,341961.51,278434.86,267476.89,294539.25,305358.01,297975.62,346537.97,323992.79,359489.0,355420.39,333961.89,292540.31,268391.6,258831.25,332208.17,340372.23,0,0,0,0,0,0,0,0,0,0,0,0]},
+  "קרדיולוגיה":{"הכנסה":[49914.46,42512.82,30085.46,66008.49,76027.52,57668.51,72978.52,56813.12,79375.75,75068.12,83116.67,109501.97,128929.81,140862.37,159249.24,138985.97,174867.86,144929.22,160847.1,161050.37,115440.7,155067.23,149424.5,165450.52,182832.44,162847.02,0,0,0,0,0,0,0,0,0,0],"הוצאות שכר":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ציוד רפואי מתכלה":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"קבלני משנה":[3817.3,4031.64,4031.64,4031.64,15258.91,3031.64,3031.64,3031.64,3031.64,3031.64,4031.64,3031.64,3031.64,3031.64,3031.64,3031.64,3031.64,3031.64,3031.64,3031.64,3031.64,3031.64,3031.64,3031.64,0,0,0,0,0,0,0,0,0,0,0,0],"סה\"כ עלות המכר":[3817.3,4031.64,4031.64,4031.64,15258.91,3031.64,3031.64,3031.64,3031.64,3031.64,4031.64,3031.64,3031.64,3031.64,3031.64,3031.64,3031.64,3031.64,3031.64,3031.64,3031.64,3031.64,3031.64,3031.64,0,0,0,0,0,0,0,0,0,0,0,0],"רווח גולמי":[46097.16,38481.18,26053.82,61976.85,60768.61,54636.87,69946.88,53781.48,76344.11,72036.48,79085.03,106470.33,125898.17,137830.73,156217.6,135954.33,171836.22,141897.58,157815.46,158018.73,112409.06,152035.59,146392.86,162418.88,0,0,0,0,0,0,0,0,0,0,0,0]},
+  "אופטלמולוגיה":{"הכנסה":[2863.24,13612.0,15854.73,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"הוצאות שכר":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ציוד רפואי מתכלה":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"קבלני משנה":[1590.99,2158.24,12061.73,12329.17,5603.45,2439.01,2439.01,2439.01,2439.01,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"סה\"כ עלות המכר":[1590.99,2158.24,12061.73,12329.17,5603.45,2439.01,2439.01,2439.01,2439.01,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"רווח גולמי":[1272.25,11453.76,3793.0,-12329.17,-5603.45,-2439.01,-2439.01,-2439.01,-2439.01,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},
+  "דרמטולוגיה":{"הכנסה":[11324.82,7564.1,6782.11,3760.72,7869.43,5143.29,9266.43,5143.29,5143.29,5143.29,5143.29,5143.29,5143.29,5143.29,5143.29,5143.29,5143.29,5143.29,5143.29,5143.29,5143.29,5143.29,5143.29,5143.29,5143.29,5143.29,0,0,0,0,0,0,0,0,0,0],"הוצאות שכר":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ציוד רפואי מתכלה":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"קבלני משנה":[6291.68,7808.39,6030.62,6030.62,3039.17,4040.0,3039.17,3039.17,3039.17,3039.17,3039.17,3039.17,3039.17,3039.17,3039.17,3039.17,3039.17,3039.17,3039.17,3039.17,3039.17,3039.17,3039.17,3039.17,0,0,0,0,0,0,0,0,0,0,0,0],"סה\"כ עלות המכר":[6291.68,7808.39,6030.62,6030.62,3039.17,4040.0,3039.17,3039.17,3039.17,3039.17,3039.17,3039.17,3039.17,3039.17,3039.17,3039.17,3039.17,3039.17,3039.17,3039.17,3039.17,3039.17,3039.17,3039.17,0,0,0,0,0,0,0,0,0,0,0,0],"רווח גולמי":[5033.14,-244.29,751.49,-2269.9,4830.26,1103.29,6227.26,2104.12,2104.12,2104.12,2104.12,2104.12,2104.12,2104.12,2104.12,2104.12,2104.12,2104.12,2104.12,2104.12,2104.12,2104.12,2104.12,2104.12,0,0,0,0,0,0,0,0,0,0,0,0]},
+  "אונקולוגיה":{"הכנסה":[146147.0,127453.84,141735.86,120060.7,109839.16,136497.43,166461.73,123558.29,145832.0,87264.22,145832.0,136972.77,147413.65,156082.35,150619.44,167082.91,178207.33,166498.72,190498.72,190498.72,165498.72,190498.72,176498.72,162609.62,186500.0,186500.0,0,0,0,0,0,0,0,0,0,0],"הוצאות שכר":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ציוד רפואי מתכלה":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"קבלני משנה":[154793.02,142211.0,102998.15,124463.95,117506.72,136497.43,146386.37,116527.07,140819.43,83230.87,138747.59,116886.21,137254.94,155015.25,143437.96,156969.28,169140.86,157338.86,181267.78,181267.78,156267.78,179929.78,166929.78,152640.72,0,0,0,0,0,0,0,0,0,0,0,0],"סה\"כ עלות המכר":[154793.02,142211.0,102998.15,124463.95,117506.72,136497.43,146386.37,116527.07,140819.43,83230.87,138747.59,116886.21,137254.94,155015.25,143437.96,156969.28,169140.86,157338.86,181267.78,181267.78,156267.78,179929.78,166929.78,152640.72,0,0,0,0,0,0,0,0,0,0,0,0],"רווח גולמי":[-8646.02,-14757.16,38737.71,-4403.25,-7667.56,0,20075.36,7031.22,5012.57,4033.35,7084.41,20086.56,10158.71,1067.1,7181.48,10113.63,9066.47,9159.86,9230.94,9230.94,9230.94,10568.94,9568.94,9968.9,0,0,0,0,0,0,0,0,0,0,0,0]},
+  "אחר":{"הכנסה":[32535.89,3296.62,-28930.84,-13706.33,-20613.38,-18027.52,-41484.78,-13117.09,-37506.11,-85482.6,-116943.51,-113766.38,-7791.17,-21393.24,-22226.02,-6571.54,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"הוצאות שכר":[109213.83,108545.83,115302.83,109822.83,101037.83,87752.83,93068.83,99963.83,113523.83,122560.83,100551.83,111116.83,106688.0,110280.0,98016.0,98016.0,98016.0,98016.0,98016.0,98016.0,98016.0,98016.0,98016.0,98016.0,0,0,0,0,0,0,0,0,0,0,0,0],"ציוד רפואי מתכלה":[4810.55,9220.46,9752.22,10736.81,13746.19,14098.04,14839.35,13748.49,12048.85,10988.82,9682.63,6726.61,7476.08,7474.08,7474.08,7474.08,7474.08,7474.08,7474.08,7474.08,7474.08,7474.08,7474.08,7474.08,0,0,0,0,0,0,0,0,0,0,0,0],"קבלני משנה":[5133.64,4485.77,6376.59,5555.88,1716.08,2600.0,3021.6,2600.0,2600.0,2600.0,2600.0,2600.0,2600.0,2600.0,2600.0,2600.0,2600.0,2600.0,2600.0,2600.0,2600.0,2600.0,2600.0,2600.0,0,0,0,0,0,0,0,0,0,0,0,0],"סה\"כ עלות המכר":[119158.02,122252.06,131431.64,126115.52,116500.1,104450.87,110929.78,116312.32,128172.68,136149.65,112834.46,120443.44,116764.08,120354.08,108090.08,108090.08,108090.08,108090.08,108090.08,108090.08,108090.08,108090.08,108090.08,108090.08,0,0,0,0,0,0,0,0,0,0,0,0],"רווח גולמי":[-86622.13,-118955.44,-160362.48,-139821.85,-137113.48,-122478.39,-152414.56,-129429.41,-165678.79,-221632.25,-229778.0,-234209.82,-124555.25,-141747.32,-130316.1,-114661.62,-108090.08,-108090.08,-108090.08,-108090.08,-108090.08,-108090.08,-108090.08,-108090.08,0,0,0,0,0,0,0,0,0,0,0,0]}
+};
+
+// Branch level totals (from Excel rows 64-68)
+const BRANCH = {
+  "הנהלה וכלליות":[541115.49,550720.24,536704.52,678673.65,693752.60,509931.50,726259.80,572017.23,969319.32,419040.38,832150.22,836665.02,666415.21,554470.44,667250.65,503344.33,530697.01,466812.22,593587.94,458800.31,631551.96,373254.98,670406.92,1382822.92,0,0,0,0,0,0,0,0,0,0,0,0],
+  "רווח תפעולי":[532054.83,307381.20,169247.41,130857.75,144656.19,345394.08,225462.21,51937.41,113690.73,181236.53,250698.69,176634.10,475858.78,742986.17,516308.77,483271.59,758899.21,692696.81,807564.42,956609.72,298414.50,781890.26,1066005.78,16058.67,0,0,0,0,0,0,0,0,0,0,0,0],
+  "פחת והפחתות":[101654.5,101654.5,101654.5,101654.5,101654.5,101654.5,101654.5,101654.5,101654.5,101654.5,101654.5,101654.5,101654.5,101654.5,101654.5,101654.5,101654.5,101654.5,101654.5,101654.5,101654.5,101654.5,101654.5,101654.5,0,0,0,0,0,0,0,0,0,0,0,0],
+  "EBITDA":[633709.33,409035.70,270901.91,232512.25,246310.69,447048.58,327116.71,153591.91,215345.23,282891.03,352353.19,278288.60,577513.28,844640.67,617963.27,584926.09,860553.71,794351.31,909218.92,1058264.22,400069.00,883544.76,1167660.28,117713.17,0,0,0,0,0,0,0,0,0,0,0,0]
+};
+
+// Compute total revenue/cogs/gross from depts
+function computeTotals() {
+  const n = 36;
+  const rev = Array(n).fill(0), cogs = Array(n).fill(0), gross = Array(n).fill(0);
+  for (const dept of Object.keys(DEPTS_RAW)) {
+    for (let i = 0; i < n; i++) {
+      rev[i]   += DEPTS_RAW[dept]['הכנסה'][i]               || 0;
+      cogs[i]  += DEPTS_RAW[dept]['סה"כ עלות המכר'][i]      || 0;
+      gross[i] += DEPTS_RAW[dept]['רווח גולמי'][i]          || 0;
+    }
+  }
+  BRANCH['הכנסות']   = rev;
+  BRANCH['עלות המכר'] = cogs;
+  BRANCH['רווח גולמי'] = gross;
+}
+computeTotals();
+
+// Future data storage (in-memory)
+// (manual future entry removed — use Excel upload instead)
+
+// ══════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════
+let state = { year:'2025', view:'monthly', metric:'הכנסה', dept:'all', chartType:'bar' };
+
+const DEPT_COLORS = {
+  'חרום':'#F54B1E','כירורגיה':'#1E1928','הדמיה':'#8C8282',
+  'נוירולוגיה':'#D4874A','קרדיולוגיה':'#5B8A6B','אופטלמולוגיה':'#9C27B0',
+  'דרמטולוגיה':'#0277BD','אונקולוגיה':'#C62828','אחר':'#B0BEC5'
+};
+const ORANGE='#F54B1E', DARK='#1E1928', CREAM='#F5EBE1', GRAY='#8C8282';
+
+const HEB_MONTHS = {
+  '01':'ינואר','02':'פברואר','03':'מרץ','04':'אפריל','05':'מאי','06':'יוני',
+  '07':'יולי','08':'אוגוסט','09':'ספטמבר','10':'אוקטובר','11':'נובמבר','12':'דצמבר'
+};
+
+// ══════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════
+function fmt(n) {
+  if (!n && n !== 0) return '—';
+  const a = Math.abs(n);
+  if (a >= 1e6) return (n<0?'-':'')+'₪'+(a/1e6).toFixed(1)+'M';
+  if (a >= 1e3) return (n<0?'-':'')+'₪'+(a/1e3).toFixed(0)+'K';
+  return (n<0?'-':'')+'₪'+a.toFixed(0);
+}
+function fmtFull(n) {
+  if (n===null||n===undefined) return '—';
+  return (n<0?'-':'')+'₪'+Math.abs(n).toLocaleString('he-IL',{maximumFractionDigits:0});
+}
+function pct(r) { return (r>=0?'+':'')+r.toFixed(1)+'%'; }
+function sumYear(arr, yr) {
+  let t=0;
+  DATES.forEach((d,i)=>{ if(d&&d.startsWith(yr)&&arr[i]) t+=arr[i]; });
+  return t;
+}
+function getSlice(arr) {
+  return DATES.reduce((acc,d,i)=>{
+    if(!d) return acc;
+    if(state.year==='all'||d.startsWith(state.year)) acc.push(arr[i]||0);
+    return acc;
+  },[]);
+}
+function getFilteredDates() {
+  return DATES.filter(d=>d&&(state.year==='all'||d.startsWith(state.year)));
+}
+function dateLabel(d) {
+  if(!d) return '';
+  const p=d.split('-');
+  return HEB_MONTHS[p[1]]+"'"+p[0].slice(2);
+}
+function isFuture(d) { return d && d >= '2026-03'; }
+function hasData(arr, dateStr) {
+  const i = DATES.indexOf(dateStr);
+  return i >= 0 && arr[i] !== 0;
+}
+function getQLabel(d) {
+  const [y, m] = d.split('-');
+  return 'Q' + Math.ceil(parseInt(m)/3) + ' ' + y;
+}
+// Get 4 quarterly sums [Q1,Q2,Q3,Q4] for a specific year
+function getQValsForYear(arr, year) {
+  const s0 = DATES.indexOf(year+'-01');
+  if (s0 < 0) return [null,null,null,null];
+  return [0,1,2,3].map(qi => {
+    const s=s0+qi*3;
+    if (s >= arr.length) return null;
+    const sum = arr.slice(s,s+3).reduce((a,b)=>a+(b||0),0);
+    return sum || null;
+  });
+}
+// Aggregate a monthly array into quarterly sums, respecting state.year filter
+function getQuarterlyAggKS(arr) {
+  const dates = getFilteredDates();
+  const qMap = new Map();
+  dates.forEach(d => {
+    const gi = DATES.indexOf(d);
+    const qk = getQLabel(d);
+    qMap.set(qk, (qMap.get(qk) || 0) + (arr[gi] || 0));
+  });
+  return { labels:[...qMap.keys()], values:[...qMap.values()].map(v=>v||null) };
+}
+
+// ══════════════════════════════════════════
+//  CHART INSTANCES
+// ══════════════════════════════════════════
+let charts = {};
+function killChart(k) { if(charts[k]){charts[k].destroy();charts[k]=null;} }
+
+// ══════════════════════════════════════════
+//  KPIs
+// ══════════════════════════════════════════
+function updateKPIs() {
+  const rev24=sumYear(BRANCH['הכנסות'],'2024'), rev25=sumYear(BRANCH['הכנסות'],'2025');
+  const ebd24=sumYear(BRANCH['EBITDA'],'2024'),   ebd25=sumYear(BRANCH['EBITDA'],'2025');
+  const grp24=sumYear(BRANCH['רווח גולמי'],'2024'),grp25=sumYear(BRANCH['רווח גולמי'],'2025');
+  const op24 =sumYear(BRANCH['רווח תפעולי'],'2024'),op25=sumYear(BRANCH['רווח תפעולי'],'2025');
+
+  function setK(valId, chgId, v25, v24) {
+    document.getElementById(valId).textContent = fmt(v25);
+    const el = document.getElementById(chgId);
+    const r = v24>0 ? (v25-v24)/v24*100 : 0;
+    el.textContent = pct(r);
+    el.className = 'badge '+(r>=0?'pos':'neg');
+  }
+  setK('kpi-rev','kpi-rev-chg',rev25,rev24);
+  setK('kpi-ebd','kpi-ebd-chg',ebd25,ebd24);
+  setK('kpi-grp','kpi-grp-chg',grp25,grp24);
+  setK('kpi-opr','kpi-opr-chg',op25,op24);
+
+  // Top dept by revenue 2025
+  let topDept='', topVal=0;
+  for(const d of Object.keys(DEPTS_RAW)) {
+    const v=sumYear(DEPTS_RAW[d]['הכנסה'],'2025');
+    if(v>topVal){topVal=v;topDept=d;}
+  }
+  document.getElementById('kpi-top').textContent = topDept;
+  document.getElementById('kpi-top-val').textContent = fmt(topVal);
+}
+
+// ══════════════════════════════════════════
+//  TREND CHART (branch or dept over time)
+// ══════════════════════════════════════════
+function updateTrendChart() {
+  killChart('trend');
+  const isQ      = state.view === 'quarterly';
+  const hasYear  = state.year !== 'all';
+  const py       = hasYear ? String(parseInt(state.year)-1) : null;
+  const hasPrev  = py && DATES.some(d => d && d.startsWith(py));
+  const showComp = hasYear && hasPrev;
+  const isAll    = state.dept === 'all';
+  let labels, datasets = [];
+
+  const baseOpts = (rotX) => ({
+    responsive:true, interaction:{intersect:false,mode:'index'},
+    plugins:{
+      legend:{position:'top',rtl:true,labels:{font:{family:'Archivo',size:11},color:DARK,boxWidth:12}},
+      tooltip:{rtl:true,callbacks:{label:c=>c.dataset.label+': '+fmt(c.raw)}}
+    },
+    scales:{
+      x:{ticks:{font:{family:'Archivo',size:10},color:GRAY,maxRotation:rotX},grid:{display:false}},
+      y:{ticks:{font:{family:'Archivo',size:10},color:GRAY,callback:v=>fmt(v)},grid:{color:CREAM}}
+    }
+  });
+
+  if (isQ) {
+    if (showComp) {
+      // QUARTERLY + YEAR COMPARISON ──────────────────
+      const arr = isAll ? (BRANCH['הכנסות']||[]) : (DEPTS_RAW[state.dept]['הכנסה']||[]);
+      const lbl = isAll ? 'הכנסות' : 'הכנסה';
+      labels = ['Q1','Q2','Q3','Q4'];
+      datasets = [
+        { label:`${lbl} ${state.year}`, data:getQValsForYear(arr,state.year),
+          backgroundColor:ORANGE+'CC', borderColor:ORANGE, borderWidth:1.5, borderRadius:5, borderSkipped:false },
+        { label:`${lbl} ${py}`,         data:getQValsForYear(arr,py),
+          backgroundColor:DARK+'88',   borderColor:DARK,   borderWidth:1.5, borderRadius:5, borderSkipped:false }
+      ];
+      document.getElementById('trendTitle').textContent=`מגמה רבעונית – ${state.year} vs ${py}`;
+      document.getElementById('trendSub').textContent=(isAll?'כפר סבא':state.dept)+' – '+lbl;
+    } else {
+      // QUARTERLY ALL YEARS (multi-metric) ───────────
+      if (isAll) {
+        const metrics=['הכנסות','רווח גולמי','EBITDA'], colors=[ORANGE,DARK,GRAY];
+        labels=getQuarterlyAggKS(BRANCH[metrics[0]]||[]).labels;
+        metrics.forEach((m,i)=>{ const agg=getQuarterlyAggKS(BRANCH[m]||[]);
+          datasets.push({label:m,data:agg.values,backgroundColor:colors[i]+'BB',borderColor:colors[i],borderWidth:1.5,borderRadius:5,borderSkipped:false}); });
+        document.getElementById('trendTitle').textContent='מגמת הכנסות רבעונית – כפר סבא';
+        document.getElementById('trendSub').textContent='הכנסות, רווח גולמי ו-EBITDA';
+      } else {
+        const d=DEPTS_RAW[state.dept];
+        labels=getQuarterlyAggKS(d['הכנסה']||[]).labels;
+        [['הכנסה',ORANGE],['סה"כ עלות המכר',DARK],['רווח גולמי',GRAY]].forEach(([m,c])=>{ const agg=getQuarterlyAggKS(d[m]||[]);
+          datasets.push({label:m,data:agg.values,backgroundColor:c+'BB',borderColor:c,borderWidth:1.5,borderRadius:5,borderSkipped:false}); });
+        document.getElementById('trendTitle').textContent='מגמה רבעונית – '+state.dept;
+        document.getElementById('trendSub').textContent='הכנסה, עלות ורווח גולמי';
+      }
+    }
+    charts['trend'] = new Chart(document.getElementById('trendChart').getContext('2d'),
+      {type:'bar', data:{labels,datasets}, options:baseOpts(0)});
+
+  } else {
+    // MONTHLY ──────────────────────────────────────────
+    if (showComp) {
+      // MONTHLY + YEAR COMPARISON
+      const months = DATES.filter(d=>d&&d.startsWith(state.year));
+      labels = months.map(d=>{ const p=d.split('-'); return HEB_MONTHS[p[1]]; });
+      const arr = isAll ? (BRANCH['הכנסות']||[]) : (DEPTS_RAW[state.dept]['הכנסה']||[]);
+      const lbl = isAll ? 'הכנסות' : 'הכנסה';
+      const currVals = months.map(d=>{ const i=DATES.indexOf(d); return i>=0?(arr[i]||null):null; });
+      const prevVals = months.map(d=>{ const pd=py+d.slice(4); const i=DATES.indexOf(pd); return i>=0?(arr[i]||null):null; });
+      const isLine = state.chartType==='line';
+      datasets = [
+        { label:`${lbl} ${state.year}`, data:currVals,
+          ...(isLine
+            ? {borderColor:ORANGE,backgroundColor:ORANGE+'30',borderWidth:2.5,tension:.35,fill:true,pointRadius:3}
+            : {backgroundColor:ORANGE+'CC',borderColor:ORANGE,borderWidth:1.5,borderRadius:5,borderSkipped:false}) },
+        { label:`${lbl} ${py}`, data:prevVals,
+          ...(isLine
+            ? {borderColor:DARK,backgroundColor:'transparent',borderWidth:2,tension:.35,fill:false,pointRadius:3,borderDash:[5,4]}
+            : {backgroundColor:DARK+'88',borderColor:DARK,borderWidth:1.5,borderRadius:5,borderSkipped:false}) }
+      ];
+      document.getElementById('trendTitle').textContent=`מגמה חודשית – ${state.year} vs ${py}`;
+      document.getElementById('trendSub').textContent=(isAll?'כפר סבא':state.dept)+' – '+lbl;
+    } else {
+      // MONTHLY ALL YEARS (multi-metric, existing)
+      const dates=getFilteredDates();
+      labels=dates.map(dateLabel);
+      if(isAll){
+        const metrics=['הכנסות','רווח גולמי','EBITDA'],colors=[ORANGE,DARK,GRAY];
+        metrics.forEach((m,i)=>{ const arr=BRANCH[m]||[];
+          datasets.push({label:m,data:getSlice(arr).map(v=>v||null),borderColor:colors[i],backgroundColor:colors[i]+'25',borderWidth:2.5,tension:.35,fill:state.chartType==='line'&&i===0,pointRadius:2.5}); });
+        document.getElementById('trendTitle').textContent='מגמת הכנסות חודשית – כפר סבא';
+        document.getElementById('trendSub').textContent='הכנסות, רווח גולמי ו-EBITDA';
+      } else {
+        const d=DEPTS_RAW[state.dept];
+        [['הכנסה',ORANGE],['סה"כ עלות המכר',DARK],['רווח גולמי',GRAY]].forEach(([m,c])=>{
+          datasets.push({label:m,data:getSlice(d[m]).map(v=>v||null),borderColor:c,backgroundColor:c+'25',borderWidth:2.5,tension:.35,fill:false,pointRadius:2.5}); });
+        document.getElementById('trendTitle').textContent='מגמה – '+state.dept;
+        document.getElementById('trendSub').textContent='הכנסה, עלות ורווח גולמי';
+      }
+    }
+    charts['trend'] = new Chart(document.getElementById('trendChart').getContext('2d'),
+      {type:state.chartType, data:{labels,datasets}, options:baseOpts(showComp?0:45)});
+  }
+}
+
+// ══════════════════════════════════════════
+//  ANNUAL COMPARISON
+// ══════════════════════════════════════════
+function updateAnnualChart() {
+  killChart('annual');
+  const arr = BRANCH[state.metric==='הכנסה'?'הכנסות':state.metric] || BRANCH['הכנסות'];
+  const y24=sumYear(arr,'2024'), y25=sumYear(arr,'2025'), y26=sumYear(arr,'2026');
+  document.getElementById('annualSub').textContent = 'לפי '+(state.metric==='הכנסה'?'הכנסות':state.metric);
+
+  charts['annual'] = new Chart(document.getElementById('annualChart').getContext('2d'),{
+    type:'bar',
+    data:{
+      labels:['2024','2025','2026 (חלקי)'],
+      datasets:[{data:[y24,y25,y26||null],backgroundColor:[DARK,ORANGE,ORANGE+'80'],borderRadius:6,borderSkipped:false}]
+    },
+    options:{
+      responsive:true,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmtFull(c.raw)}}},
+      scales:{
+        x:{ticks:{font:{family:'Archivo',size:11},color:DARK},grid:{display:false}},
+        y:{ticks:{font:{family:'Archivo',size:10},color:GRAY,callback:v=>fmt(v)},grid:{color:CREAM}}
+      }
+    }
+  });
+}
+
+// ══════════════════════════════════════════
+//  DEPT BAR COMPARISON
+// ══════════════════════════════════════════
+function updateDeptBarChart() {
+  killChart('deptBar');
+  const yr = state.year==='all'?'2025':state.year;
+  const metric = state.metric;
+  const depts = Object.keys(DEPTS_RAW);
+  const vals = depts.map(d=>sumYear(DEPTS_RAW[d][metric]||[],yr));
+
+  document.getElementById('deptBarTitle').textContent='השוואת '+metric+' לפי מחלקה';
+  document.getElementById('deptBarSub').textContent = yr;
+
+  charts['deptBar'] = new Chart(document.getElementById('deptBarChart').getContext('2d'),{
+    type:'bar',
+    data:{
+      labels:depts,
+      datasets:[{
+        data:vals,
+        backgroundColor:depts.map(d=>DEPT_COLORS[d]),
+        borderRadius:5, borderSkipped:false
+      }]
+    },
+    options:{
+      responsive:true, indexAxis:'y',
+      plugins:{legend:{display:false},tooltip:{rtl:true,callbacks:{label:c=>' '+fmtFull(c.raw)}}},
+      scales:{
+        x:{ticks:{font:{family:'Archivo',size:10},color:GRAY,callback:v=>fmt(v)},grid:{color:CREAM}},
+        y:{ticks:{font:{family:'Archivo',size:11},color:DARK,font:{weight:'600'}},grid:{display:false}}
+      }
+    }
+  });
+}
+
+// ══════════════════════════════════════════
+//  DEPT TREND CHART
+// ══════════════════════════════════════════
+function updateDeptTrendChart() {
+  killChart('deptTrend');
+  const isQ = state.view === 'quarterly';
+  let labels, datasets = [];
+  const chartType = isQ ? 'bar' : 'line';
+
+  if(state.dept==='all') {
+    const ranking = Object.keys(DEPTS_RAW).sort((a,b)=>sumYear(DEPTS_RAW[b]['הכנסה'],'2025')-sumYear(DEPTS_RAW[a]['הכנסה'],'2025')).slice(0,4);
+    if (isQ) {
+      labels = getQuarterlyAggKS(DEPTS_RAW[ranking[0]]['הכנסה']||[]).labels;
+      ranking.forEach(d=>{
+        const agg = getQuarterlyAggKS(DEPTS_RAW[d]['הכנסה']||[]);
+        datasets.push({
+          label:d, data:agg.values,
+          backgroundColor:DEPT_COLORS[d]+'BB', borderColor:DEPT_COLORS[d],
+          borderWidth:1.5, borderRadius:4, borderSkipped:false
+        });
+      });
+    } else {
+      const dates = getFilteredDates();
+      labels = dates.map(dateLabel);
+      ranking.forEach(d=>{
+        datasets.push({
+          label:d, data:getSlice(DEPTS_RAW[d]['הכנסה']).map(v=>v||null),
+          borderColor:DEPT_COLORS[d], backgroundColor:DEPT_COLORS[d]+'20',
+          borderWidth:2, tension:.35, fill:false, pointRadius:2
+        });
+      });
+    }
+    document.getElementById('deptTrendTitle').textContent='4 מחלקות מובילות – הכנסה';
+  } else {
+    const d = DEPTS_RAW[state.dept];
+    if (isQ) {
+      labels = getQuarterlyAggKS(d['הכנסה']||[]).labels;
+      [['הכנסה',ORANGE],['סה"כ עלות המכר',DARK],['רווח גולמי',GRAY]].forEach(([m,c])=>{
+        const agg = getQuarterlyAggKS(d[m]||[]);
+        datasets.push({
+          label:m, data:agg.values,
+          backgroundColor:c+'BB', borderColor:c,
+          borderWidth:1.5, borderRadius:4, borderSkipped:false
+        });
+      });
+    } else {
+      const dates = getFilteredDates();
+      labels = dates.map(dateLabel);
+      [['הכנסה',ORANGE],['סה"כ עלות המכר',DARK],['רווח גולמי',GRAY]].forEach(([m,c])=>{
+        datasets.push({
+          label:m, data:getSlice(d[m]).map(v=>v||null),
+          borderColor:c, backgroundColor:c+'20',
+          borderWidth:2, tension:.35, fill:false, pointRadius:2
+        });
+      });
+    }
+    document.getElementById('deptTrendTitle').textContent='מגמה – '+state.dept;
+  }
+
+  charts['deptTrend'] = new Chart(document.getElementById('deptTrendChart').getContext('2d'),{
+    type:chartType, data:{labels,datasets},
+    options:{
+      responsive:true, interaction:{intersect:false,mode:'index'},
+      plugins:{
+        legend:{position:'top',rtl:true,labels:{font:{family:'Archivo',size:10},color:DARK,boxWidth:10}},
+        tooltip:{rtl:true,callbacks:{label:c=>c.dataset.label+': '+fmt(c.raw)}}
+      },
+      scales:{
+        x:{ticks:{font:{family:'Archivo',size:10},color:GRAY,maxRotation:isQ?0:45},grid:{display:false}},
+        y:{ticks:{font:{family:'Archivo',size:10},color:GRAY,callback:v=>fmt(v)},grid:{color:CREAM}}
+      }
+    }
+  });
+}
+
+// ══════════════════════════════════════════
+//  MONTH COMPARISON – MULTI-SELECT
+// ══════════════════════════════════════════
+function populateMonthCheckboxes() {
+  const validDates = DATES.filter(d => d && !isFuture(d));
+  ['cbGroupA','cbGroupB'].forEach((cbId, gIdx) => {
+    const container = document.getElementById(cbId);
+    const side = gIdx === 0 ? 'side-a' : 'side-b';
+    container.innerHTML = validDates.map(d => {
+      const p = d.split('-');
+      const lbl = HEB_MONTHS[p[1]] + ' ' + p[0];
+      const checked = gIdx === 0 ? d.startsWith('2025') : d.startsWith('2024');
+      return `<label class="cmp-cb-row ${side}">
+        <input type="checkbox" value="${d}" ${checked?'checked':''} onchange="syncMonthCheckboxes();updateMonthComp();updateMonthCompChart()">
+        <span class="cmp-cb-label">${lbl}</span>
+      </label>`;
+    }).join('');
+  });
+  syncMonthCheckboxes();
+}
+
+function getCheckedMonths(containerId) {
+  return [...document.querySelectorAll(`#${containerId} input[type=checkbox]:checked`)].map(cb => cb.value);
+}
+
+// Prevent the same month appearing in both groups
+function syncMonthCheckboxes() {
+  const checkedA = new Set(getCheckedMonths('cbGroupA'));
+  const checkedB = new Set(getCheckedMonths('cbGroupB'));
+
+  document.querySelectorAll('#cbGroupB input[type=checkbox]').forEach(cb => {
+    const block = checkedA.has(cb.value);
+    if (block) cb.checked = false;
+    cb.disabled = block;
+    const lbl = cb.closest('label');
+    lbl.style.opacity = block ? '0.3' : '';
+    lbl.style.pointerEvents = block ? 'none' : '';
+  });
+
+  document.querySelectorAll('#cbGroupA input[type=checkbox]').forEach(cb => {
+    const block = checkedB.has(cb.value);
+    if (block) cb.checked = false;
+    cb.disabled = block;
+    const lbl = cb.closest('label');
+    lbl.style.opacity = block ? '0.3' : '';
+    lbl.style.pointerEvents = block ? 'none' : '';
+  });
+}
+
+function selectAllCb(containerId, checked) {
+  // Only check non-disabled boxes
+  document.querySelectorAll(`#${containerId} input[type=checkbox]`).forEach(cb => {
+    if (!cb.disabled) cb.checked = checked;
+  });
+  syncMonthCheckboxes();
+  updateMonthComp();
+  updateMonthCompChart();
+}
+
+function fmtDatesList(dates) {
+  if (!dates.length) return '—';
+  if (dates.length === 1) { const p=dates[0].split('-'); return HEB_MONTHS[p[1]]+' '+p[0]; }
+  if (dates.length <= 3) return dates.map(d => { const p=d.split('-'); return HEB_MONTHS[p[1]]+'\''+p[0].slice(2); }).join(', ');
+  return dates.length + ' חודשים';
+}
+
+function updateMonthComp() {
+  const datesA = getCheckedMonths('cbGroupA');
+  const datesB = getCheckedMonths('cbGroupB');
+  const metric = document.getElementById('metricMonthComp').value;
+
+  document.getElementById('summaryA').textContent = fmtDatesList(datesA);
+  document.getElementById('summaryB').textContent = fmtDatesList(datesB);
+
+  if (!datesA.length || !datesB.length) {
+    document.getElementById('monthCompTable').innerHTML =
+      `<tr><td colspan="5" style="padding:20px;color:var(--gray);text-align:center">יש לבחור חודשים בשתי הקבוצות</td></tr>`;
+    document.getElementById('compDiff').textContent = '';
+    return;
+  }
+
+  const depts = Object.keys(DEPTS_RAW);
+  const sumForDates = (dept, dates) => dates.reduce((acc, d) => {
+    const i = DATES.indexOf(d);
+    return acc + ((DEPTS_RAW[dept][metric] && DEPTS_RAW[dept][metric][i]) || 0);
+  }, 0);
+
+  let html = `<thead><tr>
+    <th>מחלקה</th>
+    <th style="background:#F54B1E">קבוצה א׳ (${datesA.length})</th>
+    <th style="background:#1565C0">קבוצה ב׳ (${datesB.length})</th>
+    <th>שינוי</th><th>שינוי %</th>
+  </tr></thead><tbody>`;
+
+  let totA = 0, totB = 0;
+  for (const dept of depts) {
+    const vA = sumForDates(dept, datesA);
+    const vB = sumForDates(dept, datesB);
+    totA += vA; totB += vB;
+    const diff = vB - vA, pctChg = vA !== 0 ? (diff / Math.abs(vA) * 100) : 0;
+    const cls = diff >= 0 ? 'td-pos' : 'td-neg';
+    html += `<tr>
+      <td style="font-weight:700;color:var(--orange)">${dept}</td>
+      <td>${fmtFull(vA)}</td>
+      <td>${fmtFull(vB)}</td>
+      <td class="${cls}">${fmtFull(diff)}</td>
+      <td class="${cls}">${pct(pctChg)}</td>
+    </tr>`;
+  }
+
+  const dDiff = totB - totA, dPct = totA !== 0 ? (dDiff / Math.abs(totA) * 100) : 0;
+  html += `<tr class="td-total">
+    <td>סה״כ סניף</td>
+    <td>${fmtFull(totA)}</td>
+    <td>${fmtFull(totB)}</td>
+    <td class="${dDiff>=0?'td-pos':'td-neg'}" style="background:transparent">${fmtFull(dDiff)}</td>
+    <td class="${dDiff>=0?'td-pos':'td-neg'}" style="background:transparent">${pct(dPct)}</td>
+  </tr></tbody>`;
+  document.getElementById('monthCompTable').innerHTML = html;
+
+  const el = document.getElementById('compDiff');
+  el.textContent = dDiff >= 0 ? `▲ ${fmt(dDiff)}` : `▼ ${fmt(Math.abs(dDiff))}`;
+  el.style.color = dDiff >= 0 ? 'var(--pos)' : 'var(--neg)';
+}
+
+function updateMonthCompChart() {
+  killChart('monthComp');
+  const datesA = getCheckedMonths('cbGroupA');
+  const datesB = getCheckedMonths('cbGroupB');
+  const metric = document.getElementById('metricMonthComp').value;
+  if (!datesA.length || !datesB.length) return;
+
+  const depts = Object.keys(DEPTS_RAW);
+  const sumForDates = (dept, dates) => dates.reduce((acc, d) => {
+    const i = DATES.indexOf(d);
+    return acc + ((DEPTS_RAW[dept][metric] && DEPTS_RAW[dept][metric][i]) || 0);
+  }, 0);
+
+  charts['monthComp'] = new Chart(document.getElementById('monthCompChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: depts,
+      datasets: [
+        { label: `קבוצה א׳ (${fmtDatesList(datesA)})`, data: depts.map(d => sumForDates(d, datesA)),
+          backgroundColor: ORANGE+'CC', borderRadius: 4, borderSkipped: false },
+        { label: `קבוצה ב׳ (${fmtDatesList(datesB)})`, data: depts.map(d => sumForDates(d, datesB)),
+          backgroundColor: '#1565C0CC', borderRadius: 4, borderSkipped: false }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'top', rtl: true, labels: { font: { family:'Archivo', size:11 }, color:DARK, boxWidth:12 } },
+        tooltip: { rtl: true, callbacks: { label: c => c.dataset.label + ': ' + fmtFull(c.raw) } }
+      },
+      scales: {
+        x: { ticks: { font: { family:'Archivo', size:10 }, color:GRAY }, grid: { display:false } },
+        y: { ticks: { font: { family:'Archivo', size:10 }, color:GRAY, callback: v => fmt(v) }, grid: { color:CREAM } }
+      }
+    }
+  });
+}
+
+// ══════════════════════════════════════════
+//  QUARTERLY TABLE
+// ══════════════════════════════════════════
+function updateQuarterlyTable() {
+  const quarters = ['Q1 2024','Q2 2024','Q3 2024','Q4 2024','Q1 2025','Q2 2025','Q3 2025','Q4 2025','Q1 2026'];
+  const qRanges  = [[0,3],[3,6],[6,9],[9,12],[12,15],[15,18],[18,21],[21,24],[24,26]];
+  const metrics  = ['הכנסות','עלות המכר','רווח גולמי','רווח תפעולי','EBITDA'];
+
+  let html=`<thead><tr><th>מדד</th>`;
+  quarters.forEach((q,i)=>{
+    const fut=i>=8;
+    html+=`<th ${fut?'class="future-col"':''}>${q}</th>`;
+  });
+  html+=`</tr></thead><tbody>`;
+
+  for(const m of metrics) {
+    const arr=BRANCH[m]||[];
+    html+=`<tr><td>${m}</td>`;
+    qRanges.forEach(([s,e],qi)=>{
+      const v=arr.slice(s,e).reduce((a,b)=>a+b,0);
+      const fut=qi>=8;
+      const cls=(v<0?'td-neg':'')+(fut?' td-future':'');
+      html+=`<td class="${cls.trim()}">${v?fmtFull(v):'—'}</td>`;
+    });
+    html+=`</tr>`;
+  }
+  html+='</tbody>';
+  document.getElementById('quarterlyTable').innerHTML=html;
+}
+
+// ══════════════════════════════════════════
+//  QUARTERLY COMPARISON (multi-select)
+// ══════════════════════════════════════════
+const ALL_QUARTERS = ['Q1 2024','Q2 2024','Q3 2024','Q4 2024','Q1 2025','Q2 2025','Q3 2025','Q4 2025','Q1 2026'];
+const QUARTER_RANGES = [[0,3],[3,6],[6,9],[9,12],[12,15],[15,18],[18,21],[21,24],[24,26]];
+
+function populateQuarterCheckboxes() {
+  ['cbQGroupA','cbQGroupB'].forEach((cbId, gIdx) => {
+    const container = document.getElementById(cbId);
+    const side = gIdx === 0 ? 'side-a' : 'side-b';
+    container.innerHTML = ALL_QUARTERS.map((q, qi) => {
+      const checked = gIdx === 0 ? q.includes('2025') : q.includes('2024');
+      return `<label class="cmp-cb-row ${side}">
+        <input type="checkbox" value="${qi}" ${checked?'checked':''} onchange="syncQuarterCheckboxes();updateQuarterlyComp()">
+        <span class="cmp-cb-label">${q}</span>
+      </label>`;
+    }).join('');
+  });
+  syncQuarterCheckboxes();
+}
+
+function getCheckedQuarters(containerId) {
+  return [...document.querySelectorAll(`#${containerId} input[type=checkbox]:checked`)].map(cb => parseInt(cb.value));
+}
+
+function syncQuarterCheckboxes() {
+  const checkedA = new Set(getCheckedQuarters('cbQGroupA').map(String));
+  const checkedB = new Set(getCheckedQuarters('cbQGroupB').map(String));
+
+  document.querySelectorAll('#cbQGroupB input[type=checkbox]').forEach(cb => {
+    const block = checkedA.has(cb.value);
+    if (block) cb.checked = false;
+    cb.disabled = block;
+    const lbl = cb.closest('label');
+    lbl.style.opacity = block ? '0.3' : '';
+    lbl.style.pointerEvents = block ? 'none' : '';
+  });
+
+  document.querySelectorAll('#cbQGroupA input[type=checkbox]').forEach(cb => {
+    const block = checkedB.has(cb.value);
+    if (block) cb.checked = false;
+    cb.disabled = block;
+    const lbl = cb.closest('label');
+    lbl.style.opacity = block ? '0.3' : '';
+    lbl.style.pointerEvents = block ? 'none' : '';
+  });
+}
+
+function selectAllCbQ(containerId, checked) {
+  document.querySelectorAll(`#${containerId} input[type=checkbox]`).forEach(cb => {
+    if (!cb.disabled) cb.checked = checked;
+  });
+  syncQuarterCheckboxes();
+  updateQuarterlyComp();
+}
+
+function sumQuarterIndices(arr, indices) {
+  return indices.reduce((acc, qi) => {
+    const [s, e] = QUARTER_RANGES[qi];
+    return acc + arr.slice(s, e).reduce((a, b) => a + b, 0);
+  }, 0);
+}
+
+function updateQuarterlyComp() {
+  const qIdxA = getCheckedQuarters('cbQGroupA');
+  const qIdxB = getCheckedQuarters('cbQGroupB');
+  const metric = document.getElementById('metricQuarterly').value;
+
+  if (!qIdxA.length || !qIdxB.length) {
+    document.getElementById('quarterlyCompTable').innerHTML =
+      `<tr><td colspan="5" style="padding:20px;color:var(--gray);text-align:center">יש לבחור רבעונים בשתי הקבוצות</td></tr>`;
+    document.getElementById('qCompDiff').textContent = '';
+    killChart('quarterlyComp');
+    return;
+  }
+
+  const ALL_METRICS = ['הכנסות','עלות המכר','רווח גולמי','רווח תפעולי','EBITDA'];
+  const lblA = qIdxA.length <= 2 ? qIdxA.map(i => ALL_QUARTERS[i]).join(' + ') : qIdxA.length+' רבעונים';
+  const lblB = qIdxB.length <= 2 ? qIdxB.map(i => ALL_QUARTERS[i]).join(' + ') : qIdxB.length+' רבעונים';
+
+  // Summary diff (for selected metric)
+  const arr = BRANCH[metric] || [];
+  const totA = sumQuarterIndices(arr, qIdxA), totB = sumQuarterIndices(arr, qIdxB);
+  const dDiff = totB - totA, dPct = totA !== 0 ? (dDiff / Math.abs(totA) * 100) : 0;
+  const el = document.getElementById('qCompDiff');
+  el.textContent = dDiff >= 0 ? `▲ ${fmt(dDiff)}` : `▼ ${fmt(Math.abs(dDiff))}`;
+  el.style.color = dDiff >= 0 ? 'var(--pos)' : 'var(--neg)';
+
+  // Comparison table (all branch metrics)
+  let html = `<thead><tr>
+    <th>מדד</th>
+    <th style="background:#F54B1E">קבוצה א׳ (${qIdxA.length})</th>
+    <th style="background:#1565C0">קבוצה ב׳ (${qIdxB.length})</th>
+    <th>שינוי</th><th>שינוי %</th>
+  </tr></thead><tbody>`;
+
+  for (const m of ALL_METRICS) {
+    const arrM = BRANCH[m] || [];
+    const vA = sumQuarterIndices(arrM, qIdxA), vB = sumQuarterIndices(arrM, qIdxB);
+    const d = vB - vA, p = vA !== 0 ? (d / Math.abs(vA) * 100) : 0;
+    const cls = d >= 0 ? 'td-pos' : 'td-neg';
+    const isMain = m === metric;
+    html += `<tr ${isMain?'style="background:var(--cream)"':''}>
+      <td style="${isMain?'font-weight:700;color:var(--orange)':''}">${m}</td>
+      <td>${fmtFull(vA)}</td><td>${fmtFull(vB)}</td>
+      <td class="${cls}">${fmtFull(d)}</td>
+      <td class="${cls}">${pct(p)}</td>
+    </tr>`;
+  }
+  html += '</tbody>';
+  document.getElementById('quarterlyCompTable').innerHTML = html;
+
+  // Chart: compare selected metric across the two groups broken by quarter
+  killChart('quarterlyComp');
+  const arrM = BRANCH[metric] || [];
+  const labelsA = qIdxA.map(i => ALL_QUARTERS[i]);
+  const labelsB = qIdxB.map(i => ALL_QUARTERS[i]);
+  const valsA = qIdxA.map(i => { const [s,e]=QUARTER_RANGES[i]; return arrM.slice(s,e).reduce((a,b)=>a+b,0); });
+  const valsB = qIdxB.map(i => { const [s,e]=QUARTER_RANGES[i]; return arrM.slice(s,e).reduce((a,b)=>a+b,0); });
+
+  // Merge labels for grouped comparison
+  const allLabels = [...new Set([...labelsA,...labelsB])];
+  const dsA = allLabels.map(l => { const qi=ALL_QUARTERS.indexOf(l); const [s,e]=QUARTER_RANGES[qi]||[0,0]; return qIdxA.includes(qi)?arrM.slice(s,e).reduce((a,b)=>a+b,0):null; });
+  const dsB = allLabels.map(l => { const qi=ALL_QUARTERS.indexOf(l); const [s,e]=QUARTER_RANGES[qi]||[0,0]; return qIdxB.includes(qi)?arrM.slice(s,e).reduce((a,b)=>a+b,0):null; });
+
+  charts['quarterlyComp'] = new Chart(document.getElementById('quarterlyCompChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: allLabels,
+      datasets: [
+        { label: `קבוצה א׳ – ${metric}`, data: dsA, backgroundColor: ORANGE+'CC', borderRadius: 4, borderSkipped: false },
+        { label: `קבוצה ב׳ – ${metric}`, data: dsB, backgroundColor: '#1565C0CC', borderRadius: 4, borderSkipped: false }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'top', rtl: true, labels: { font: { family:'Archivo', size:11 }, color:DARK, boxWidth:12 } },
+        tooltip: { rtl: true, callbacks: { label: c => c.dataset.label + ': ' + fmtFull(c.raw) } }
+      },
+      scales: {
+        x: { ticks: { font: { family:'Archivo', size:10 }, color:GRAY }, grid: { display:false } },
+        y: { ticks: { font: { family:'Archivo', size:10 }, color:GRAY, callback: v => fmt(v) }, grid: { color:CREAM } }
+      }
+    }
+  });
+}
+
+// ══════════════════════════════════════════
+//  MONTHLY / QUARTERLY TABLE BY DEPT
+// ══════════════════════════════════════════
+function updateMonthlyTable() {
+  const isQ = state.view === 'quarterly';
+  const yr = state.year==='all'?'כל השנים':state.year;
+  document.getElementById('tableYearLbl').textContent = yr;
+  document.getElementById('tableViewLbl').textContent = isQ ? 'רבעוני' : 'חודשי';
+  const depts = state.dept==='all' ? Object.keys(DEPTS_RAW) : [state.dept];
+  const metric = document.getElementById('metricMonthly').value;
+  document.getElementById('tableMetricLbl').textContent = metric;
+
+  if (isQ) {
+    // Build quarterly rows using getQuarterlyAggKS
+    const firstAgg = getQuarterlyAggKS(DEPTS_RAW[depts[0]][metric]||[]);
+    const qLabels = firstAgg.labels;
+
+    let html = `<thead><tr><th>רבעון</th>`;
+    depts.forEach(d => html+=`<th>${d}</th>`);
+    if(depts.length>1) html+=`<th>סה״כ</th>`;
+    html+=`</tr></thead><tbody>`;
+
+    qLabels.forEach((qk, qi) => {
+      html+=`<tr>`;
+      html+=`<td style="font-weight:700">${qk}</td>`;
+      let rowTotal=0;
+      depts.forEach(dept => {
+        const agg = getQuarterlyAggKS(DEPTS_RAW[dept][metric]||[]);
+        const v = agg.values[qi] || 0;
+        rowTotal+=v;
+        const cls=v<0?'td-neg':'';
+        html+=`<td class="${cls}">${v?fmtFull(v):'—'}</td>`;
+      });
+      if(depts.length>1){
+        const cls=rowTotal<0?'td-neg':'';
+        html+=`<td class="${cls}" style="font-weight:700">${rowTotal?fmtFull(rowTotal):'—'}</td>`;
+      }
+      html+=`</tr>`;
+    });
+    html+='</tbody>';
+    document.getElementById('monthlyTable').innerHTML=html;
+
+  } else {
+    // Monthly rows (existing logic)
+    const dates = getFilteredDates();
+    let html=`<thead><tr><th>חודש</th>`;
+    depts.forEach(d=>html+=`<th>${d}</th>`);
+    if(depts.length>1) html+=`<th>סה״כ</th>`;
+    html+=`</tr></thead><tbody>`;
+
+    for(const d of dates) {
+      const i=DATES.indexOf(d);
+      const fut=isFuture(d);
+      html+=`<tr>`;
+      const p=d.split('-');
+      html+=`<td ${fut?'class="td-future"':''} style="${fut?'color:#1565C0;font-weight:700':''}">${HEB_MONTHS[p[1]]+' '+p[0]}${fut?' 📝':''}</td>`;
+      let rowTotal=0;
+      depts.forEach(dept=>{
+        const v=(DEPTS_RAW[dept][metric]&&DEPTS_RAW[dept][metric][i])||0;
+        rowTotal+=v;
+        html+=`<td class="${v<0?'td-neg':''}">${v?fmtFull(v):'—'}</td>`;
+      });
+      if(depts.length>1){
+        html+=`<td class="${rowTotal<0?'td-neg':''}" style="font-weight:700">${rowTotal?fmtFull(rowTotal):'—'}</td>`;
+      }
+      html+=`</tr>`;
+    }
+    html+='</tbody>';
+    document.getElementById('monthlyTable').innerHTML=html;
+  }
+}
+
+// ══════════════════════════════════════════
+//  EXCEL FILE UPLOAD
+// ══════════════════════════════════════════
+
+// Dept row mapping in Excel (0-indexed): [startRow, dept name in dashboard]
+const DEPT_ROWS = [
+  [1,  'חרום'],
+  [8,  'כירורגיה'],
+  [15, 'הדמיה'],
+  [22, 'נוירולוגיה'],
+  [29, 'קרדיולוגיה'],
+  [36, 'אופטלמולוגיה'],
+  [43, 'דרמטולוגיה'],
+  [50, 'אונקולוגיה'],
+  [57, 'אחר'],
+];
+const METRIC_OFFSETS = ['הכנסה','הוצאות שכר','ציוד רפואי מתכלה','קבלני משנה','סה"כ עלות המכר','רווח גולמי'];
+// Branch-level rows (0-indexed):  64=הנהלה, 66=רווח תפעולי, 67=פחת, 68=EBITDA
+const BRANCH_ROWS = { 'הנהלה וכלליות':64, 'רווח תפעולי':66, 'פחת והפחתות':67, 'EBITDA':68 };
+const SHEET_NAME = 'דשבורד מצטבר כפר סבא';
+const DATA_COL_START = 2; // Column C = index 2
+const DATA_COL_COUNT = 36; // 36 months (2024-01 to 2026-12)
+
+function checkUploadPassword() {
+  const val = document.getElementById('uploadPwInput').value;
+  const errEl = document.getElementById('uploadPwErr');
+  if (val === 'o12345') {
+    document.getElementById('uploadLock').style.display = 'none';
+    document.getElementById('uploadContent').style.display = 'block';
+    errEl.textContent = '';
+  } else {
+    errEl.textContent = '❌ סיסמה שגויה, נסה שוב';
+    document.getElementById('uploadPwInput').value = '';
+    document.getElementById('uploadPwInput').focus();
+  }
+}
+
+function setUploadStatus(msg, type) {
+  const el = document.getElementById('uploadStatus');
+  el.textContent = msg;
+  el.className = 'upload-status ' + type;
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('uploadDrop').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) parseExcelFile(file);
+}
+
+function handleFileInput(e) {
+  const file = e.target.files[0];
+  if (file) parseExcelFile(file);
+}
+
+function parseExcelFile(file) {
+  if (!file.name.match(/\.(xlsx|xls)$/i)) {
+    setUploadStatus('⚠ יש לבחור קובץ Excel בפורמט .xlsx או .xls', 'err');
+    return;
+  }
+  setUploadStatus('⏳ קורא את הקובץ...', 'loading');
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const wb   = XLSX.read(data, { type: 'array', cellDates: false });
+
+      if (!wb.SheetNames.includes(SHEET_NAME)) {
+        setUploadStatus(`⚠ הגליון "${SHEET_NAME}" לא נמצא בקובץ. גליונות זמינים: ${wb.SheetNames.join(', ')}`, 'err');
+        return;
+      }
+
+      const ws   = wb.Sheets[SHEET_NAME];
+      const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: 0 });
+
+      let updated = 0, warnings = [];
+
+      // Read dept data
+      for (const [startRow, deptName] of DEPT_ROWS) {
+        if (!DEPTS_RAW[deptName]) { warnings.push(`מחלקה לא מוכרת: ${deptName}`); continue; }
+        METRIC_OFFSETS.forEach((metric, mi) => {
+          const rowIdx = startRow + mi;
+          if (rowIdx >= rows.length) return;
+          const row = rows[rowIdx];
+          const vals = [];
+          for (let c = DATA_COL_START; c < DATA_COL_START + DATA_COL_COUNT; c++) {
+            const v = row[c];
+            vals.push(typeof v === 'number' ? v : 0);
+          }
+          DEPTS_RAW[deptName][metric] = vals;
+          updated++;
+        });
+      }
+
+      // Read branch-level rows
+      for (const [key, rowIdx] of Object.entries(BRANCH_ROWS)) {
+        if (rowIdx >= rows.length) continue;
+        const row = rows[rowIdx];
+        const vals = [];
+        for (let c = DATA_COL_START; c < DATA_COL_START + DATA_COL_COUNT; c++) {
+          const v = row[c];
+          vals.push(typeof v === 'number' ? v : 0);
+        }
+        BRANCH[key] = vals;
+        updated++;
+      }
+
+      // Recompute derived totals
+      computeTotals();
+      updateAll();
+
+      const warn = warnings.length ? ` | אזהרות: ${warnings.join('; ')}` : '';
+      setUploadStatus(
+        `✓ הקובץ עודכן בהצלחה! ${updated} סדרות נתונים נטענו מ-"${file.name}"${warn}`,
+        'ok'
+      );
+    } catch (err) {
+      setUploadStatus(`✗ שגיאה בקריאת הקובץ: ${err.message}`, 'err');
+    }
+  };
+  reader.onerror = () => setUploadStatus('✗ שגיאה בטעינת הקובץ', 'err');
+  reader.readAsArrayBuffer(file);
+}
+
+// ══════════════════════════════════════════
+//  STATE SETTERS
+// ══════════════════════════════════════════
+function setYear(y) {
+  state.year=y;
+  document.querySelectorAll('#yearBtns button').forEach(b=>{
+    b.classList.toggle('active',(y==='all'&&b.textContent==='הכל')||b.textContent===y);
+  });
+  updateAll();
+}
+function setView(v) {
+  state.view=v;
+  document.querySelectorAll('#viewBtns button').forEach(b=>{
+    b.classList.toggle('active',(v==='monthly'&&b.textContent==='חודשי')||(v==='quarterly'&&b.textContent==='רבעוני'));
+  });
+  updateAll();
+}
+function setChartType(t) {
+  state.chartType=t;
+  document.getElementById('btnLine').classList.toggle('active',t==='line');
+  document.getElementById('btnBar').classList.toggle('active',t==='bar');
+  updateTrendChart();
+}
+function setDept(d) {
+  state.dept=d;
+  document.querySelectorAll('.dept-tab').forEach(el=>{
+    const n=el.getAttribute('onclick').replace("setDept('","").replace("')","");
+    el.classList.toggle('active',n===d);
+  });
+  updateDeptBarChart();
+  updateDeptTrendChart();
+  updateTrendChart();
+  updateMonthlyTable();
+}
+function updateAll() {
+  state.metric=document.getElementById('metricSel').value;
+  updateKPIs();
+  updateTrendChart();
+  updateAnnualChart();
+  updateDeptBarChart();
+  updateDeptTrendChart();
+  updateMonthlyTable();
+  updateQuarterlyTable();
+  updateMonthComp();
+  updateMonthCompChart();
+  updateQuarterlyComp();
+}
+
+// ══════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════
+document.getElementById('todayDate').textContent = new Date().toLocaleDateString('he-IL',{day:'2-digit',month:'long',year:'numeric'});
+populateMonthCheckboxes();
+populateQuarterCheckboxes();
+updateAll();
+updateMonthCompChart();
+updateQuarterlyComp();
+</script>
+</body>
+</html>
